@@ -4,23 +4,35 @@
 
     <div class="form-group">
       <div class="form-label">글번호</div>
-      <input type="text" name="title" class="form-input" />
-    </div>
-    <div class="form-group">
-      <div class="form-label">작성자</div>
-      <input type="text" name="author" class="form-input" />
-    </div>
-    <div class="form-group">
-      <div class="form-label">등록일</div>
-      <input type="text" name="date" class="form-input" />
+      <input type="text" name="title" class="form-input" :value="notice_no" />
     </div>
     <div class="form-group">
       <div class="form-label">제목</div>
-      <input type="text" name="title" class="form-input" />
+      <input
+        type="text"
+        name="author"
+        class="form-input"
+        v-model="notice_title"
+      />
+    </div>
+    <div class="form-group">
+      <div class="form-label">작성자</div>
+      <input type="text" name="date" class="form-input" :value="loginID" />
+    </div>
+    <div class="form-group">
+      <div class="form-label">등록일</div>
+      <input
+        type="text"
+        name="title"
+        class="form-input"
+        :value="notice_created_at"
+      />
     </div>
     <div class="form-group">
       <div class="form-label">내용</div>
-      <textarea name="content" class="form-textarea"></textarea>
+      <textarea name="content" class="form-textarea">
+        {{ notice_content }}
+      </textarea>
     </div>
     <div class="button-group">
       <template v-if="paction === 'U'">
@@ -38,11 +50,25 @@
 export default {
   props: {
     action: String,
+    notice_title: String,
+    loginID: String,
+    notice_content: String,
+    notice_created_at: String,
+    notice_no: Number,
   },
   data() {
     return {
       paction: this.action,
+      notice_title: this.notice_title,
+      loginID: this.loginID,
+      notice_content: this.notice_content,
+      notice_created_at: this.notice_created_at,
+      notice_no: this.notice_no,
+
     };
+  },
+  mounted() {
+    // console.log(notice_no, notice_created_at, notice_title, notice_content)
   },
   methods: {
     updateNotice() {},
