@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import SLearningMaterialsModal from "./SResourcesModal.vue";
+import SLearningMaterialsModal from "../sAlert/SResourcesModal.vue";
 export default {
   components: {
     SLearningMaterialsModal,

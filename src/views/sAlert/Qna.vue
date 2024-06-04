@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import SQuestionsAndAnswersModal from "./SQnaModal.vue";
+import SQuestionsAndAnswersModal from "../sAlert/SQnaModal.vue";
 export default {
   components: {
     SQuestionsAndAnswersModal,
