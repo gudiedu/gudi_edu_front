@@ -26,6 +26,10 @@
       <div class="form-label">답변</div>
       <textarea name="content" class="form-textarea"></textarea>
     </div>
+    <div class="form-group">
+      <div class="form-label">답변내용</div>
+      <textarea name="content" class="form-textarea"></textarea>
+    </div>
     <!-- CKEditor 사용 -->
     <!-- 첨부파일 input 추가 -->
 

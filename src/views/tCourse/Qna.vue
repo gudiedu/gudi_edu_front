@@ -60,10 +60,7 @@
                 <td>{{ item.name }}</td>
                 <td @click="questionModify(item.question_title)">{{ item.question_title }}</td>
                 <td>{{ item.question_created_at }}</td>
-                <td>
-                  <span v-if="item.reply_question">답변 완료</span>
-                  <span v-else>답변 대기</span>
-                </td>
+                <td>{{ item.reply_no > 0 ? "Y" : "N" }}</td>
               </tr>
             </template>
           </template>
@@ -117,7 +114,6 @@
 <script>
 import TQuestionsAndAnswersModal from "./TQnaModal.vue";
 import Paginate from "vuejs-paginate-next";
-import axios from "axios";
 
 export default {
   components: {
@@ -142,6 +138,8 @@ export default {
       question_created_at: "",
       question_title: "",
       name: "",
+      reply_no: "",
+      reply_content: "",
       loginID: "",
     };
   },
@@ -167,20 +165,29 @@ export default {
 
       //let vm = this; //this를 axios안에서 사용할 수 없으므로 별도로 할달을 빼놓았음
 
+      let vm = this;
+
       let params = new URLSearchParams(); //파라미터를 넘길 때 사용
       params.append("stitle", this.stitle);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
+      params.append("question_title", this.question_title);
+      params.append("question_no", this.question_no);
+      params.append("question_content", this.question_content);
+      params.append("question_created_at", this.question_created_at);
+      params.append("reply_no", this.reply_no);
+      params.append("reply_content", this.reply_content);
+      params.append("name", this.name);
 
-      axios
+      this.axios
         .post("/tCourse/listquestion.do", params)
         .then((response) => {
           console.log(JSON.stringify(response));
 
-          //   vm.questionList = response.data.listData;
-          //  vm.totalCnt = response.data.totalCnt;
+          vm.questionList = response.data.listData;
+          vm.totalCnt = response.data.totalCnt;
 
-          this.questionList = response.data.listdate;
+          this.questionList = response.data.listdata;
           this.totalCnt = response.data.totalcnt;
         })
         .catch(function (error) {
