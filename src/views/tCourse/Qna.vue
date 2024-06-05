@@ -31,15 +31,10 @@
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input
-              type="text"
-              class="search-input"
-              placeholder="검색어를 입력해주세요."
-              v-model="stitle"
-            />
+            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="searchList">검색</button>
           </div>
         </div>
       </div>
@@ -53,37 +48,66 @@
             <th>작성자</th>
             <th>제목</th>
             <th>등록일</th>
-            <th>답변</th>
+            <th>답변여부</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>학생</td>
-            <td @click="qaModify">질문입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>학생</td>
-            <td @click="qaModify">질문2입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변대기</td>
-          </tr>
+          <template v-if="totalCnt > 0">
+            <template v-for="item in questionList" :key="item.question_no">
+              <tr>
+                <td>{{ item.question_no }}</td>
+                <!--<td @click="questionModifyFile(item.question_no)">-->
+                <td>{{ item.name }}</td>
+                <td @click="questionModify(item.question_title)">{{ item.question_title }}</td>
+                <td>{{ item.question_created_at }}</td>
+                <td>
+                  <span v-if="item.reply_question">답변 완료</span>
+                  <span v-else>답변 대기</span>
+                </td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
+            <tr>
+              <td colspan="5">질의응답이 없습니다.</td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
 
     <!-- 페이지네이션 추가-->
 
-    <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+    <div id="questionPagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
     </div>
+
+    <!--<div class="button-group">
+      <button class="insert-button" @click="openAddModal">등록</button>
+    </div>-->
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <TQuestionsAndAnswersModal :action="action" />
+          <TQuestionsAndAnswersModal
+            :action="action"
+            :question_content="question_content"
+            :question_created_at="question_created_at"
+            :question_no="question_no"
+            :question_title="question_title"
+            :loginID="loginID"
+            :name="name"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -92,42 +116,105 @@
 
 <script>
 import TQuestionsAndAnswersModal from "./TQnaModal.vue";
+import Paginate from "vuejs-paginate-next";
+import axios from "axios";
+
 export default {
   components: {
     TQuestionsAndAnswersModal,
+    Paginate,
   },
   data() {
     return {
       titleText: "질의응답",
       addModal: false,
       action: "",
-      selectedNotice: null,
+      selectedQuestion: null,
       activeFilter: "all",
       stitle: "",
+      questionList: [],
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
+      course_no: 0,
+      question_content: "",
+      question_no: 0,
+      question_created_at: "",
+      question_title: "",
+      name: "",
+      loginID: "",
     };
   },
+  // methods: {
+  // findAll() {
+  //   this.activeFilter = "all";
+  // },
+  // findAdmin() {
+  //   this.activeFilter = "admin";
+  // },
+  // findTeacher() {
+  //   this.activeFilter = "teacher";
+  // },
+
+  mounted() {
+    this.searchList();
+  },
+
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
+    searchList: function () {
+      // 화살표 함수 대신 일반 함수 사용 , ES6문법을 사용해서 에러..
+      //alert('searchlist')
+
+      //let vm = this; //this를 axios안에서 사용할 수 없으므로 별도로 할달을 빼놓았음
+
+      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+
+      axios
+        .post("/tCourse/listquestion.do", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+
+          //   vm.questionList = response.data.listData;
+          //  vm.totalCnt = response.data.totalCnt;
+
+          this.questionList = response.data.listdate;
+          this.totalCnt = response.data.totalcnt;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+
     searchMethod() {},
-    qaModify(qa) {
-      this.selectedNotice = qa;
+    questionModify(question) {
+      this.selectedQuestion = question;
       this.action = "U";
       this.addModal = true;
     },
+
     openAddModal() {
       this.action = "";
       this.addModal = true;
     },
     closeAddModal() {
       this.addModal = false;
+    },
+
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var xx = total % page;
+      var result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
     },
   },
 };

@@ -31,11 +31,11 @@
 
     <div class="button-group">
       <template v-if="paction === 'U'">
-        <v-btn class="update-button" @click="updateNotice">수정</v-btn>
-        <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
+        <v-btn class="update-button" @click="updateQuestion">수정</v-btn>
+        <v-btn class="delete-button" @click="deleteQuestion">삭제</v-btn>
       </template>
       <template v-else>
-        <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
+        <v-btn class="insert-button" @click="insertQuestion">등록</v-btn>
       </template>
     </div>
   </div>
@@ -43,6 +43,7 @@
 
 <script>
 export default {
+  name: "TQuestionsAndAnswersModal",
   props: {
     action: String,
   },
@@ -52,9 +53,9 @@ export default {
     };
   },
   methods: {
-    updateNotice() {},
-    deleteNotice() {},
-    insertNotice() {},
+    updateQuestion() {},
+    deleteQuestion() {},
+    insertQuestion() {},
   },
 };
 </script>
