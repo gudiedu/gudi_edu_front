@@ -51,7 +51,7 @@
         class="form-textarea"
       ></textarea>
     </div>
-    <div class="form-group">
+    <div class="form-group" v-if="fileName">
       <div class="form-label">첨부파일</div>
       <div id="preview" v-html="previewHtml" @click="downLoad"></div>
     </div>
@@ -116,6 +116,7 @@ export default {
             response.data.result.file_origin === null
           ) {
             this.previewHtml = "";
+            this.fileName = "";
           } else {
             this.previewHtml = response.data.result.file_origin;
             this.fileName = response.data.result.file_origin;
