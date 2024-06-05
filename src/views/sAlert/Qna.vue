@@ -7,26 +7,6 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >강사</v-btn
-          >
-        </div> -->
 
         <div class="search">
           <div class="search-container">
@@ -35,7 +15,7 @@
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
-              v-model="stitle"
+              
             />
           </div>
           <div class="button-group">
@@ -49,28 +29,24 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>글번호</th>
-            <th>작성자</th>
+            <th>과목</th>
             <th>제목</th>
+            <th>작성자</th>
             <th>등록일</th>
-            <th>답변</th>
+            <th>답변여부</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>학생</td>
-            <td @click="qaModify">질문입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>학생</td>
-            <td @click="qaModify">질문2입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변대기</td>
-          </tr>
+          <template v-for="item in sListQna" :key="item.question_no">
+            <!--해당 게시글에 대한 세부정보는 SQnaSelectModal로 열기-->
+            <tr @click="openOneQnaModal(item)">
+              <td>{{ item.course_name }}</td>
+              <td>{{ item.question_title }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.question_created_at }}</td>
+              <td>{{ item.reply_no > 0 ? 'Y' : 'N' }}</td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
@@ -78,7 +54,7 @@
     <!-- 페이지네이션 추가-->
 
     <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+      <button class="insert-button" @click="openSubmitModal()">등록</button>
     </div>
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
@@ -91,10 +67,13 @@
 </template>
 
 <script>
-import SQuestionsAndAnswersModal from "../sAlert/SQnaModal.vue";
+import SQnaSubmitModal from "./SQnaSubmitModal.vue";
+import SQnaSelectModal from "./SQnaSelectModal.vue";
+
 export default {
   components: {
-    SQuestionsAndAnswersModal,
+    SQnaSubmitModal,
+    SQnaSelectModal,
   },
   data() {
     return {
@@ -103,26 +82,64 @@ export default {
       action: "",
       selectedNotice: null,
       activeFilter: "all",
-      stitle: "",
+      sListQna: [],
+      question_title: "",
+      question_no: "",
+      question_content: "",
+      question_created_at: "",
+      reply_no: "",
+      reply_content: "",
+      name: "", // 사용자정보의 이름
+      isSelectedModalOpen: false, // 1개의 게시글에 대한 모달 실행 여부 default-false로 설정
     };
   },
+  mounted(){
+    alert("질의응답 페이지 들어와수다");
+    this.qna_list();
+  },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
+    
+    qna_list : function(){
+      alert("qna_list 조회해보잰 햄수다");
+
+      // qna로 넘겨줄 parameter 정리
+      let vm = this; // axios에서 this를 사용하기 위해 qna에 담아봄
+
+      let qnaParams = new URLSearchParams();
+      qnaParams.append("question_title", this.question_title);
+      qnaParams.append("question_no", this.question_no);
+      qnaParams.append("question_content", this.question_content);
+      qnaParams.append("question_created_at", this.question_created_at);
+      qnaParams.append("reply_no", this.reply_no);
+      qnaParams.append("reply_content", this.reply_content);
+      qnaParams.append("name", this.name);
+
+      alert("append 해수다");
+
+      this.axios
+        .post("/sAlert/qna.do", qnaParams)
+        .then((response) => {
+          alert("axios 와수다");
+          vm.sListQna = response.data.listQna;
+        })
+        .catch(function (error){
+          alert("ERROR 나수다!!!!!!! 확인해줍써!!!!!!!!!" + error);
+        });
+    },
+    openOneQnaModal(item){
+      this.selectedQna = item; // 클릭된 질문의 데이터를 저장
+      this.isSelectedModalOpen = true; // 모달창 열어봄
+    },
+    closeOneModal(){
+      this.isSelectedModalOpen = false; // 모달창 닫음
+    },
     searchMethod() {},
     qaModify(qa) {
       this.selectedNotice = qa;
       this.action = "U";
       this.addModal = true;
     },
-    openAddModal() {
+    openSubmitModal() {
       this.action = "";
       this.addModal = true;
     },
