@@ -59,10 +59,10 @@
         <tbody>
           <template v-for="item in noticeList">
             <tr v-if="this.activeFilter === 'all'" :key="item.notice_no">
-              <td @click="selectNotice(item.notice_no)">
+              <td @click="selectNotice(item.notice_no,'')">
                 {{ item.notice_no }}
               </td>
-              <td @click="selectNotice(item.notice_no)">
+              <td @click="selectNotice(item.notice_no,'')">
                 {{ item.notice_title }}
               </td>
               <td>{{ item.loginID }}</td>
@@ -72,10 +72,10 @@
               v-else-if="this.activeFilter === item.user_type"
               :key="item.notice_no"
             >
-              <td @click="noticeModify(item.notice_no)">
+              <td @click="selectNotice(item.notice_no,'')">
                 {{ item.notice_no }}
               </td>
-              <td @click="noticeModifyFile(item.notice_no)">
+              <td @click="selectNotice(item.notice_no,'')">
                 {{ item.notice_title }}
               </td>
               <td>{{ item.loginID }}</td>
@@ -118,6 +118,7 @@
             :paction="action"
             @close="closePopup"
             @searchList="searchList"
+            @selectNotice="selectNotice"
           />
         </v-card-text>
       </v-card>
@@ -201,15 +202,13 @@ export default {
       this.activeFilter = "t";
     },
     searchMethod() {},
-    noticeModify(notice) {
+    noticeModify(notice_no) {
       this.selectedNotice = notice;
       this.action = "U";
       this.addModal = true;
     },
-    selectNotice(notice_no) {
-      this.action = "";
-      // this.addModal = true;
-
+    selectNotice(notice_no, action) {
+      this.action = action;
       let vm = this;
 
       let params = new URLSearchParams();

@@ -8,7 +8,7 @@
           type="text"
           name="title"
           class="form-input"
-          :value="notice_no"
+          v-model="notice_no"
           disabled
         />
       </div>
@@ -79,7 +79,7 @@
       </div>
     </template>
     <div class="button-group">
-      <template v-if="paction === 'U' || paction === 'I'">
+      <template v-if="paction === 'I'">
         <form id="file-form" enctype="multipart/form-data">
           <input
             type="file"
@@ -95,9 +95,25 @@
           >
         </form>
       </template>
+      <template v-if="paction === 'U'">
+        <form id="file-form" enctype="multipart/form-data">
+          <input
+            type="file"
+            id="file-insert"
+            name="file-insert"
+            class="insert-button"
+            @change="handleFileChange"
+          />
+          <v-btn
+            class="insert-button"
+            @click.prevent="updateNotice(notice_title, notice_content)"
+            >수정</v-btn
+          >
+        </form>
+      </template>
       <template v-else>
-        <v-btn class="update-button" @click="updateNotice">수정</v-btn>
-        <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
+        <v-btn class="update-button" @click="updateNotice(notice_no)">수정</v-btn>
+        <v-btn class="delete-button" @click="deleteNotice(notice_no)">삭제</v-btn>
       </template>
     </div>
   </div>
@@ -126,8 +142,31 @@ export default {
   },
   mounted() {},
   methods: {
-    updateNotice() {},
-    deleteNotice() {},
+    updateNotice(notice_no) {
+      let vm = this;
+      console.log('실행됨');
+      this.paction = "U";
+
+    },
+    deleteNotice(notice_no) {
+      let vm = this;
+      
+      let params = new URLSearchParams();
+      params.append("notice_no", notice_no);
+
+      this.axios
+        .post("/aAlert/notice/delete", params)
+        .then(() => {
+          alert("성공적으로 삭제되었습니다.")
+          this.$emit("close");
+          this.$emit("searchList");
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+
+
+    },
     handleFileChange(event) {
       this.selectedFile = event.target.files[0];
     },
