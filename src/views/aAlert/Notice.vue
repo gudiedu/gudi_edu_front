@@ -108,14 +108,17 @@
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <NoticeModal 
+          <NoticeModal
             :action="action"
             :notice_content="notice_content"
             :notice_created_at="notice_created_at"
             :notice_no="notice_no"
             :notice_title="notice_title"
             :loginID="loginID"
-             />
+            :paction="action"
+            @close="closePopup"
+            @searchList="searchList"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -182,6 +185,12 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    openAddModal: function () {
+      this.action = "I";
+      this.addModal = true;
+      this.notice_title = "";
+      this.notice_content = "";
+    },
     findAll() {
       this.activeFilter = "all";
     },
@@ -223,12 +232,8 @@ export default {
     },
     openPopup: async function () {
       this.addModal = true;
-
-      popUp.onclose = () => {
-        console.log("close");
-      };
     },
-    closeAddModal() {
+    closePopup: async function () {
       this.addModal = false;
     },
     page: function () {
