@@ -116,6 +116,8 @@
             :notice_title="notice_title"
             :loginID="loginID"
             :paction="action"
+            :previewHtml="previewHtml"
+            :fileName="fileName"
             @close="closePopup"
             @searchList="searchList"
             @selectNotice="selectNotice"
@@ -133,7 +135,7 @@ import Paginate from "vuejs-paginate-next";
 export default {
   components: {
     NoticeModal,
-    Paginate
+    Paginate,
   },
   data() {
     return {
@@ -153,6 +155,9 @@ export default {
       notice_created_at: "",
       notice_no: 0,
       typeList: [],
+      previewHtml: "",
+      fileName: "",
+      etx: "",
     };
   },
   mounted() {
@@ -191,12 +196,12 @@ export default {
       this.notice_title = "";
       this.notice_content = "";
     },
-    findType(userType){
-      if(userType === 'a'){
+    findType(userType) {
+      if (userType === "a") {
         this.findAdmin();
-      }else if(userType === 't'){
+      } else if (userType === "t") {
         this.findTeacher();
-      }else{
+      } else {
         this.findAll();
       }
     },
@@ -240,6 +245,33 @@ export default {
           this.notice_content = response.data.notice_content;
           this.notice_created_at = response.data.notice_created_at;
           this.notice_no = response.data.notice_no;
+          this.ext = response.data.file_extension;
+
+          if (
+            !response.data.file_no
+          ) {
+            this.previewHtml = "";
+            this.fileName = "";
+          } else {
+            this.previewHtml = response.data.file_origin;
+            this.fileName = response.data.file_origin;
+
+            let ext = response.data.file_extension;
+
+            if (
+              ext.toLowerCase() == "jpg" ||
+              ext.toLowerCase() == "jpeg" ||
+              ext.toLowerCase() == "png" ||
+              ext.toLowerCase() == "gif"
+            ) {
+              this.previewHtml =
+                "<img src='" +
+                response.data.file_local_path +
+                "' id 'imgFile' style='width:100px; height 100px;' />";
+            } else {
+              this.previewHtml = response.data.result.file_origin;
+            }
+          }
           this.openPopup();
         })
         .catch(function (error) {
@@ -266,10 +298,10 @@ export default {
       }
     },
     pagination() {
-      let endElement = (this.currentPage * this.pageSize);
+      let endElement = this.currentPage * this.pageSize;
       let startElement = endElement - this.pageSize;
       this.pageList = this.typeList.slice(startElement, endElement);
-    }
+    },
   },
 };
 </script>

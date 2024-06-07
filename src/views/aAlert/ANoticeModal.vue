@@ -68,6 +68,10 @@
       </textarea
         >
       </div>
+      <div class="form-group" v-if="fileName">
+        <div class="form-label">첨부파일</div>
+        <div id="preview" v-html="previewHtml" @click="download"></div>
+      </div>
     </template>
     <template v-else>
       <div class="form-group">
@@ -76,6 +80,10 @@
         {{ notice_content }}
       </textarea
         >
+      </div>
+      <div class="form-group" v-if="fileName">
+        <div class="form-label">첨부파일</div>
+        <div id="preview" v-html="previewHtml" @click="download"></div>
       </div>
     </template>
     <div class="button-group">
@@ -104,14 +112,14 @@
             class="insert-button"
             @change="handleFileChange"
           />
-          <v-btn
-            class="insert-button"
-            @click.prevent="deleteFile"
+          <v-btn class="insert-button" @click.prevent="deleteFile"
             >첨부파일 삭제</v-btn
           >
           <v-btn
             class="insert-button"
-            @click.prevent="updateNotice(notice_no,notice_title, notice_content)"
+            @click.prevent="
+              updateNotice(notice_no, notice_title, notice_content)
+            "
             >수정</v-btn
           >
         </form>
@@ -137,6 +145,8 @@ export default {
     notice_content: String,
     notice_created_at: String,
     notice_no: Number,
+    previewHtml: String,
+    fileName: String,
   },
   data() {
     return {
@@ -148,11 +158,13 @@ export default {
       notice_no: this.notice_no,
       selectedFile: null,
       removeFile: "N",
+      fileName: this.fileName,
+      previewHtml: this.previewHtml,
     };
   },
   mounted() {},
   methods: {
-    updateNotice(notice_no,notice_title, notice_content) {
+    updateNotice(notice_no, notice_title, notice_content) {
       let vm = this;
 
       let formTag = document.getElementById("file-form");
@@ -220,10 +232,32 @@ export default {
     handleFileChange(event) {
       this.selectedFile = event.target.files[0];
     },
-    deleteFile(){
-      console.log("파일 삭제 메서드 실행됨")
+    deleteFile() {
+      this.previewHtml = "";
       this.removeFile = "Y";
-    }
+    },
+    download: function () {
+      let params = new URLSearchParams();
+      params.append("notice_no", this.notice_no);
+
+      this.axios({
+        url: "/aAlert/notice/fileDownload",
+        data: params,
+        method: "POST",
+        responseType: "blob",
+      })
+        .then((response) => {
+          let FILE = window.URL.createObjectURL(new Blob([response.data]));
+          let docUrl = document.createElement("a");
+          docUrl.href = FILE;
+          docUrl.setAttribute("download", this.fileName);
+          document.body.appendChild(docUrl);
+          docUrl.click();
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
   },
 };
 </script>
