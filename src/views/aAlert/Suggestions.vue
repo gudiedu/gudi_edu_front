@@ -104,18 +104,35 @@ export default {
       selectedNotice: null,
       activeFilter: "all",
       stitle: "",
+      suggestionList: [],
     };
   },
+  mounted() {
+    this.searchList();
+    this.page();
+  },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
+    searchList: function (stitle) {
+      let vm = this;
+
+      if (stitle !== undefined) {
+        vm.stitle = stitle;
+      }
+
+      let params = new URLSearchParams();
+      params.append("stitle", this.stitle);
+
+      this.axios
+        .post("/aSuggestion", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+          
+
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
     searchMethod() {},
     suggestionModify(suggestion) {
       this.selectedNotice = suggestion;
@@ -185,12 +202,12 @@ export default {
 
 .search-container {
   display: flex;
-    align-items: center;
-    /* padding: 10px; */
-    /* padding: 20px; */
-    border: 1px solid #ccc;
-    border-radius: 25px;
-    margin: 16px 0;
+  align-items: center;
+  /* padding: 10px; */
+  /* padding: 20px; */
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  margin: 16px 0;
 }
 
 .search-icon {
