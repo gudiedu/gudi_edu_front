@@ -84,6 +84,7 @@ export default {
     action: String,
     resourceNo: Number,
   },
+
   data() {
     return {
       paction: this.action,
