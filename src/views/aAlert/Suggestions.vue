@@ -50,26 +50,23 @@
         <thead>
           <tr>
             <th>글번호</th>
-            <th>작성자</th>
             <th>제목</th>
+            <th>작성자</th>
             <th>등록일</th>
             <th>답변</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>관리자</td>
-            <td @click="suggestionModify">건의사항입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>강사</td>
-            <td @click="suggestionModify">건의사항2입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변대기</td>
+          <tr v-for="item in suggestionList" :key="item.suggestion_no">
+            <td>
+              {{ item.suggestion_no }}
+            </td>
+            <td>
+              {{ item.suggestion_title }}
+            </td>
+            <td>{{ item.loginID }}</td>
+            <td>{{ item.suggestion_created_at }}</td>
+            <td>{{ item.suggestion_answered }}</td>
           </tr>
         </tbody>
       </v-table>
@@ -126,8 +123,8 @@ export default {
         .post("/aSuggestion", params)
         .then((response) => {
           console.log(JSON.stringify(response));
-          
-
+          vm.suggestionList = response.data;
+          console.log(this.suggestionList);
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
@@ -135,7 +132,7 @@ export default {
     },
     searchMethod() {},
     suggestionModify(suggestion) {
-      this.selectedNotice = suggestion;
+      this.selectedSuggestion = suggestion;
       this.action = "U";
       this.addModal = true;
     },
