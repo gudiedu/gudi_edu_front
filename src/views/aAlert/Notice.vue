@@ -103,7 +103,7 @@
     </div>
 
     <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+      <button class="insert-button" @click="addNotice">등록</button>
     </div>
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
@@ -133,13 +133,6 @@ import Paginate from "vuejs-paginate-next";
 export default {
   components: {
     NoticeModal,
-  },
-  props: {
-    // notice_title: String,
-    // loginID: String,
-    // notice_content: String,
-    // notice_created_at: String,
-    // notice_no: Number,
   },
   data() {
     return {
@@ -186,7 +179,7 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
-    openAddModal: function () {
+    addNotice() {
       this.action = "I";
       this.addModal = true;
       this.notice_title = "";

@@ -95,7 +95,7 @@
           >
         </form>
       </template>
-      <template v-if="paction === 'U'">
+      <template v-else-if="paction === 'U'">
         <form id="file-form" enctype="multipart/form-data">
           <input
             type="file"
@@ -106,14 +106,23 @@
           />
           <v-btn
             class="insert-button"
-            @click.prevent="updateNotice(notice_title, notice_content)"
+            @click.prevent="deleteFile"
+            >첨부파일 삭제</v-btn
+          >
+          <v-btn
+            class="insert-button"
+            @click.prevent="updateNotice(notice_no,notice_title, notice_content)"
             >수정</v-btn
           >
         </form>
       </template>
       <template v-else>
-        <v-btn class="update-button" @click="updateNotice(notice_no)">수정</v-btn>
-        <v-btn class="delete-button" @click="deleteNotice(notice_no)">삭제</v-btn>
+        <v-btn class="update-button" @click="changeNotice(notice_no)"
+          >수정</v-btn
+        >
+        <v-btn class="delete-button" @click="deleteNotice(notice_no)"
+          >삭제</v-btn
+        >
       </template>
     </div>
   </div>
@@ -137,38 +146,58 @@ export default {
       notice_content: this.notice_content,
       notice_created_at: this.notice_created_at,
       notice_no: this.notice_no,
-      selectedFile: null
+      selectedFile: null,
+      removeFile: "N",
     };
   },
   mounted() {},
   methods: {
-    updateNotice(notice_no) {
+    updateNotice(notice_no,notice_title, notice_content) {
       let vm = this;
-      console.log('실행됨');
-      this.paction = "U";
 
-    },
-    deleteNotice(notice_no) {
-      let vm = this;
-      
-      let params = new URLSearchParams();
-      params.append("notice_no", notice_no);
+      let formTag = document.getElementById("file-form");
+      let dataWithFile = new FormData(formTag);
+      dataWithFile.append("notice_title", notice_title);
+      dataWithFile.append("notice_content", notice_content);
+      dataWithFile.append("notice_no", notice_no);
+      dataWithFile.append("removeFile", this.removeFile);
+
+      if (this.selectedFile) {
+        dataWithFile.append("file", this.selectedFile);
+      }
+      console.log(dataWithFile.get("file"));
 
       this.axios
-        .post("/aAlert/notice/delete", params)
-        .then(() => {
-          alert("성공적으로 삭제되었습니다.")
+        .post("/aAlert/notice/update", dataWithFile)
+        .then((response) => {
+          console.log(dataWithFile);
+          console.log(dataWithFile.get("file"));
           this.$emit("close");
           this.$emit("searchList");
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
-
-
     },
-    handleFileChange(event) {
-      this.selectedFile = event.target.files[0];
+    changeNotice() {
+      this.paction = "U";
+    },
+    deleteNotice(notice_no) {
+      let vm = this;
+
+      let params = new URLSearchParams();
+      params.append("notice_no", notice_no);
+
+      this.axios
+        .post("/aAlert/notice/delete", params)
+        .then(() => {
+          alert("성공적으로 삭제되었습니다.");
+          this.$emit("close");
+          this.$emit("searchList");
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
     insertNotice(notice_title, notice_content) {
       let vm = this;
@@ -180,13 +209,13 @@ export default {
       if (this.selectedFile) {
         dataWithFile.append("file", this.selectedFile);
       }
-      console.log(dataWithFile.get('file'));
+      console.log(dataWithFile.get("file"));
 
       this.axios
         .post("/aAlert/notice/new", dataWithFile)
         .then((response) => {
-          console.log(dataWithFile)
-          console.log(dataWithFile.get('file'))
+          console.log(dataWithFile);
+          console.log(dataWithFile.get("file"));
           this.$emit("close");
           this.$emit("searchList");
         })
@@ -194,6 +223,13 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    handleFileChange(event) {
+      this.selectedFile = event.target.files[0];
+    },
+    deleteFile(){
+      console.log("파일 삭제 메서드 실행됨")
+      this.removeFile = "Y";
+    }
   },
 };
 </script>
