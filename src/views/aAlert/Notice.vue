@@ -57,12 +57,12 @@
           </tr>
         </thead>
         <tbody>
-          <template v-for="item in noticeList">
+          <template v-for="item in pageList">
             <tr v-if="this.activeFilter === 'all'" :key="item.notice_no">
-              <td @click="selectNotice(item.notice_no,'')">
+              <td @click="selectNotice(item.notice_no, '')">
                 {{ item.notice_no }}
               </td>
-              <td @click="selectNotice(item.notice_no,'')">
+              <td @click="selectNotice(item.notice_no, '')">
                 {{ item.notice_title }}
               </td>
               <td>{{ item.loginID }}</td>
@@ -72,10 +72,10 @@
               v-else-if="this.activeFilter === item.user_type"
               :key="item.notice_no"
             >
-              <td @click="selectNotice(item.notice_no,'')">
+              <td @click="selectNotice(item.notice_no, '')">
                 {{ item.notice_no }}
               </td>
-              <td @click="selectNotice(item.notice_no,'')">
+              <td @click="selectNotice(item.notice_no, '')">
                 {{ item.notice_title }}
               </td>
               <td>{{ item.loginID }}</td>
@@ -94,7 +94,7 @@
         :page-count="page()"
         :page-range="5"
         :margin-pages="0"
-        :click-handler="searchList"
+        :click-handler="pagination()"
         :prev-text="'이전'"
         :next-text="'다음'"
         :container-class="'pagination'"
@@ -133,6 +133,7 @@ import Paginate from "vuejs-paginate-next";
 export default {
   components: {
     NoticeModal,
+    Paginate
   },
   data() {
     return {
@@ -151,9 +152,11 @@ export default {
       notice_content: "",
       notice_created_at: "",
       notice_no: 0,
+      typeList: [],
     };
   },
   mounted() {
+    // this.pagination();
     this.searchList();
     this.page();
   },
@@ -174,6 +177,9 @@ export default {
           console.log(JSON.stringify(response));
 
           vm.noticeList = response.data;
+          vm.totalCnt = vm.noticeList.length;
+          vm.typeList = vm.noticeList;
+          vm.findType(vm.activeFilter);
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
@@ -185,17 +191,35 @@ export default {
       this.notice_title = "";
       this.notice_content = "";
     },
+    findType(userType){
+      if(userType === 'a'){
+        this.findAdmin();
+      }else if(userType === 't'){
+        this.findTeacher();
+      }else{
+        this.findAll();
+      }
+    },
     findAll() {
+      this.currentPage = 1;
       this.activeFilter = "all";
+      this.typeList = this.noticeList;
+      this.totalCnt = this.noticeList.length;
     },
     findAdmin() {
+      this.currentPage = 1;
       this.activeFilter = "a";
+      this.typeList = this.noticeList.filter((e) => e.user_type === "a");
+      this.totalCnt = this.typeList.length;
     },
     findTeacher() {
+      this.currentPage = 1;
       this.activeFilter = "t";
+      this.typeList = this.noticeList.filter((e) => e.user_type === "t");
+      this.totalCnt = this.typeList.length;
     },
     searchMethod() {},
-    noticeModify(notice_no) {
+    noticeModify() {
       this.selectedNotice = notice;
       this.action = "U";
       this.addModal = true;
@@ -229,11 +253,23 @@ export default {
       this.addModal = false;
     },
     page: function () {
-      var total = this.totalCnt;
-      var page = this.pageSize;
-      var xx = total % page;
-      var result = parseInt(total / page);
+      let total = this.totalCnt;
+      let page = this.pageSize;
+      let xx = total % page;
+      let result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
     },
+    pagination() {
+      let endElement = (this.currentPage * this.pageSize);
+      let startElement = endElement - this.pageSize;
+      this.pageList = this.typeList.slice(startElement, endElement);
+    }
   },
 };
 </script>

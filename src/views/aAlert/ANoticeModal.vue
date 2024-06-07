@@ -170,8 +170,6 @@ export default {
       this.axios
         .post("/aAlert/notice/update", dataWithFile)
         .then((response) => {
-          console.log(dataWithFile);
-          console.log(dataWithFile.get("file"));
           this.$emit("close");
           this.$emit("searchList");
         })
@@ -209,13 +207,9 @@ export default {
       if (this.selectedFile) {
         dataWithFile.append("file", this.selectedFile);
       }
-      console.log(dataWithFile.get("file"));
-
       this.axios
         .post("/aAlert/notice/new", dataWithFile)
         .then((response) => {
-          console.log(dataWithFile);
-          console.log(dataWithFile.get("file"));
           this.$emit("close");
           this.$emit("searchList");
         })
