@@ -63,15 +63,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td @click="lectureCodeModify">A001</td>
-            <td>Java</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td @click="lectureCodeModify">A002</td>
-            <td>Python</td>
+          <tr v-for="(item, index) in courseList" :key="item.detail_code">
+            <td>{{ index + 1 }}</td>
+            <td @click="lectureCodeModify(item)">{{ item.detail_code }}</td>
+            <td>{{ item.detail_name }}</td>
           </tr>
         </tbody>
       </v-table>
@@ -85,7 +80,7 @@
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ALectureLCodeModal :action="action" />
+          <ALectureLCodeModal :action="action" :detail_code="detail_code" @close="closeAddModal" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -93,6 +88,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import ALectureLCodeModal from "./ACourseCodeModal.vue";
 export default {
   components: { ALectureLCodeModal },
@@ -102,11 +98,27 @@ export default {
       addModal: false,
       action: "",
       selectedNotice: null,
-      activeFilter: "all",
       stitle: "",
+      detail_code: "",
+      courseList: [] // 강의 코드 목록을 저장할 배열
     };
   },
+  mounted() {
+    // 페이지 로드될 때 강의 코드 목록을 가져오는 메서드 호출
+    this.getCourseList();
+  },
   methods: {
+    getCourseList() {
+  axios.get('/acourse/aCourseList.do')
+    .then(response => {
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+      this.courseList = response.data.listdate; // 데이터 바인딩
+      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching course list:', error);
+    });
+},
     findAll() {
       this.activeFilter = "all";
     },
@@ -117,17 +129,26 @@ export default {
       this.activeFilter = "teacher";
     },
     searchMethod() {},
+    
     lectureCodeModify(lecture) {
       this.selectedNotice = lecture;
       this.action = "U";
       this.addModal = true;
     },
     openAddModal() {
-      this.action = "";
-      this.addModal = true;
+      axios.get('/acourse/codeSelect')
+        .then(response => {
+          this.detail_code = response.data; // 새로운 강의 코드 저장
+          this.action = "";
+          this.addModal = true;
+        })
+        .catch(error => {
+          console.error('Error generating course code:', error);
+        });
     },
     closeAddModal() {
       this.addModal = false;
+      this.getCourseList(); // 모달이 닫힐 때 강의 목록을 갱신합니다.
     },
   },
 };
