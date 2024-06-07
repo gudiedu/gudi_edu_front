@@ -83,6 +83,7 @@ export default {
       noticeContent: "",
       previewHtml: "",
       fileName: "",
+      etx: "",
     };
   },
   mounted() {
@@ -103,6 +104,7 @@ export default {
           this.noticeCreatedAt = response.data.result.notice_created_at;
           this.noticeTitle = response.data.result.notice_title;
           this.noticeContent = response.data.result.notice_content;
+          this.ext = response.data.result.file_extension;
 
           //response.data.result.file_name //파일이름
           //response.data.result.logical_path //논리경로

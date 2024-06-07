@@ -58,9 +58,9 @@
         <tbody>
           <template v-if="totalCnt > 0">
             <template v-for="item in noticeList" :key="item.notice_no">
-              <tr>
+              <tr class="table_row" @click="noticeModify(item.notice_no)">
                 <td>{{ item.notice_no }}</td>
-                <td @click="noticeModify(item.notice_no)">
+                <td>
                   {{ item.notice_title }}
                 </td>
                 <td>{{ item.name }}</td>
@@ -125,7 +125,7 @@ export default {
       // selectedNotice: null,
       activeFilter: "all",
       stitle: "",
-      statud: "",
+      status: "",
       noticeList: [],
       totalCnt: 0,
       pageSize: 10,
@@ -200,6 +200,10 @@ export default {
 </script>
 
 <style scoped>
+.table_row {
+  cursor: pointer;
+}
+
 .dashboard-card {
   margin: 20px;
   padding: 20px;
