@@ -2,34 +2,47 @@
   <div class="lecture-detail">
     <h2 class="title">질의응답</h2>
 
+    <!-- 글번호와 제목을 같은 줄에 배치 -->
     <div class="form-group">
       <div class="form-label">글번호</div>
-      <input type="text" name="title" class="form-input" />
+      <input type="text" name="postNumber" class="form-input" style="width: 10%" />
+      <div class="form-label" style="margin-left: 10px">제목</div>
+      <input type="text" name="title" class="form-input" style="width: 70%" />
     </div>
+
+    <!-- 작성자와 등록일을 같은 줄에 배치 -->
     <div class="form-group">
       <div class="form-label">작성자</div>
-      <input type="text" name="author" class="form-input" />
+      <input type="text" name="author" class="form-input" style="width: 45%" />
+      <div class="form-label" style="margin-left: 10px">등록일</div>
+      <input type="text" name="date" class="form-input" style="width: 45%" />
     </div>
-    <div class="form-group">
-      <div class="form-label">등록일</div>
-      <input type="text" name="date" class="form-input" />
-    </div>
-    <div class="form-group">
-      <div class="form-label">제목</div>
-      <input type="text" name="title" class="form-input" />
-    </div>
+
+    <!-- 내용 입력 -->
     <div class="form-group">
       <div class="form-label">내용</div>
       <textarea name="content" class="form-textarea"></textarea>
     </div>
-    <div class="form-group">
-      <div class="form-label">답변</div>
-      <textarea name="content" class="form-textarea"></textarea>
+
+    <!-- 답변을 한 박스 안에 배치 -->
+    <div class="answer-box">
+      <!-- 답변번호, 답변 작성자, 등록일을 같은 줄에 배치 -->
+      <div class="form-group">
+        <div class="form-label">답변번호</div>
+        <input type="text" name="answerNumber" class="form-input" style="width: 20%" />
+        <div class="form-label" style="margin-left: 10px">답변 작성자</div>
+        <input type="text" name="answerAuthor" class="form-input" style="width: 35%" />
+        <div class="form-label" style="margin-left: 10px">등록일</div>
+        <input type="text" name="answerDate" class="form-input" style="width: 35%" />
+      </div>
+
+      <!-- 답변내용 -->
+      <div class="form-group">
+        <div class="form-label">답변내용</div>
+        <textarea name="answerContent" class="form-textarea"></textarea>
+      </div>
     </div>
-    <div class="form-group">
-      <div class="form-label">답변내용</div>
-      <textarea name="content" class="form-textarea"></textarea>
-    </div>
+
     <!-- CKEditor 사용 -->
     <!-- 첨부파일 input 추가 -->
 
@@ -84,7 +97,7 @@ export default {
 
 .form-group {
   display: flex;
-  flex-direction: column;
+  flex-direction: center;
   margin-bottom: 16px;
 }
 
@@ -94,8 +107,15 @@ export default {
   margin-bottom: 8px;
 }
 
-.form-input,
+.form-input {
+  flex: 1; /* 변경: 남은 공간을 입력 필드에 할당 */
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 .form-textarea {
+  width: 100%;
   padding: 10px;
   border: 1px solid #dcdcdc;
   border-radius: 4px;
@@ -113,6 +133,19 @@ export default {
 .form-textarea {
   height: 200px;
   resize: vertical;
+}
+
+/* 새로운 answer-box 스타일 */
+.answer-box {
+  padding: 16px;
+  background-color: #f9f9f9; /* 배경 색상을 약간 회색으로 설정 */
+  border: 1px solid #ddd; /* 연한 테두리 설정 */
+  border-radius: 8px; /* 모서리를 둥글게 설정 */
+  margin-top: 20px;
+}
+
+.answer-box .form-group {
+  margin-bottom: 10px;
 }
 
 .button-group {
