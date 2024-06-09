@@ -94,7 +94,7 @@ export default {
       params.append("lgn_Id", this.loginId);
       params.append("pwd", this.pwd);
       this.axios
-        .post("/api/loginProc.do", params)
+        .post("/loginProc.do", params)
         .then((res) => {
           console.log(res);
           let data = res.data;

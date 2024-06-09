@@ -3,11 +3,8 @@
     <v-card class="dashboard-card">
       <v-card-title class="d-flex align-center pe-2">
         <div class="titletext">{{ titleText }}</div>
-        <v-spacer></v-spacer>
       </v-card-title>
-
       <div class="container">
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -15,7 +12,6 @@
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
-              
             />
           </div>
           <div class="button-group">
@@ -23,9 +19,6 @@
           </div>
         </div>
       </div>
-
-      <v-divider></v-divider>
-
       <v-table class="dashboard-table">
         <thead>
           <tr>
@@ -34,32 +27,62 @@
             <th>작성자</th>
             <th>등록일</th>
             <th>답변여부</th>
-          </tr>
-        </thead>
-        <tbody>
-          <template v-for="item in sListQna" :key="item.question_no">
-            <!--해당 게시글에 대한 세부정보는 SQnaSelectModal로 열기-->
-            <tr @click="openOneQnaModal(item)">
-              <td>{{ item.course_name }}</td>
-              <td>{{ item.question_title }}</td>
-              <td>{{ item.name }}</td>
-              <td>{{ item.question_created_at }}</td>
-              <td>{{ item.reply_no > 0 ? 'Y' : 'N' }}</td>
             </tr>
+            </thead>
+            <tbody>
+              <template v-if="totalCount > 0">
+              <!--해당 게시글에 대한 세부정보는 SQnaSelectModal로 열기-->
+              <template v-for="item in sListQna" :key="item.question_no">
+              <tr @click="openSelectedModal(item.question_no)">
+                <td>{{ item.course_name }}</td>
+                <td>{{ item.question_title }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.question_created_at }}</td>
+                <td>{{ item.reply_no > 0 ? 'Y' : 'N' }}</td>
+              </tr>
+            </template>
           </template>
-        </tbody>
+            <template v-else>
+              <tr style="text-align: center">
+                <td>조회된 데이터가 없습니다.</td>
+              </tr>
+            </template>
+          </tbody>
       </v-table>
     </v-card>
-
     <!-- 페이지네이션 추가-->
+     <div id="qnaPagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage" 
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="qna_list"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'">
+      </paginate>
+     </div>
 
     <div class="button-group">
       <button class="insert-button" @click="openSubmitModal()">등록</button>
     </div>
-    <v-dialog v-model="addModal" max-width="600px">
+    <v-dialog v-model="submitQnaModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <SQuestionsAndAnswersModal :action="action" />
+          
+          <SQnaSubmitModal :action="action" />
+         
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="isSelectedModalOpen" width="600px" height="1000px">
+      <v-card>
+        <v-card-text>
+          <SQnaSelectModal />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -69,18 +92,22 @@
 <script>
 import SQnaSubmitModal from "./SQnaSubmitModal.vue";
 import SQnaSelectModal from "./SQnaSelectModal.vue";
+import Paginate from "vuejs-paginate-next";
+
 
 export default {
   components: {
     SQnaSubmitModal,
     SQnaSelectModal,
+    Paginate,
   },
+  // modal setup
+  
   data() {
     return {
       titleText: "질의응답",
-      addModal: false,
+      submitQnaModal: false,
       action: "",
-      selectedNotice: null,
       activeFilter: "all",
       sListQna: [],
       question_title: "",
@@ -91,6 +118,10 @@ export default {
       reply_content: "",
       name: "", // 사용자정보의 이름
       isSelectedModalOpen: false, // 1개의 게시글에 대한 모달 실행 여부 default-false로 설정
+      sQuestionNo: 0,
+      currentPage: 1,
+      totalCount: 0,
+      pageSize: 10,
     };
   },
   mounted(){
@@ -103,7 +134,7 @@ export default {
       alert("qna_list 조회해보잰 햄수다");
 
       // qna로 넘겨줄 parameter 정리
-      let vm = this; // axios에서 this를 사용하기 위해 qna에 담아봄
+      let vm = this; // axios에서 this를 사용하기 위해 vm에 담아봄
 
       let qnaParams = new URLSearchParams();
       qnaParams.append("question_title", this.question_title);
@@ -113,39 +144,62 @@ export default {
       qnaParams.append("reply_no", this.reply_no);
       qnaParams.append("reply_content", this.reply_content);
       qnaParams.append("name", this.name);
+      qnaParams.append("currentPage", this.currentPage);
 
       alert("append 해수다");
-
+      
       this.axios
         .post("/sAlert/qna.do", qnaParams)
         .then((response) => {
           alert("axios 와수다");
           vm.sListQna = response.data.listQna;
+          console.log(response.data.listQna);
+          alert("response.data.listQna : " + response.data.listQna);
+          alert("sListQna : " + vm.sListQna);
         })
         .catch(function (error){
           alert("ERROR 나수다!!!!!!! 확인해줍써!!!!!!!!!" + error);
         });
     },
-    openOneQnaModal(item){
-      this.selectedQna = item; // 클릭된 질문의 데이터를 저장
-      this.isSelectedModalOpen = true; // 모달창 열어봄
+
+    openSelectedModal(sQuestionNo){
+      // this.selectedQna = qnaSelectedList; // 선택한 게시글 정보 모달에 가졍가기
+      this.isSelectedModalOpen = true;
+      alert("게시글 하나 클릭 해수다:)");
+      alert("isSelectedModalOpen 값: " + this.isSelectedModalOpen);
+      this.sQuestionNo = sQuestionNo;
+      alert("sQuestionNo 값 : " + this.sQuestionNo);
     },
-    closeOneModal(){
-      this.isSelectedModalOpen = false; // 모달창 닫음
+
+    closeModal(){
+      this.isSelectedModalOpen = false;
     },
-    searchMethod() {},
+
     qaModify(qa) {
       this.selectedNotice = qa;
       this.action = "U";
       this.addModal = true;
     },
     openSubmitModal() {
-      this.action = "";
-      this.addModal = true;
+      this.SQnaSubmitModal = true;
     },
-    closeAddModal() {
-      this.addModal = false;
+    closeSubmitModal() {
+      this.SQnaSubmitModal = false;
     },
+
+     page: function(){
+       var total = this.totalCount;
+       var page = this.pageSize;
+       var remain = total % page;
+       var result = parseInt(total / page);
+
+       if(remain == 0){
+         return result;
+       } else {
+         result = result + 1;
+         return result;
+       }
+     },
   },
 };
 </script>

@@ -31,7 +31,6 @@
 
     <div class="button-group">
       <template v-if="paction === 'U'">
-        <v-btn class="update-button" @click="updateNotice">수정</v-btn>
         <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
       </template>
       <template v-else>
@@ -52,8 +51,10 @@ export default {
     };
   },
   methods: {
-    updateNotice() {},
-    deleteNotice() {},
+    deleteNotice() {
+
+      
+    },
     insertNotice() {},
   },
 };
