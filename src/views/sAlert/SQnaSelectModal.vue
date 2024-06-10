@@ -1,151 +1,213 @@
 <template>
-  <div class="modal">
-    <h2 class="title">질문/답변 조회</h2>
-    <!--Modal Selected Question Content-->
-      <div class="selected-question">
-        <v-table class="question">
-          <template v-for="item in selectedListQna" :key="item.question_no">
-            <tr>
-              <th>과목</th>
-              <td> {{ item.course_name }} </td>
-            </tr>
-            <tr>
-              <th>등록일</th>
-              <td> {{ itme.question_created_at }}</td>
-            </tr>
-            <tr>
-              <th>제목</th>
-              <td>{{ item.question_title }}</td>
-            </tr>
-            <tr>
-              <th>내용</th>
-              <td>{{ item.question_content }}</td>
-            </tr>
-          </template>
-        </v-table>
-      </div> <!--This is the end of Selected Question div-->
-      <!--This is the start of the reply content area -->
-      <div class="qna-reply">
-        <template v-for="item in selectedListQna" :key="item.question_no">
-            <tr>
-              <th>작성자</th>
-              <td> {{ item.name }} </td>
-            </tr>
-            <tr>
-              <th>등록일</th>
-              <td> {{ itme.reply_created_at }}</td>
-            </tr>
-            <tr>
-              <th>내용</th>
-              <td>{{ item.reply_content }}</td>
-            </tr>
-          </template>
-      </div> <!--the end of div.qna-reply-->
+  <v-container>
+    <v-card class="lecture-detail">
+      <h2 class="title">질문/답변조회</h2>
 
-  </div> <!--the end of div.modal-->
+      <v-row>
+        <v-col cols="12" sm="2" class="box1">
+          <div class="form-group">
+            <div class="form-label">질문번호</div>
+            <input
+              readonly
+              type="text"
+              name="SelectedQuestionNo"
+              v-model="SelectedQuestionNo"
+              class="form-input"
+            />
+          </div>
+        </v-col>
+
+        <v-col cols="12" sm="5" class="box1">
+          <div class="form-group">
+            <div class="form-label">작성자</div>
+            <input
+              readonly
+              type="text"
+              name="name"
+              v-model="name"
+              class="form-input"
+            />
+          </div>
+        </v-col>
+
+        <v-col cols="12" sm="5" class="box1">
+          <div class="form-group">
+            <div class="form-label">등록일</div>
+            <input
+              readonly
+              type="text"
+              name="questionCreatedAt"
+              v-model="questionCreatedAt"
+              class="form-input"
+            />
+          </div>
+        </v-col>
+
+        <v-col cols="12" class="box1">
+          <div class="form-group">
+            <div class="form-label">제목</div>
+            <input
+              readonly
+              type="text"
+              name="questionTitle"
+              v-model="questionTitle"
+              class="form-input"
+            />
+          </div>
+        </v-col>
+
+        <v-col cols="12" class="box1">
+          <div class="form-group">
+            <div class="form-label">내용</div>
+            <textarea
+              readonly
+              type="text"
+              name="questionContent"
+              v-model="questionContent"
+              class="form-textarea"
+            />
+          </div>
+        </v-col>
+
+
+        <template v-if="questionAnswered">
+          <v-col cols="12" class="box1">
+            <div class="form-group">
+              <div class="form-label">답변</div>
+              <textarea
+                readonly
+                type="text"
+                name="questionReplyContent"
+                v-model="questionReplyContent"
+                class="form-textarea"
+              />
+            </div>
+          </v-col>
+        </template>
+      </v-row>
+    </v-card>
+  </v-container>
 </template>
 
 <script>
-export default{
+export default {
   props: {
-    isSelectedModalOpen: Boolean,
-    sQuestionNo: Number,
     action: String,
+    sQuestionNo: Number,
   },
-  data(){
-    return{
-      isModalOpen: this.isSelectedModalOpen,
-      selectedListQna: [],
-      sqno: this.sQuestionNo,
-      question_title: "",
-      question_content: "",
-      question_created_at: "",
-      reply_no: "",
-      reply_content: "",
+  data() {
+    return {
+      paction: this.action,
+      SelectedQuestionNo: this.sQuestionNo,
       name: "",
-    }
+      questionTitle: "",
+      questionContent: "",
+      questionCreatedAt: "",
+      questionAnswered: "",
+      questionReplyContent: "",
+    };
   },
-  mounted(){
-    this.qna_selected_list(); // method
+  mounted() {
+    this.sQnaSelected();
+    this.sQnaReplyContent();
   },
   methods: {
-    qna_selected_list : function(){
-      alert("선택한 질의응답 조회해보잰 하맨");
 
-      let selectedParams = new URLSearchParams();
-      selectedParams.append("sqno", this.sqno);
+    sQnaSelected() {
+      let params = new URLSearchParams();
+      params.append("pSuggestionNo", this.pSuggestionNo);
 
       this.axios
-        .post("/sAlert/sSelectedQna.do", selectedParams)
+        .post("/sAlert/sQnaSelected.do", params)
         .then((response) => {
           console.log(JSON.stringify(response));
-          console.log(response.data );
+          console.log(response.data);
 
-          // 과목, 등록일, 제목, 내용
-          this.course_name = response.data.result.course_name;
-          this.question_created_at = response.data.result.question_created_at;
-          this.question_title = response.data.result.question_title;
-          this.question_content = response.data.result.question_content;
-          this.reply_no = response.data.result.reply_no;
-          this.reply_content = response.data.result.reply_content;
           this.name = response.data.result.name;
-
+          this.questionTitle = response.data.result.question_title;
+          this.questionContent = response.data.result.question_content;
+          this.questionCreatedAt = response.data.result.question_created_at;
+          this.questionAnswered = response.data.result.reply_no;
         })
+        .catch(function (error) {
+          alert("sQnaSelected에서 오류나수다 " + error);
+        });
+    },
 
-    }
+    sQnaReplyContent() {
+      let params = new URLSearchParams();
+      params.append("SQuestionNo", this.SQuestionNo);
 
+      this.axios
+        .post("/sAlert/sQnaSelectedReply.do", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+          console.log(response.data);
+
+          this.QnaContentReply =
+            response.data.result.question_reply_content;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
   },
-
-}
-
+};
 </script>
+
 <style scoped>
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* 모달 배경색 및 투명도 조절 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Modal Content */
-.selected-question {
-  background-color: white;
-  padding: 20px;
+.lecture-detail {
+  padding: 16px;
+  background-color: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 16px;
+  max-width: 800px;
+  margin: auto;
 }
 
-/* Table Styles */
-.v-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
-.v-table th,
-.v-table td {
+.form-group {
+  display: flex;
+  flex-direction: column;
+  /* margin-bottom: 16px; */
+}
+
+.form-label {
+  font-size: 14px;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.form-input,
+.form-textarea {
   padding: 10px;
-  border-bottom: 1px solid #ddd; /* 테이블 셀 아래 경계선 스타일 */
-}
-
-/* Button Style */
-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
+  border: 1px solid #dcdcdc;
   border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
+  color: #34495e;
 }
 
-button:hover {
-  background-color: #0056b3;
+.form-input:focus,
+.form-textarea:focus {
+  border-color: #407bff;
+  box-shadow: 0 0 4px rgba(64, 123, 255, 0.2);
+  outline: none;
+}
+
+.form-textarea {
+  height: 200px;
+  resize: vertical;
+}
+
+.goBackButton {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 </style>

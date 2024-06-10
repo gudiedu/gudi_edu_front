@@ -1,42 +1,34 @@
 <template>
   <div class="lecture-detail">
-    <h2 class="title">질의응답</h2>
+    <h2 class="title">질의응답 등록</h2>
 
-    <div class="form-group">
-      <div class="form-label">글번호</div>
-      <input type="text" name="title" class="form-input" />
-    </div>
-    <div class="form-group">
-      <div class="form-label">작성자</div>
-      <input type="text" name="author" class="form-input" />
-    </div>
-    <div class="form-group">
-      <div class="form-label">등록일</div>
-      <input type="text" name="date" class="form-input" />
-    </div>
+    <form id="submitting">
     <div class="form-group">
       <div class="form-label">제목</div>
-      <input type="text" name="title" class="form-input" />
+      <input type="text"
+        name="questionTitle"
+        v-model="questionTitle"
+        class="form-input" />
     </div>
     <div class="form-group">
       <div class="form-label">내용</div>
-      <textarea name="content" class="form-textarea"></textarea>
-    </div>
-    <div class="form-group">
-      <div class="form-label">답변</div>
-      <textarea name="content" class="form-textarea"></textarea>
+      <textarea 
+        name="questionContent"
+        v-model="questionConcent"
+         class="form-textarea"></textarea>
     </div>
     <!-- CKEditor 사용 -->
     <!-- 첨부파일 input 추가 -->
 
     <div class="button-group">
-      <template v-if="paction === 'U'">
-        <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
+      <template v-if="paction === 'D'">
+        <v-btn class="delete-button" @click="deleteQuestion">삭제</v-btn>
       </template>
       <template v-else>
-        <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
+        <v-btn class="insert-button" @click="submitQuestion">등록</v-btn>
       </template>
     </div>
+  </form>
   </div>
 </template>
 
@@ -48,14 +40,37 @@ export default {
   data() {
     return {
       paction: this.action,
+      questionTitle: "",
+      questionContent: "",
+      sSQuestionNo: this.sQuestionNo,
+      name: "",
     };
   },
   methods: {
-    deleteNotice() {
+    deleteQuestion() {
 
       
     },
-    insertNotice() {},
+    submitQuestion() {
+      let formTag = document.getElementById("submitting");
+      let data = new FormData(formTag);
+      data.append("questionTitle", this.questionTitle);
+      data.append("questionContent", this.questionContent);
+
+      this.axios
+        .post("/sAlert/sQnaInsert.do")
+        .then((response) => {
+          console.log(JSON.stringify(response));
+
+          if (response.data.result > 0) {
+            alert(response.data.resultMsg);
+            this.$emit("close-modal"); // 모달 닫기 이벤트 발생
+          }
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
   },
 };
 </script>
