@@ -2,32 +2,13 @@
   <v-container fluid>
     <v-card class="dashboard-card">
       <v-card-title class="d-flex align-center pe-2">
-        <div class="titletext">{{ titleText }}</div>
+        <div class="titletext">
+          {{ titleText }}
+        </div>
         <v-spacer></v-spacer>
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >강사</v-btn
-          >
-        </div> -->
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -55,12 +36,20 @@
           <template v-if="totalCnt > 0">
             <template v-for="item in questionList" :key="item.question_no">
               <tr>
-                <td>{{ item.question_no }}</td>
+                <td>
+                  {{ item.question_no }}
+                </td>
                 <!--<td @click="questionModifyFile(item.question_no)">-->
                 <td>{{ item.name }}</td>
-                <td @click="questionModify(item.question_title)">{{ item.question_title }}</td>
-                <td>{{ item.question_created_at }}</td>
-                <td>{{ item.reply_no > 0 ? "Y" : "N" }}</td>
+                <td @click="questionModify(item.question_no, item.reply_no)">
+                  {{ item.question_title }}
+                </td>
+                <td>
+                  {{ item.question_created_at }}
+                </td>
+                <td>
+                  {{ item.reply_no > 0 ? "Y" : "N" }}
+                </td>
               </tr>
             </template>
           </template>
@@ -93,13 +82,14 @@
     <!--<div class="button-group">
       <button class="insert-button" @click="openAddModal">등록</button>
     </div>-->
-    <v-dialog v-model="addModal" max-width="600px">
+    <v-dialog v-model="addModal" max-width="800px" max-height="1000px">
       <v-card>
         <v-card-text>
           <TQuestionsAndAnswersModal
             :action="action"
             :question_content="question_content"
             :question_created_at="question_created_at"
+            :reply_no="reply_no"
             :question_no="question_no"
             :question_title="question_title"
             :loginID="loginID"
@@ -171,13 +161,13 @@ export default {
       params.append("stitle", this.stitle);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
-      params.append("question_title", this.question_title);
-      params.append("question_no", this.question_no);
-      params.append("question_content", this.question_content);
-      params.append("question_created_at", this.question_created_at);
-      params.append("reply_no", this.reply_no);
-      params.append("reply_content", this.reply_content);
-      params.append("name", this.name);
+      // params.append("question_title", this.question_title);
+      // params.append("question_no", this.question_no);
+      // params.append("question_content", this.question_content);
+      // params.append("question_created_at", this.question_created_at);
+      // params.append("reply_no", this.reply_no);
+      // params.append("reply_content", this.reply_content);
+      // params.append("name", this.name);
 
       this.axios
         .post("/tCourse/listquestion.do", params)
@@ -196,8 +186,9 @@ export default {
     },
 
     searchMethod() {},
-    questionModify(question) {
-      this.selectedQuestion = question;
+    questionModify(question, reply_no) {
+      this.question_no = question;
+      this.reply_no = reply_no;
       this.action = "U";
       this.addModal = true;
     },

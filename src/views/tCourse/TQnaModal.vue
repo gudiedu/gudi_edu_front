@@ -2,52 +2,68 @@
   <div class="lecture-detail">
     <h2 class="title">질의응답</h2>
 
-    <!-- 글번호와 제목을 같은 줄에 배치 -->
-    <div class="form-group">
-      <div class="form-label">글번호</div>
-      <input type="text" name="postNumber" class="form-input" style="width: 10%" />
-      <div class="form-label" style="margin-left: 10px">제목</div>
-      <input type="text" name="title" class="form-input" style="width: 70%" />
-    </div>
+    <table class="info-table">
+      <tr>
+        <td class="label">글제목</td>
+        <td class="content" colspan="3">{{ questionTitle }}</td>
+      </tr>
+      <tr>
+        <td class="label">작성자</td>
+        <td class="content">{{ name }}</td>
+        <td class="label">등록일</td>
+        <td class="content">{{ question_created_at }}</td>
+      </tr>
+      <tr class="full">
+        <td class="content" colspan="4">{{ questionContent }}</td>
+      </tr>
+    </table>
 
-    <!-- 작성자와 등록일을 같은 줄에 배치 -->
-    <div class="form-group">
-      <div class="form-label">작성자</div>
-      <input type="text" name="author" class="form-input" style="width: 45%" />
-      <div class="form-label" style="margin-left: 10px">등록일</div>
-      <input type="text" name="date" class="form-input" style="width: 45%" />
-    </div>
+    <v-table class="dashboard-table">
+      <thead>
+        <tr>
+          <th class="col-number">답변번호</th>
+          <th class="col-content">답변내용</th>
+          <th class="col-author">답변작성자</th>
+          <th class="col-date">등록일</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template v-if="listdata.length > 0">
+          <template v-for="item in listdata" :key="item.reply_no">
+            <tr>
+              <td style="text-align: center">
+                {{ item.reply_no }}
+              </td>
+              <!--<td @click="questionModifyFile(item.question_no)">-->
 
-    <!-- 내용 입력 -->
+              <!--<td @click="replyModify(item.reply_title)">-->
+
+              <td>{{ item.reply_content }}</td>
+              <td style="text-align: center">{{ item.name }}</td>
+              <td style="text-align: center">
+                {{ formattedDate(item.reply_created_at) }}
+              </td>
+            </tr>
+          </template>
+        </template>
+        <template v-else>
+          <tr>
+            <td colspan="4">답변이 없습니다.</td>
+          </tr>
+        </template>
+      </tbody>
+    </v-table>
+
     <div class="form-group">
-      <div class="form-label">내용</div>
+      <div class="form-label">답변</div>
       <textarea name="content" class="form-textarea"></textarea>
-    </div>
-
-    <!-- 답변을 한 박스 안에 배치 -->
-    <div class="answer-box">
-      <!-- 답변번호, 답변 작성자, 등록일을 같은 줄에 배치 -->
-      <div class="form-group">
-        <div class="form-label">답변번호</div>
-        <input type="text" name="answerNumber" class="form-input" style="width: 20%" />
-        <div class="form-label" style="margin-left: 10px">답변 작성자</div>
-        <input type="text" name="answerAuthor" class="form-input" style="width: 35%" />
-        <div class="form-label" style="margin-left: 10px">등록일</div>
-        <input type="text" name="answerDate" class="form-input" style="width: 35%" />
-      </div>
-
-      <!-- 답변내용 -->
-      <div class="form-group">
-        <div class="form-label">답변내용</div>
-        <textarea name="answerContent" class="form-textarea"></textarea>
-      </div>
     </div>
 
     <!-- CKEditor 사용 -->
     <!-- 첨부파일 input 추가 -->
 
     <div class="button-group">
-      <template v-if="paction === 'U'">
+      <template v-if="totalCnt > 0">
         <v-btn class="update-button" @click="updateQuestion">수정</v-btn>
         <v-btn class="delete-button" @click="deleteQuestion">삭제</v-btn>
       </template>
@@ -63,16 +79,49 @@ export default {
   name: "TQuestionsAndAnswersModal",
   props: {
     action: String,
+    questionTitle: String,
+    questionContent: String,
+    question_created_at: String,
+    name: String,
+    reply_no: String,
+    question_no: String,
   },
   data() {
     return {
+      listdata: [],
       paction: this.action,
     };
   },
+  mounted() {
+    this.selectQuestion();
+  },
   methods: {
+    formattedDate(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // 월은 0부터 시작하므로 1을 더함
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    },
     updateQuestion() {},
     deleteQuestion() {},
     insertQuestion() {},
+    selectQuestion() {
+      console.log(this.question_no, this.reply_no);
+      this.axios
+        .get("/tCourse/listquestionreply.do", {
+          params: {
+            question_no: this.question_no,
+            reply_no: this.reply_no,
+          },
+        })
+        .then((response) => {
+          this.listdata = response.data.listdata;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
   },
 };
 </script>
@@ -185,5 +234,78 @@ export default {
 .delete-button:hover {
   background-color: #e57373;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.info-table .label {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid #ddd;
+  width: 15%; /* 레이블 셀의 너비를 20%로 설정 */
+}
+
+.info-table .content {
+  background-color: #ffffff;
+  width: 40%; /* 내용 셀의 너비를 40%로 설정 */
+  text-align: left;
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.info-table .full .content {
+  width: 100%;
+}
+
+.info-table tr.full .content {
+  text-align: left;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.dashboard-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  text-align: center !important;
+}
+
+.dashboard-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 16px;
+}
+
+.dashboard-table tr:hover {
+  background-color: #f1f1f1;
+}
+/* 열 너비 조정 */
+.col-number {
+  width: 10%;
+  text-align: center;
+}
+
+.col-content {
+  width: 55%;
+  text-align: center;
+}
+
+.col-author {
+  width: 15%;
+  text-align: center;
+}
+
+.col-date {
+  width: 20%;
+  text-align: center;
 }
 </style>
