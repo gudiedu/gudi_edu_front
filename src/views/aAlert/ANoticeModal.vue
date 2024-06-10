@@ -64,9 +64,7 @@
       <div class="form-group">
         <div class="form-label">내용</div>
         <textarea name="content" class="form-textarea" v-model="notice_content">
-        {{ notice_content }}
-      </textarea
-        >
+        </textarea>
       </div>
       <div class="form-group" v-if="fileName">
         <div class="form-label">첨부파일</div>
@@ -76,10 +74,13 @@
     <template v-else>
       <div class="form-group">
         <div class="form-label">내용</div>
-        <textarea name="content" class="form-textarea" disabled>
-        {{ notice_content }}
-      </textarea
+        <textarea
+          name="content"
+          class="form-textarea"
+          v-model="notice_content"
+          disabled
         >
+        </textarea>
       </div>
       <div class="form-group" v-if="fileName">
         <div class="form-label">첨부파일</div>
@@ -181,7 +182,7 @@ export default {
 
       this.axios
         .post("/aAlert/notice/update", dataWithFile)
-        .then((response) => {
+        .then(() => {
           this.$emit("close");
           this.$emit("searchList");
         })
@@ -221,7 +222,7 @@ export default {
       }
       this.axios
         .post("/aAlert/notice/new", dataWithFile)
-        .then((response) => {
+        .then(() => {
           this.$emit("close");
           this.$emit("searchList");
         })

@@ -247,9 +247,7 @@ export default {
           this.notice_no = response.data.notice_no;
           this.ext = response.data.file_extension;
 
-          if (
-            !response.data.file_no
-          ) {
+          if (!response.data.file_no) {
             this.previewHtml = "";
             this.fileName = "";
           } else {

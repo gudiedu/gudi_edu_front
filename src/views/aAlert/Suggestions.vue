@@ -39,7 +39,9 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="searchList(stitle)">
+              검색
+            </button>
           </div>
         </div>
       </div>
@@ -58,15 +60,24 @@
         </thead>
         <tbody>
           <tr v-for="item in suggestionList" :key="item.suggestion_no">
-            <td>
+            <td
+              @click="
+                selectSuggestion(item.suggestion_no, item.suggestion_answered)
+              "
+            >
               {{ item.suggestion_no }}
             </td>
-            <td>
-              {{ item.suggestion_title }}
+            <td
+              @click="
+                selectSuggestion(item.suggestion_no, item.suggestion_answered)
+              "
+            >
+              [{{ item.suggestion_category }}] {{ item.suggestion_title }}
             </td>
             <td>{{ item.loginID }}</td>
             <td>{{ item.suggestion_created_at }}</td>
-            <td>{{ item.suggestion_answered }}</td>
+            <td v-if="item.suggestion_answered === 'Y'">완료</td>
+            <td v-else>대기중</td>
           </tr>
         </tbody>
       </v-table>
@@ -80,7 +91,10 @@
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ASuggestionsModal :action="action" />
+          <ASuggestionsModal
+            :action="action"
+            :selectedSuggestion="selectedSuggestion"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -98,7 +112,7 @@ export default {
       titleText: "건의사항",
       addModal: false,
       action: "",
-      selectedNotice: null,
+      selectedSuggestion: {},
       activeFilter: "all",
       stitle: "",
       suggestionList: [],
@@ -106,7 +120,7 @@ export default {
   },
   mounted() {
     this.searchList();
-    this.page();
+    // this.page();
   },
   methods: {
     searchList: function (stitle) {
@@ -125,10 +139,18 @@ export default {
           console.log(JSON.stringify(response));
           vm.suggestionList = response.data;
           console.log(this.suggestionList);
+          console.log(this.suggestionList.data);
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
+    },
+    selectSuggestion(suggestion_no, suggestion_answered) {
+      this.selectedSuggestion = {
+        suggestion_no: suggestion_no,
+        suggestion_answered: suggestion_answered,
+      };
+      this.openPopup();
     },
     searchMethod() {},
     suggestionModify(suggestion) {
@@ -136,11 +158,10 @@ export default {
       this.action = "U";
       this.addModal = true;
     },
-    openAddModal() {
-      this.action = "";
+    openPopup: async function () {
       this.addModal = true;
     },
-    closeAddModal() {
+    closePopup: async function () {
       this.addModal = false;
     },
   },
