@@ -55,18 +55,18 @@
 <script>
 import "../assets/css/admin/login.css";
 export default {
-  data: function () {
+  data: function() {
     return {
-      loginId: "",
-      pwd: "",
-      saveId: false,
-    };
+      loginID: "",
+      password: "",
+      saveId: false,    //기존 false
+    }
   },
   mounted() {
-    let id = this.getCookie("LOGIN_ID");
-    console.log("id:::" + id);
-    this.loginId = id;
-    this.saveId = id != "" ? true : false;
+    let id = this.getCookie("LOGIN_ID")
+    console.log('id:::' + id)
+    this.loginId = id
+    this.saveId = id != "" ? true : false    //this.saveId = id != "" ? true : false
 
     //document.querySelector("#userPwd")
     //document.getElementById("userPwd")
@@ -74,71 +74,74 @@ export default {
     //this.$refs.userPwd.focus()
   },
   methods: {
-    fLoginProc: function () {
-      console.log("saveId::" + this.saveId);
-
-      this.setCookie("LOGIN_ID", this.loginId, this.saveId == true ? 7 : -1);
-
+    fLoginProc: function() {
+      console.log('saveId::' + this.saveId)
+      // cookie 1일 설정
+      this.setCookie("LOGIN_ID", this.loginId, 1)  //false his.setCookie("LOGIN_ID", this.loginId, this.saveId == true ? 7 : -1) 
       //로그인 전에 필수 체크
-      if (this.$refs.userId.value == "") {
-        alert("로그인 ID를 입력하세요.");
-        this.$refs.userId.focus();
-        return false;
-      } else if (this.$refs.userPwd.value == "") {
-        alert("비밀번호를 입력하세요.");
-        this.$refs.userPwd.focus();
-        return false;
-      }
+      if(this.$refs.userId.value == "") {
+        alert("로그인 ID를 입력하세요.")
+        this.$refs.userId.focus()
+        return false
+      } else if(this.$refs.userPwd.value == "") {
+        alert("비밀번호를 입력하세요.")
+        this.$refs.userPwd.focus()
+        return false
+      } 
 
       const params = new URLSearchParams();
-      params.append("lgn_Id", this.loginId);
-      params.append("pwd", this.pwd);
-      this.axios
-        .post("/api/loginProc.do", params)
-        .then((res) => {
-          console.log(res);
-          let data = res.data;
-          if (data.result == "SUCCESS") {
-            this.$store.commit("setLoginInfo", {
-              loginId: data.loginId,
-              userNm: data.userNm,
-              userType: data.userType,
-              usrMnuAtrt: data.usrMnuAtrt,
-            });
-            sessionStorage.setItem("loginInfo", JSON.stringify(data));
-            sessionStorage.setItem("loginId", data.loginId);
-            this.$router.push("/dashboard");
-          } else {
-            alert("ID 혹은 비밀번호가 틀립니다.");
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      params.append('loginID', this.loginId);
+      params.append('password', this.pwd);
+      this.axios.post('/api/loginProc.do', params)
+      .then(res => {
+        console.log(res)
+        let data = res.data;
+        if(data.result == "SUCCESS") {
+          this.$store.commit("setLoginInfo", {
+            loginId: data.loginId,
+            userNm: data.name,
+            userType: data.user_type,
+            usrMnuAtrt: data.usrMnuAtrt,
+          })
+          sessionStorage.setItem('loginInfo', JSON.stringify(data))
+          sessionStorage.setItem('loginID', JSON.stringify(data.loginId))
+          this.$router.push('/dashboard')
+          //sessionStroage 값 확인
+          //sessionStorage.getItem("세션값:" + JSON.stringify(data.loginId))
+        } else {
+          alert("ID 혹은 비밀번호가 틀립니다.");
+        }
+      }).catch(error => {
+        console.log(error);
+      })
     },
-    setCookie: function (name, value, day) {
-      let today = new Date();
-      today.setDate(today.getDate() + day);
-      document.cookie =
-        name + "=" + value + "; path=/; expires=" + today.toUTCString() + ";";
+    //쿠키 설정 
+    setCookie: function(name, value, day) {
+      let today = new Date()
+      today.setDate(today.getDate() + day)
+      document.cookie = name + "=" + value +"; path=/; expires=" 
+      + today.toUTCString() + ";"
+      console.log("document.cookie:"  + document.cookie)
     },
-    getCookie: function (name) {
+    getCookie: function(name) {
       //쿠키에서 loginId 값을 가져온다.
-      let cookie = document.cookie + ";";
-      let idx = cookie.indexOf(name, 0);
+      let cookie = document.cookie + ";"
+      console.log('cookie:'+ cookie);    //LOGIN_ID=admin;`
+      let idx = cookie.indexOf(name, 0)
       let val = "";
-      console.log("idx::" + idx);
-      if (idx > -1) {
-        cookie = cookie.substring(idx, cookie.length);
-        let begin = cookie.indexOf("=", 0) + 1;
-        let end = cookie.indexOf(";", begin);
-        val = unescape(cookie.substring(begin, end));
+      console.log('idx::' + idx)
+      if(idx > -1){
+        cookie = cookie.substring(idx, cookie.length)
+        let begin = cookie.indexOf("=", 0) + 1
+        let end = cookie.indexOf(";", begin)
+        val = cookie.substring(begin, end)
       }
-      console.log("val::" + val);
-      return val;
+      console.log('val::' + val)
+      return val
     },
-  },
-};
+
+  }
+}
 </script>
 
 <style>
