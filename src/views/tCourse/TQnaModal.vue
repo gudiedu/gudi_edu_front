@@ -31,17 +31,14 @@
       </thead>
       <tbody>
         <template v-if="listdata.length > 0">
-          <template v-for="item in listdata" :key="item.reply_no">
+          <template v-for="(item, index) in listdata" :key="item.reply_no">
             <tr @click="flag_changed(true, item.reply_no)" :class="{ selected: reply_num === item.reply_no, 'non-selected': reply_num !== item.reply_no }">
               <td style="text-align: center">
-                {{ item.reply_no }}
+                {{ index + 1 }}
+                <!-- 여기서 index를 사용합니다 -->
               </td>
-              <!--<td @click="questionModifyFile(item.question_no)">-->
-
-              <!--<td @click="replyModify(item.reply_title)">-->
-
               <td>{{ item.reply_content }}</td>
-              <td style="text-align: center">{{ item.name }}</td>
+              <td style="text-align: center">{{ item.replier_name }}</td>
               <td style="text-align: center">
                 {{ item.reply_created_at }}
               </td>
@@ -108,7 +105,12 @@ export default {
     flag_changed(stat, reply_no) {
       this.reply_num = stat ? reply_no : null;
       this.flag_seleted = stat;
-      document.querySelector('textarea[name="content"]').value = "";
+      if (stat) {
+        const selectedReply = this.listdata.find((item) => item.reply_no === reply_no);
+        this.reply_content = selectedReply ? selectedReply.reply_content : "";
+      } else {
+        this.reply_content = "";
+      }
     },
 
     insertReply() {
@@ -134,7 +136,27 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
-    updateReply() {},
+
+    updateReply() {
+      this.axios
+        .post("/tCourse/updatequestionreply.do", {
+          reply_no: this.reply_num,
+          reply_content: this.reply_content,
+          question_no: this.question_no,
+        })
+        .then((response) => {
+          if (response.data.result >= 0) {
+            alert(response.data.resultMsg);
+            this.selectQuestion();
+            this.flag_changed(false); // 수정 완료 후 상태 초기화
+          } else {
+            alert(response.data.resultMsg);
+          }
+        })
+        .catch((error) => {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
 
     deleteReply() {
       console.log("Deleting reply with reply_no:", this.reply_num);
