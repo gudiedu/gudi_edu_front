@@ -132,7 +132,7 @@ export default {
       stitle: "",
       suggestionList: [],
       totalCnt: 0,
-      pageSize: 5,
+      pageSize: 10,
       currentPage: 1,
       pageList: [],
     };

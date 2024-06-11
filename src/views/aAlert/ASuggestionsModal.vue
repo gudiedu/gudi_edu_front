@@ -60,7 +60,9 @@
         @click="download(responseSuggestion.file_no, suggestionFileName)"
       ></div>
     </div>
-    <v-btn class="delete-button" @click="deleteSuggestion">삭제</v-btn>
+    <div class="button-group">
+      <v-btn class="delete-button" @click="deleteSuggestion">건의삭제</v-btn>
+    </div>
     <div class="form-group" v-if="action === 'U' || action === 'I'">
       <div class="form-label">답변</div>
       <textarea name="content" class="form-textarea" v-model="replyContent">
@@ -86,7 +88,7 @@
     </div>
     <!-- 첨부파일 input 추가 -->
 
-    <div class="button-group">
+    
       <template v-if="action === 'I'">
         <form id="file-form" enctype="multipart/form-data">
           <input
@@ -108,20 +110,21 @@
             type="file"
             id="file-insert"
             name="file-insert"
-            class="insert-button"
             @change="handleFileChange"
           />
-          <v-btn class="insert-button" @click.prevent="deleteFile">첨부파일 삭제</v-btn>
-          <v-btn class="insert-button" @click.prevent="updateSuggestion"
-            >등록</v-btn
-          >
         </form>
+        <div class="button-group">
+          <v-btn class="delete-button" @click.prevent="deleteFile">첨부파일 삭제</v-btn>
+          <v-btn class="insert-button" @click.prevent="updateSuggestion">등록</v-btn>
+        </div>
       </template>
       <template v-else>
-        <v-btn class="update-button" @click="toggleUpdate">수정</v-btn>
-        <v-btn class="delete-button" @click="deleteReply">삭제</v-btn>
+        <div class="button-group">
+          <v-btn class="update-button" @click="toggleUpdate">수정</v-btn>
+          <v-btn class="delete-button" @click="deleteReply">답변삭제</v-btn>
+        </div>
       </template>
-    </div>
+    
   </div>
 </template>
 
