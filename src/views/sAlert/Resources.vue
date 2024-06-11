@@ -103,7 +103,7 @@
     <v-dialog v-model="resourceModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ResourceModal :action="action" />
+          <ResourceModal :action="action" :resourceNo="resourceNo" />
         </v-card-text>
       </v-card>
     </v-dialog>

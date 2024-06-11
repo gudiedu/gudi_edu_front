@@ -1,10 +1,13 @@
 <template>
   <div class="lecture-detail">
-    <h2 class="title">출결</h2>
+    <h2 class="title">{{ courseName }} 출결사항</h2>
 
     <div class="attendanceModal">
       <v-card class="dashboard-card">
-        <div class="titletext">강의일정 : 2024.01.02 - 2024.05.01</div>
+        <div class="titletext">
+          강의일정 : {{ courseStartDate }} -
+          {{ courseEndDate }}
+        </div>
 
         <v-table class="dashboard-table">
           <thead>
@@ -13,22 +16,43 @@
               <th>출석일</th>
               <th>결석일</th>
               <th>출석률(일수)</th>
-              <th>총수당지급액</th>
+              <!-- <th>총수당지급액</th> -->
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>100</td>
-              <td>90</td>
-              <td>1</td>
-              <td>90%</td>
-              <td>500,000</td>
+              <td>{{ totalCourseDays }}일</td>
+              <td>{{ attendanceDays }}일</td>
+              <td>{{ absenceDays }}일</td>
+              <td>{{ attendanceRate }}%</td>
+              <!-- <td>{{ totalAllowanceAmount }}원</td> -->
             </tr>
           </tbody>
         </v-table>
       </v-card>
 
-      <div class="bottom">
+      <v-card class="dashboard-card">
+        <div class="titletext">특이사항</div>
+
+        <v-table class="dashboard-table">
+          <thead>
+            <tr>
+              <th>결석일자</th>
+              <th>출석상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="item in attendanceNotes" :key="item.course_no">
+              <tr>
+                <td>{{ item.attendance_date }}</td>
+                <td>{{ item.attendance_status }}</td>
+              </tr>
+            </template>
+          </tbody>
+        </v-table>
+      </v-card>
+
+      <!-- <div class="bottom">
         <v-card class="dashboard-card half-width">
           <div class="titletext">특이사항</div>
 
@@ -66,18 +90,8 @@
             </tbody>
           </v-table>
         </v-card>
-      </div>
+      </div> -->
     </div>
-
-    <!-- <div class="button-group">
-      <template v-if="paction === 'U'">
-        <v-btn class="update-button" @click="updateNotice">수정</v-btn>
-        <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
-      </template>
-      <template v-else>
-        <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
-      </template>
-    </div> -->
   </div>
 </template>
 
@@ -85,21 +99,120 @@
 export default {
   props: {
     action: String,
+    courseNo: Number,
   },
   data() {
     return {
       paction: this.action,
+      pCourseNo: this.courseNo,
+      courseName: "",
+      courseStartDate: "",
+      courseEndDate: "",
+      totalCourseDays: "",
+      attendanceDays: "",
+      absenceDays: "",
+      attendanceRate: "",
+      totalAllowanceAmount: "",
+      attendanceNotes: [],
     };
   },
+  mounted() {
+    this.attendanceList();
+  },
   methods: {
-    updateNotice() {},
-    deleteNotice() {},
-    insertNotice() {},
+    attendanceList() {
+      let vm = this;
+
+      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      params.append("pCourseNo", this.pCourseNo);
+
+      this.axios
+        .post("/classroom/sStudentAttendance.do", params)
+        .then((response) => {
+          //console.log(JSON.stringify(response));
+
+          this.courseName = response.data.sStudentCourseInfo.course_name;
+          this.courseStartDate =
+            response.data.sStudentCourseInfo.course_start_date;
+          this.courseEndDate = response.data.sStudentCourseInfo.course_end_date;
+
+          this.calculateTotalCourseDays();
+
+          this.attendanceDays = response.data.attendanceDays;
+          this.absenceDays = response.data.absenceDays;
+
+          this.calculateAttendanceRate();
+
+          vm.attendanceNotes = response.data.sAttendanceNotes;
+          console.log(vm.attendanceNotes);
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+
+    calculateTotalCourseDays() {
+      const startDate = new Date(this.courseStartDate);
+      const endDate = new Date(this.courseEndDate);
+
+      const timeDifference = endDate - startDate;
+
+      const dayDifference = timeDifference / (1000 * 3600 * 24);
+
+      this.totalCourseDays = dayDifference + 1;
+    },
+
+    calculateAttendanceRate() {
+      if (this.totalCourseDays > 0) {
+        this.attendanceRate = (
+          (this.attendanceDays / this.totalCourseDays) *
+          100
+        ).toFixed(2);
+      } else {
+        this.attendanceRate = 0;
+      }
+    },
   },
 };
 </script>
 
 <style scoped>
+.dashboard-card {
+  margin: 16px 0;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+  padding: 12px 15px;
+  text-align: center;
+}
+
+.dashboard-table th {
+  background-color: #f2f2f2;
+  border-bottom: 2px solid #ddd;
+  font-weight: bold !important;
+  text-align: center !important;
+}
+
+.dashboard-table tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.dashboard-table tbody tr:nth-of-type(even) {
+  background-color: #f9f9f9;
+}
+
+.dashboard-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
 .attendanceModal {
   padding: 16px;
 }
@@ -118,6 +231,7 @@ export default {
 .titletext {
   font-size: 16px;
   font-weight: bold;
+  margin: 10px;
 }
 
 .lecture-detail {
@@ -135,76 +249,5 @@ export default {
   font-weight: 600;
   margin-bottom: 16px;
   color: #2c3e50;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 16px;
-}
-
-.form-label {
-  font-size: 14px;
-  color: #2c3e50;
-  margin-bottom: 8px;
-}
-
-.form-input,
-.form-textarea {
-  padding: 10px;
-  border: 1px solid #dcdcdc;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #34495e;
-}
-
-.form-input:focus,
-.form-textarea:focus {
-  border-color: #407bff;
-  box-shadow: 0 0 4px rgba(64, 123, 255, 0.2);
-  outline: none;
-}
-
-.form-textarea {
-  height: 200px;
-  resize: vertical;
-}
-
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.update-button,
-.delete-button,
-.insert-button {
-  padding: 10px 16px;
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.update-button,
-.insert-button {
-  background-color: #407bff;
-}
-
-.update-button:hover,
-.insert-button:hover {
-  background-color: #5a9bff;
-  box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
-}
-
-.delete-button {
-  background-color: #d32f2f;
-}
-
-.delete-button:hover {
-  background-color: #e57373;
-  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 </style>
