@@ -5,7 +5,7 @@
     <table class="info-table">
       <tr>
         <td class="label">글제목</td>
-        <td class="content" colspan="3">{{ questionTitle }}</td>
+        <td class="content" colspan="3">{{ question_title }}</td>
       </tr>
       <tr>
         <td class="label">작성자</td>
@@ -14,7 +14,9 @@
         <td class="content">{{ question_created_at }}</td>
       </tr>
       <tr class="full">
-        <td class="content" colspan="4">{{ questionContent }}</td>
+        <td class="content" colspan="4">
+          <div class="content-scroll">{{ question_content }}</div>
+        </td>
       </tr>
     </table>
 
@@ -30,7 +32,7 @@
       <tbody>
         <template v-if="listdata.length > 0">
           <template v-for="item in listdata" :key="item.reply_no">
-            <tr>
+            <tr @click="flag_changed(true, item.reply_no)" :class="{ selected: reply_num === item.reply_no, 'non-selected': reply_num !== item.reply_no }">
               <td style="text-align: center">
                 {{ item.reply_no }}
               </td>
@@ -41,7 +43,7 @@
               <td>{{ item.reply_content }}</td>
               <td style="text-align: center">{{ item.name }}</td>
               <td style="text-align: center">
-                {{ formattedDate(item.reply_created_at) }}
+                {{ item.reply_created_at }}
               </td>
             </tr>
           </template>
@@ -56,19 +58,20 @@
 
     <div class="form-group">
       <div class="form-label">답변</div>
-      <textarea name="content" class="form-textarea"></textarea>
+      <textarea name="content" class="form-textarea content-scroll" v-model="reply_content"></textarea>
     </div>
 
     <!-- CKEditor 사용 -->
     <!-- 첨부파일 input 추가 -->
 
     <div class="button-group">
-      <template v-if="totalCnt > 0">
-        <v-btn class="update-button" @click="updateQuestion">수정</v-btn>
-        <v-btn class="delete-button" @click="deleteQuestion">삭제</v-btn>
+      <template v-if="this.flag_seleted">
+        <v-btn class="update-button" @click="updateReply">수정</v-btn>
+        <v-btn class="delete-button" @click="deleteReply">삭제</v-btn>
+        <v-btn class="" @click="flag_changed(false)">취소</v-btn>
       </template>
       <template v-else>
-        <v-btn class="insert-button" @click="insertQuestion">등록</v-btn>
+        <v-btn class="insert-button" @click="insertReply">등록</v-btn>
       </template>
     </div>
   </div>
@@ -79,40 +82,86 @@ export default {
   name: "TQuestionsAndAnswersModal",
   props: {
     action: String,
-    questionTitle: String,
-    questionContent: String,
+    question_title: String,
+    question_content: String,
     question_created_at: String,
     name: String,
-    reply_no: String,
-    question_no: String,
+    question_no: Number,
   },
   data() {
     return {
       listdata: [],
       paction: this.action,
+      flag_seleted: false,
+      reply_num: null,
+      reply_no: this.reply_no,
+      loginID: "",
+      reply_content: "",
+      reply_created_at: "",
+      course_no: 0,
     };
   },
   mounted() {
     this.selectQuestion();
   },
   methods: {
-    formattedDate(dateString) {
-      const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0"); // 월은 0부터 시작하므로 1을 더함
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
+    flag_changed(stat, reply_no) {
+      this.reply_num = stat ? reply_no : null;
+      this.flag_seleted = stat;
+      document.querySelector('textarea[name="content"]').value = "";
     },
-    updateQuestion() {},
-    deleteQuestion() {},
-    insertQuestion() {},
+
+    insertReply() {
+      this.axios
+        .post("/tCourse/insertquestionreply.do", {
+          question_no: this.question_no,
+          loginID: this.loginID,
+          name: this.name,
+          reply_content: this.reply_content,
+          reply_created_at: this.reply_created_at,
+          course_no: this.course_no,
+        })
+        .then((response) => {
+          if (response.data.result >= 0) {
+            alert(response.data.resultMsg);
+            // 필요한 경우 추가 후 목록을 갱신합니다.
+            this.selectQuestion();
+          } else {
+            alert(response.data.resultMsg);
+          }
+        })
+        .catch((error) => {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+    updateReply() {},
+
+    deleteReply() {
+      console.log("Deleting reply with reply_no:", this.reply_num);
+      this.axios
+        .post("/tCourse/deletequestionreply.do", {
+          reply_no: this.reply_num,
+        })
+        .then((response) => {
+          if (response.data.result >= 0) {
+            alert(response.data.resultMsg);
+            // 필요한 경우 삭제 후 목록을 갱신합니다.
+            this.selectQuestion();
+          } else {
+            alert(response.data.resultMsg);
+          }
+        })
+        .catch((error) => {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+
     selectQuestion() {
-      console.log(this.question_no, this.reply_no);
+      console.log(this.question_no);
       this.axios
         .get("/tCourse/listquestionreply.do", {
           params: {
             question_no: this.question_no,
-            reply_no: this.reply_no,
           },
         })
         .then((response) => {
@@ -268,6 +317,7 @@ export default {
 
 .dashboard-table {
   width: 100%;
+  height: 200px;
   border-collapse: collapse;
   margin: 16px 0;
 }
@@ -307,5 +357,22 @@ export default {
 .col-date {
   width: 20%;
   text-align: center;
+}
+
+.selected {
+  background-color: #f1f1f1;
+}
+.non-selected {
+  background-color: none;
+}
+.content-scroll {
+  height: 200px;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.content-scroll::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 </style>

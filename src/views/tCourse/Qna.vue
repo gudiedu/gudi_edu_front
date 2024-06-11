@@ -41,7 +41,7 @@
                 </td>
                 <!--<td @click="questionModifyFile(item.question_no)">-->
                 <td>{{ item.name }}</td>
-                <td @click="questionModify(item.question_no, item.reply_no)">
+                <td @click="questionModify(item)">
                   {{ item.question_title }}
                 </td>
                 <td>
@@ -186,9 +186,12 @@ export default {
     },
 
     searchMethod() {},
-    questionModify(question, reply_no) {
-      this.question_no = question;
-      this.reply_no = reply_no;
+    questionModify(item) {
+      this.question_no = item.question_no;
+      this.question_title = item.question_title;
+      this.question_content = item.question_content;
+      this.name = item.name;
+      this.question_created_at = item.question_created_at;
       this.action = "U";
       this.addModal = true;
     },
