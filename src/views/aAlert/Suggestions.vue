@@ -59,7 +59,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in suggestionList" :key="item.suggestion_no">
+          <tr v-for="item in pageList" :key="item.suggestion_no">
             <td
               @click="
                 selectSuggestion(item.suggestion_no, item.suggestion_answered)
@@ -84,16 +84,29 @@
     </v-card>
 
     <!-- 페이지네이션 추가-->
-
-    <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+    <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="pagination()"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
     </div>
+
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
           <ASuggestionsModal
             :action="action"
             :selectedSuggestion="selectedSuggestion"
+            @close="closePopup"
+            @searchList="searchList"
           />
         </v-card-text>
       </v-card>
@@ -103,9 +116,11 @@
 
 <script>
 import ASuggestionsModal from "./ASuggestionsModal.vue";
+import Paginate from "vuejs-paginate-next";
 export default {
   components: {
     ASuggestionsModal,
+    Paginate,
   },
   data() {
     return {
@@ -116,11 +131,15 @@ export default {
       activeFilter: "all",
       stitle: "",
       suggestionList: [],
+      totalCnt: 0,
+      pageSize: 5,
+      currentPage: 1,
+      pageList: [],
     };
   },
   mounted() {
     this.searchList();
-    // this.page();
+    this.page();
   },
   methods: {
     searchList: function (stitle) {
@@ -137,9 +156,8 @@ export default {
         .post("/aSuggestion", params)
         .then((response) => {
           console.log(JSON.stringify(response));
-          vm.suggestionList = response.data;
-          console.log(this.suggestionList);
-          console.log(this.suggestionList.data);
+          this.suggestionList = response.data;
+          this.totalCnt = this.suggestionList.length;
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
@@ -155,7 +173,6 @@ export default {
     searchMethod() {},
     suggestionModify(suggestion) {
       this.selectedSuggestion = suggestion;
-      this.action = "U";
       this.addModal = true;
     },
     openPopup: async function () {
@@ -163,6 +180,24 @@ export default {
     },
     closePopup: async function () {
       this.addModal = false;
+    },
+    page: function () {
+      let total = this.totalCnt;
+      let page = this.pageSize;
+      let xx = total % page;
+      let result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+    },
+    pagination() {
+      let endElement = this.currentPage * this.pageSize;
+      let startElement = endElement - this.pageSize;
+      this.pageList = this.suggestionList.slice(startElement, endElement);
     },
   },
 };
