@@ -5,7 +5,6 @@
         <div class="titletext">{{ titleText }}</div>
         <v-spacer></v-spacer>
       </v-card-title>
-
       <div class="container">
         <div class="filter-button-group">
           <v-btn
@@ -14,14 +13,14 @@
             >전체</v-btn
           >
           <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
+            :class="{ 'filter-button': true, active: activeFilter === 'a' }"
             @click="findAdmin"
             >관리자</v-btn
           >
           <v-btn
             :class="{
               'filter-button': true,
-              active: activeFilter === 'teacher',
+              active: activeFilter === 't',
             }"
             @click="findTeacher"
             >강사</v-btn
@@ -39,7 +38,9 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="searchList(stitle)">
+              검색
+            </button>
           </div>
         </div>
       </div>
@@ -50,37 +51,77 @@
         <thead>
           <tr>
             <th>글번호</th>
-            <th>작성자</th>
             <th>제목</th>
+            <th>작성자</th>
             <th>등록일</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>관리자</td>
-            <td @click="noticeModify">공지사항입니다.</td>
-            <td>2024.01.01</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>강사</td>
-            <td @click="noticeModify">공지사항2입니다.</td>
-            <td>2024.01.01</td>
-          </tr>
+          <template v-for="item in pageList">
+            <tr v-if="this.activeFilter === 'all'" :key="item.notice_no">
+              <td @click="selectNotice(item.notice_no, '')">
+                {{ item.notice_no }}
+              </td>
+              <td @click="selectNotice(item.notice_no, '')">
+                {{ item.notice_title }}
+              </td>
+              <td>{{ item.loginID }}</td>
+              <td>{{ item.notice_created_at }}</td>
+            </tr>
+            <tr
+              v-else-if="this.activeFilter === item.user_type"
+              :key="item.notice_no"
+            >
+              <td @click="selectNotice(item.notice_no, '')">
+                {{ item.notice_no }}
+              </td>
+              <td @click="selectNotice(item.notice_no, '')">
+                {{ item.notice_title }}
+              </td>
+              <td>{{ item.loginID }}</td>
+              <td>{{ item.notice_created_at }}</td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
 
     <!-- 페이지네이션 추가-->
+    <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="pagination()"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
+    </div>
 
     <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+      <button class="insert-button" @click="addNotice">등록</button>
     </div>
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <NoticeModal :action="action" />
+          <NoticeModal
+            :action="action"
+            :notice_content="notice_content"
+            :notice_created_at="notice_created_at"
+            :notice_no="notice_no"
+            :notice_title="notice_title"
+            :loginID="loginID"
+            :paction="action"
+            :previewHtml="previewHtml"
+            :fileName="fileName"
+            @close="closePopup"
+            @searchList="searchList"
+            @selectNotice="selectNotice"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -89,9 +130,12 @@
 
 <script>
 import NoticeModal from "./ANoticeModal.vue";
+import Paginate from "vuejs-paginate-next";
+
 export default {
   components: {
     NoticeModal,
+    Paginate,
   },
   data() {
     return {
@@ -101,30 +145,160 @@ export default {
       selectedNotice: null,
       activeFilter: "all",
       stitle: "",
+      noticeList: [],
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
+      notice_title: "",
+      loginID: "",
+      notice_content: "",
+      notice_created_at: "",
+      notice_no: 0,
+      typeList: [],
+      previewHtml: "",
+      fileName: "",
+      etx: "",
     };
   },
+  mounted() {
+    // this.pagination();
+    this.searchList();
+    this.page();
+  },
   methods: {
+    searchList: function (stitle) {
+      let vm = this;
+
+      if (stitle !== undefined) {
+        vm.stitle = stitle;
+      }
+
+      let params = new URLSearchParams();
+      params.append("stitle", this.stitle);
+
+      this.axios
+        .post("/aAlert", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+
+          vm.noticeList = response.data;
+          vm.totalCnt = vm.noticeList.length;
+          vm.typeList = vm.noticeList;
+          vm.findType(vm.activeFilter);
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+    addNotice() {
+      this.action = "I";
+      this.addModal = true;
+      this.notice_title = "";
+      this.notice_content = "";
+    },
+    findType(userType) {
+      if (userType === "a") {
+        this.findAdmin();
+      } else if (userType === "t") {
+        this.findTeacher();
+      } else {
+        this.findAll();
+      }
+    },
     findAll() {
+      this.currentPage = 1;
       this.activeFilter = "all";
+      this.typeList = this.noticeList;
+      this.totalCnt = this.noticeList.length;
     },
     findAdmin() {
-      this.activeFilter = "admin";
+      this.currentPage = 1;
+      this.activeFilter = "a";
+      this.typeList = this.noticeList.filter((e) => e.user_type === "a");
+      this.totalCnt = this.typeList.length;
     },
     findTeacher() {
-      this.activeFilter = "teacher";
+      this.currentPage = 1;
+      this.activeFilter = "t";
+      this.typeList = this.noticeList.filter((e) => e.user_type === "t");
+      this.totalCnt = this.typeList.length;
     },
     searchMethod() {},
-    noticeModify(notice) {
+    noticeModify() {
       this.selectedNotice = notice;
       this.action = "U";
       this.addModal = true;
     },
-    openAddModal() {
-      this.action = "";
+    selectNotice(notice_no, action) {
+      this.action = action;
+      let vm = this;
+
+      let params = new URLSearchParams();
+      params.append("notice_no", notice_no);
+
+      this.axios
+        .post("/aAlert/notice", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+          this.notice_title = response.data.notice_title;
+          this.loginID = response.data.loginID;
+          this.notice_content = response.data.notice_content;
+          this.notice_created_at = response.data.notice_created_at;
+          this.notice_no = response.data.notice_no;
+          this.ext = response.data.file_extension;
+
+          if (!response.data.file_no) {
+            this.previewHtml = "";
+            this.fileName = "";
+          } else {
+            this.previewHtml = response.data.file_origin;
+            this.fileName = response.data.file_origin;
+
+            let ext = response.data.file_extension;
+
+            if (
+              ext.toLowerCase() == "jpg" ||
+              ext.toLowerCase() == "jpeg" ||
+              ext.toLowerCase() == "png" ||
+              ext.toLowerCase() == "gif"
+            ) {
+              this.previewHtml =
+                "<img src='" +
+                response.data.file_local_path +
+                "' id 'imgFile' style='width:100px; height 100px;' />";
+            } else {
+              this.previewHtml = response.data.result.file_origin;
+            }
+          }
+          this.openPopup();
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+    openPopup: async function () {
       this.addModal = true;
     },
-    closeAddModal() {
+    closePopup: async function () {
       this.addModal = false;
+    },
+    page: function () {
+      let total = this.totalCnt;
+      let page = this.pageSize;
+      let xx = total % page;
+      let result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+    },
+    pagination() {
+      let endElement = this.currentPage * this.pageSize;
+      let startElement = endElement - this.pageSize;
+      this.pageList = this.typeList.slice(startElement, endElement);
     },
   },
 };
@@ -182,12 +356,12 @@ export default {
 
 .search-container {
   display: flex;
-    align-items: center;
-    /* padding: 10px; */
-    /* padding: 20px; */
-    border: 1px solid #ccc;
-    border-radius: 25px;
-    margin: 16px 0;
+  align-items: center;
+  /* padding: 10px; */
+  /* padding: 20px; */
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  margin: 16px 0;
 }
 
 .search-icon {

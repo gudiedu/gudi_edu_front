@@ -23,17 +23,15 @@
               width="50"
               height="25"
               style="font-size: 100%; text-align: left"
-            >
-            </td>
+            ></td>
           </tr>
         </table>
       </span>
     </p>
 
-    
     <div class="chat-list">
       <div class="chat-item" v-for="chat in chats" :key="chat.id">
-        <div class="chat-item-info"  @click="chatJoin">
+        <div class="chat-item-info" @click="chatJoin">
           <div class="chat-item-name">{{ chat.name }}</div>
           <div class="chat-item-participants">{{ chat.participants }}명</div>
           <div>채팅방 입장</div>
@@ -45,29 +43,21 @@
         <span>채팅방 생성</span>
       </a>
     </div>
-
-
-
-
   </div>
 </template>
 
 <script>
-
 export default {
   data: function () {
     return {
       list: [],
       chats: [
-        { id: 1, name: '친구들', participants: 3 },
-        { id: 2, name: '가족', participants: 5 },
-        { id: 3, name: '회사', participants: 10 },
-        { id: 4, name: '동호회', participants: 8 },
-        { id: 5, name: '스터디 그룹', participants: 4 }
+        { id: 1, name: "친구들", participants: 3 },
+        { id: 2, name: "가족", participants: 5 },
+        { id: 3, name: "회사", participants: 10 },
+        { id: 4, name: "동호회", participants: 8 },
+        { id: 5, name: "스터디 그룹", participants: 4 },
       ],
-
-    
-  
     };
   },
   mounted() {
@@ -76,43 +66,31 @@ export default {
   methods: {
     searchlist: function () {
       let vm = this;
-
-
-
       this.axios
-        .post("")
+        .post("/aAlert")
         .then((response) => {
-          console.log(JSON.stringify(response));
+          // console.log(JSON.stringify(response));
 
-          vm.list = response.data.list;
+          // vm.list = response.data.list;
+          console.log("요청 성공");
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
     chatJoin: function () {
-
-
-      
-      window.open('#/test', '_blank', 'width=650,height=600');
-
+      window.open("#/test", "_blank", "width=650,height=600");
     },
-    chatMake: function ()  {
-
-
-    },
-
-
+    chatMake: function () {},
   },
 
-  components: { },
+  components: {},
 };
 </script>
 
 <style>
-
 .chatmake {
   margin-top: 20px;
-    float: right;
+  float: right;
 }
 </style>

@@ -39,7 +39,9 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="searchList(stitle)">
+              검색
+            </button>
           </div>
         </div>
       </div>
@@ -50,40 +52,62 @@
         <thead>
           <tr>
             <th>글번호</th>
-            <th>작성자</th>
             <th>제목</th>
+            <th>작성자</th>
             <th>등록일</th>
             <th>답변</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>관리자</td>
-            <td @click="suggestionModify">건의사항입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>강사</td>
-            <td @click="suggestionModify">건의사항2입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변대기</td>
+          <tr v-for="item in pageList" :key="item.suggestion_no">
+            <td
+              @click="
+                selectSuggestion(item.suggestion_no, item.suggestion_answered)
+              "
+            >
+              {{ item.suggestion_no }}
+            </td>
+            <td
+              @click="
+                selectSuggestion(item.suggestion_no, item.suggestion_answered)
+              "
+            >
+              [{{ item.suggestion_category }}] {{ item.suggestion_title }}
+            </td>
+            <td>{{ item.loginID }}</td>
+            <td>{{ item.suggestion_created_at }}</td>
+            <td v-if="item.suggestion_answered === 'Y'">완료</td>
+            <td v-else>대기중</td>
           </tr>
         </tbody>
       </v-table>
     </v-card>
 
     <!-- 페이지네이션 추가-->
-
-    <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+    <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="pagination()"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
     </div>
+
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ASuggestionsModal :action="action" />
+          <ASuggestionsModal
+            :action="action"
+            :selectedSuggestion="selectedSuggestion"
+            @close="closePopup"
+            @searchList="searchList"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -92,42 +116,88 @@
 
 <script>
 import ASuggestionsModal from "./ASuggestionsModal.vue";
+import Paginate from "vuejs-paginate-next";
 export default {
   components: {
     ASuggestionsModal,
+    Paginate,
   },
   data() {
     return {
       titleText: "건의사항",
       addModal: false,
       action: "",
-      selectedNotice: null,
+      selectedSuggestion: {},
       activeFilter: "all",
       stitle: "",
+      suggestionList: [],
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
+      pageList: [],
     };
   },
+  mounted() {
+    this.searchList();
+    this.page();
+  },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
+    searchList: function (stitle) {
+      let vm = this;
+
+      if (stitle !== undefined) {
+        vm.stitle = stitle;
+      }
+
+      let params = new URLSearchParams();
+      params.append("stitle", this.stitle);
+
+      this.axios
+        .post("/aSuggestion", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+          this.suggestionList = response.data;
+          this.totalCnt = this.suggestionList.length;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+    selectSuggestion(suggestion_no, suggestion_answered) {
+      this.selectedSuggestion = {
+        suggestion_no: suggestion_no,
+        suggestion_answered: suggestion_answered,
+      };
+      this.openPopup();
+    },
     searchMethod() {},
     suggestionModify(suggestion) {
-      this.selectedNotice = suggestion;
-      this.action = "U";
+      this.selectedSuggestion = suggestion;
       this.addModal = true;
     },
-    openAddModal() {
-      this.action = "";
+    openPopup: async function () {
       this.addModal = true;
     },
-    closeAddModal() {
+    closePopup: async function () {
       this.addModal = false;
+    },
+    page: function () {
+      let total = this.totalCnt;
+      let page = this.pageSize;
+      let xx = total % page;
+      let result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+    },
+    pagination() {
+      let endElement = this.currentPage * this.pageSize;
+      let startElement = endElement - this.pageSize;
+      this.pageList = this.suggestionList.slice(startElement, endElement);
     },
   },
 };
@@ -185,12 +255,12 @@ export default {
 
 .search-container {
   display: flex;
-    align-items: center;
-    /* padding: 10px; */
-    /* padding: 20px; */
-    border: 1px solid #ccc;
-    border-radius: 25px;
-    margin: 16px 0;
+  align-items: center;
+  /* padding: 10px; */
+  /* padding: 20px; */
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  margin: 16px 0;
 }
 
 .search-icon {

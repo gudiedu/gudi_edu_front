@@ -1,34 +1,137 @@
 <template>
   <div class="lecture-detail">
     <h2 class="title">공지사항</h2>
-
-    <div class="form-group">
-      <div class="form-label">글번호</div>
-      <input type="text" name="title" class="form-input" />
-    </div>
-    <div class="form-group">
-      <div class="form-label">작성자</div>
-      <input type="text" name="author" class="form-input" />
-    </div>
-    <div class="form-group">
-      <div class="form-label">등록일</div>
-      <input type="text" name="date" class="form-input" />
-    </div>
-    <div class="form-group">
-      <div class="form-label">제목</div>
-      <input type="text" name="title" class="form-input" />
-    </div>
-    <div class="form-group">
-      <div class="form-label">내용</div>
-      <textarea name="content" class="form-textarea"></textarea>
-    </div>
+    <template v-if="paction !== 'I'">
+      <div class="form-group">
+        <div class="form-label">글번호</div>
+        <input
+          type="text"
+          name="title"
+          class="form-input"
+          v-model="notice_no"
+          disabled
+        />
+      </div>
+    </template>
+    <template v-if="paction === 'I' || paction === 'U'">
+      <div class="form-group">
+        <div class="form-label">제목</div>
+        <input
+          type="text"
+          name="author"
+          class="form-input"
+          v-model="notice_title"
+        />
+      </div>
+    </template>
+    <template v-else>
+      <div class="form-group">
+        <div class="form-label">제목</div>
+        <input
+          type="text"
+          name="author"
+          class="form-input"
+          v-model="notice_title"
+          disabled
+        />
+      </div>
+    </template>
+    <template v-if="paction !== 'I'">
+      <div class="form-group">
+        <div class="form-label">작성자</div>
+        <input
+          type="text"
+          name="date"
+          class="form-input"
+          :value="loginID"
+          disabled
+        />
+      </div>
+    </template>
+    <template v-if="paction !== 'I'">
+      <div class="form-group">
+        <div class="form-label">등록일</div>
+        <input
+          type="text"
+          name="title"
+          class="form-input"
+          disabled
+          :value="notice_created_at"
+        />
+      </div>
+    </template>
+    <template v-if="paction === 'I' || paction === 'U'">
+      <div class="form-group">
+        <div class="form-label">내용</div>
+        <textarea name="content" class="form-textarea" v-model="notice_content">
+        </textarea>
+      </div>
+      <div class="form-group" v-if="fileName">
+        <div class="form-label">첨부파일</div>
+        <div id="preview" v-html="previewHtml" @click="download"></div>
+      </div>
+    </template>
+    <template v-else>
+      <div class="form-group">
+        <div class="form-label">내용</div>
+        <textarea
+          name="content"
+          class="form-textarea"
+          v-model="notice_content"
+          disabled
+        >
+        </textarea>
+      </div>
+      <div class="form-group" v-if="fileName">
+        <div class="form-label">첨부파일</div>
+        <div id="preview" v-html="previewHtml" @click="download"></div>
+      </div>
+    </template>
     <div class="button-group">
-      <template v-if="paction === 'U'">
-        <v-btn class="update-button" @click="updateNotice">수정</v-btn>
-        <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
+      <template v-if="paction === 'I'">
+        <form id="file-form" enctype="multipart/form-data">
+          <input
+            type="file"
+            id="file-insert"
+            name="file-insert"
+            class="insert-button"
+            @change="handleFileChange"
+          />
+          <v-btn
+            class="insert-button"
+            @click.prevent="insertNotice(notice_title, notice_content)"
+            >등록</v-btn
+          >
+        </form>
+      </template>
+      <template v-else-if="paction === 'U'">
+        <form id="file-form" enctype="multipart/form-data">
+          <input
+            type="file"
+            id="file-insert"
+            name="file-insert"
+            class="insert-button"
+            @change="handleFileChange"
+          />
+          <v-btn class="insert-button" @click.prevent="deleteFile"
+            >첨부파일 삭제</v-btn
+          >
+          <v-btn
+            class="insert-button"
+            @click.prevent="
+              updateNotice(notice_no, notice_title, notice_content)
+            "
+            >수정</v-btn
+          >
+        </form>
       </template>
       <template v-else>
-        <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
+        <v-btn class="update-button" @click="changeNotice(notice_no)"
+          >수정</v-btn
+        >
+        <v-btn class="delete-button" @click="deleteNotice(notice_no)"
+          >삭제</v-btn
+        >
       </template>
     </div>
   </div>
@@ -38,16 +141,124 @@
 export default {
   props: {
     action: String,
+    notice_title: String,
+    loginID: String,
+    notice_content: String,
+    notice_created_at: String,
+    notice_no: Number,
+    previewHtml: String,
+    fileName: String,
   },
   data() {
     return {
       paction: this.action,
+      notice_title: this.notice_title,
+      loginID: this.loginID,
+      notice_content: this.notice_content,
+      notice_created_at: this.notice_created_at,
+      notice_no: this.notice_no,
+      selectedFile: null,
+      removeFile: "N",
+      fileName: this.fileName,
+      previewHtml: this.previewHtml,
     };
   },
+  mounted() {},
   methods: {
-    updateNotice() {},
-    deleteNotice() {},
-    insertNotice() {},
+    updateNotice(notice_no, notice_title, notice_content) {
+      let vm = this;
+
+      let formTag = document.getElementById("file-form");
+      let dataWithFile = new FormData(formTag);
+      dataWithFile.append("notice_title", notice_title);
+      dataWithFile.append("notice_content", notice_content);
+      dataWithFile.append("notice_no", notice_no);
+      dataWithFile.append("removeFile", this.removeFile);
+
+      if (this.selectedFile) {
+        dataWithFile.append("file", this.selectedFile);
+      }
+      console.log(dataWithFile.get("file"));
+
+      this.axios
+        .post("/aAlert/notice/update", dataWithFile)
+        .then(() => {
+          this.$emit("close");
+          this.$emit("searchList");
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+    changeNotice() {
+      this.paction = "U";
+    },
+    deleteNotice(notice_no) {
+      let vm = this;
+
+      let params = new URLSearchParams();
+      params.append("notice_no", notice_no);
+
+      this.axios
+        .post("/aAlert/notice/delete", params)
+        .then(() => {
+          alert("성공적으로 삭제되었습니다.");
+          this.$emit("close");
+          this.$emit("searchList");
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+    insertNotice(notice_title, notice_content) {
+      let vm = this;
+
+      let formTag = document.getElementById("file-form");
+      let dataWithFile = new FormData(formTag);
+      dataWithFile.append("notice_title", notice_title);
+      dataWithFile.append("notice_content", notice_content);
+      if (this.selectedFile) {
+        dataWithFile.append("file", this.selectedFile);
+      }
+      this.axios
+        .post("/aAlert/notice/new", dataWithFile)
+        .then(() => {
+          this.$emit("close");
+          this.$emit("searchList");
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+    handleFileChange(event) {
+      this.selectedFile = event.target.files[0];
+    },
+    deleteFile() {
+      this.previewHtml = "";
+      this.removeFile = "Y";
+    },
+    download: function () {
+      let params = new URLSearchParams();
+      params.append("notice_no", this.notice_no);
+
+      this.axios({
+        url: "/aAlert/notice/fileDownload",
+        data: params,
+        method: "POST",
+        responseType: "blob",
+      })
+        .then((response) => {
+          let FILE = window.URL.createObjectURL(new Blob([response.data]));
+          let docUrl = document.createElement("a");
+          docUrl.href = FILE;
+          docUrl.setAttribute("download", this.fileName);
+          document.body.appendChild(docUrl);
+          docUrl.click();
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
   },
 };
 </script>
