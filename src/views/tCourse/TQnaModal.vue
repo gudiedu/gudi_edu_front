@@ -65,7 +65,7 @@
       <template v-if="this.flag_seleted">
         <v-btn class="update-button" @click="updateReply">수정</v-btn>
         <v-btn class="delete-button" @click="deleteReply">삭제</v-btn>
-        <v-btn class="" @click="flag_changed(false)">취소</v-btn>
+        <v-btn class="cancel-button" @click="flag_changed(false)">취소</v-btn>
       </template>
       <template v-else>
         <v-btn class="insert-button" @click="insertReply">등록</v-btn>
@@ -128,6 +128,7 @@ export default {
             alert(response.data.resultMsg);
             // 필요한 경우 추가 후 목록을 갱신합니다.
             this.selectQuestion();
+            this.reply_content = "";
           } else {
             alert(response.data.resultMsg);
           }
@@ -276,7 +277,8 @@ export default {
 
 .update-button,
 .delete-button,
-.insert-button {
+.insert-button,
+.cancel-button {
   /* padding: 10px 16px; */
   color: #ffffff;
   border: none;
@@ -304,6 +306,16 @@ export default {
 
 .delete-button:hover {
   background-color: #e57373;
+  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
+
+.cancel-button {
+  background-color: #686767;
+  margin: 0;
+}
+
+.cancel-button:hover {
+  background-color: #c2c2c2;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 
