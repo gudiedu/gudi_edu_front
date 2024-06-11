@@ -69,7 +69,7 @@
           </div>
         </v-col>
 
-        <v-col cols="12" class="box1">
+        <v-col cols="12" class="box1" v-if="fileName">
           <div class="form-label">첨부파일</div>
           <div id="preview" v-html="previewHtml" @click="downLoad"></div>
         </v-col>
@@ -88,7 +88,7 @@
             </div>
           </v-col>
 
-          <v-col cols="12" class="box1">
+          <v-col cols="12" class="box1" v-if="fileName2">
             <div class="form-label">첨부파일</div>
             <div id="preview" v-html="previewHtml2" @click="downLoad2"></div>
           </v-col>
@@ -96,9 +96,15 @@
       </v-row>
     </v-card>
 
-    <v-card-actions class="goBackButton">
-      <v-btn color="primary" @click="goBack">뒤로가기</v-btn>
-    </v-card-actions>
+    <div class="button-group">
+      <v-btn
+        class="delete-button"
+        @click="deleteSuggestion"
+        v-if="!suggestionAnswered"
+        >삭제</v-btn
+      >
+      <v-btn class="goBack-button" @click="goBack">뒤로가기</v-btn>
+    </div>
   </v-container>
 </template>
 
@@ -119,6 +125,10 @@ export default {
       suggestionContent: "",
       suggestionAnswered: "",
       suggestionContentReply: "",
+      previewHtml: "",
+      previewHtml2: "",
+      fileName: "",
+      fileName2: "",
       //suggestionAnswered: this.selectedSuggestion.suggestion_answered === true,
     };
   },
@@ -127,6 +137,27 @@ export default {
     this.selectSuggestionReply();
   },
   methods: {
+    deleteSuggestion() {
+      // let vm = this;
+
+      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      params.append("pSuggestionNo", this.pSuggestionNo);
+
+      this.axios
+        .post("/sAlert/sDeleteSuggestion.do", params)
+        .then((response) => {
+          //console.log(JSON.stringify(response));
+
+          if (response.data.result > 0) {
+            alert(response.data.resultMsg);
+            this.$emit("close-modal"); // 모달 닫기 이벤트 발생
+          }
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+
     goBack() {
       // 뒤로가기 로직 구현
       this.$router.go(-1);
@@ -139,7 +170,7 @@ export default {
       this.axios
         .post("/sAlert/sSelectSuggestion.do", params)
         .then((response) => {
-          console.log(JSON.stringify(response));
+          //console.log(JSON.stringify(response));
           console.log(response.data);
 
           this.name = response.data.result.name;
@@ -147,6 +178,7 @@ export default {
           this.suggestionTitle = response.data.result.suggestion_title;
           this.suggestionContent = response.data.result.suggestion_content;
           this.suggestionAnswered = response.data.result.suggestion_answered;
+          //console.log(this.suggestionAnswered);
 
           this.ext = response.data.result.file_extension;
 
@@ -196,46 +228,43 @@ export default {
       this.axios
         .post("/sAlert/sSelectSuggestionReply.do", params)
         .then((response) => {
-          console.log(JSON.stringify(response));
-          console.log(response.data);
+          // Ensure response and result exist before accessing properties
+          if (response.data && response.data.result) {
+            this.suggestionContentReply =
+              response.data.result.suggestion_reply_content || "";
+            this.ext = response.data.result.file_extension || "";
 
-          this.suggestionContentReply =
-            response.data.result.suggestion_reply_content;
-
-          this.ext = response.data.result.file_extension;
-
-          //response.data.result.file_name //파일이름
-          //response.data.result.logical_path //논리경로
-          //response.data.result.phygical_path //물리경로
-          //response.data.result.file_size //파일크기
-          //response.data.result.file_ext //파일확장자
-
-          //파일 이미지 보여주거나, 파일 이름 보여주기
-          if (
-            response.data.result.file_origin === "" ||
-            response.data.result.file_origin === null
-          ) {
-            this.previewHtml2 = "";
-            this.fileName = "";
-          } else {
-            this.previewHtml2 = response.data.result.file_origin;
-            this.fileName = response.data.result.file_origin;
-
-            let ext = response.data.result.file_extension;
-
+            // Check for file details before assigning values
             if (
-              ext.toLowerCase() == "jpg" ||
-              ext.toLowerCase() == "jpeg" ||
-              ext.toLowerCase() == "png" ||
-              ext.toLowerCase() == "gif"
+              response.data.result.file_origin &&
+              response.data.result.file_origin !== ""
             ) {
-              this.previewHtml2 =
-                "<img src='" +
-                response.data.result.file_local_path +
-                "' id 'imgFile' style='width:100px; height 100px;' />";
-            } else {
               this.previewHtml2 = response.data.result.file_origin;
+              this.fileName2 = response.data.result.file_origin;
+
+              let ext = response.data.result.file_extension || "";
+
+              if (
+                ext.toLowerCase() === "jpg" ||
+                ext.toLowerCase() === "jpeg" ||
+                ext.toLowerCase() === "png" ||
+                ext.toLowerCase() === "gif"
+              ) {
+                this.previewHtml2 =
+                  "<img src='" +
+                  response.data.result.file_local_path +
+                  "' id='imgFile' style='width:100px; height:100px;' />";
+              } else {
+                this.previewHtml2 = response.data.result.file_origin;
+              }
+            } else {
+              this.previewHtml2 = "";
+              this.fileName2 = "";
             }
+          } else {
+            this.suggestionContentReply = "";
+            this.previewHtml2 = "";
+            this.fileName2 = "";
           }
         })
         .catch(function (error) {
@@ -286,7 +315,7 @@ export default {
         //a 태그를 만들어서 이 태그 안에 파일 이름을 넣어
         let docUrl = document.createElement("a");
         docUrl.href = FILE;
-        docUrl.setAttribute("download", this.fileName);
+        docUrl.setAttribute("download", this.fileName2);
         document.body.appendChild(docUrl); //만든 a태그를 끼어넣어
         docUrl.click(); //강제로 클릭하게 만들어 //url을 클릭하면 다운로드가 됨
         //console.log('FILE : ' + FILE)
@@ -346,9 +375,45 @@ export default {
   resize: vertical;
 }
 
-.goBackButton {
+.button-group {
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
+  gap: 8px;
+}
+
+.update-button,
+.delete-button,
+.insert-button,
+.goBack-button {
+  /* padding: 10px 16px; */
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.update-button,
+.insert-button,
+.goBack-button {
+  background-color: #407bff;
+}
+
+.update-button:hover,
+.insert-button:hover,
+.goBack-button:hover {
+  background-color: #5a9bff;
+  box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
+}
+
+.delete-button {
+  background-color: #d32f2f;
+  margin: 0;
+}
+
+.delete-button:hover {
+  background-color: #e57373;
+  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 </style>

@@ -97,6 +97,7 @@
       <v-card>
         <v-card-text>
           <SSuggestionsModifyModal
+            @close-modal="closeModifyModal"
             :action="action"
             :suggestionNo="suggestionNo"
           />
@@ -149,13 +150,13 @@ export default {
 
     closeInsertModal() {
       this.suggestionInsertModal = false;
-      this.searchList(); // 모달 닫힌 후 리스트를 새로고침
+      this.searchList();
     },
 
-    // closeModifyModal() {
-    //   this.suggestionModifyModal = false;
-    //   this.searchList(); // 모달 닫힌 후 리스트를 새로고침
-    // },
+    closeModifyModal() {
+      this.suggestionModifyModal = false;
+      this.searchList();
+    },
 
     searchList() {
       let params = new URLSearchParams();
