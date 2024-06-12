@@ -103,8 +103,10 @@ export default {
             userType: data.user_type,
             usrMnuAtrt: data.usrMnuAtrt,
           })
+          
           sessionStorage.setItem('loginInfo', JSON.stringify(data))
           sessionStorage.setItem('loginID', JSON.stringify(data.loginId))
+          sessionStorage.setItem('name', JSON.stringify(data.name));
           this.$router.push('/dashboard')
           //sessionStroage 값 확인
           //sessionStorage.getItem("세션값:" + JSON.stringify(data.loginId))
