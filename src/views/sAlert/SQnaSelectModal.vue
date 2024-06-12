@@ -68,23 +68,32 @@
             />
           </div>
         </v-col>
-
-
-        <template v-if="questionAnswered">
-          <v-col cols="12" class="box1">
-            <div class="form-group">
-              <div class="form-label">답변</div>
-              <textarea
-                readonly
-                type="text"
-                name="questionReplyContent"
-                v-model="questionReplyContent"
-                class="form-textarea"
-              />
-            </div>
-          </v-col>
-        </template>
       </v-row>
+    <v-table class="dashboard-table">
+      <template v-if="replyNo != 0">
+        <tbody class="reply-section">
+          <tr class="reply-item">
+            <th>작성자</th>
+            <th>답변일</th>
+            <th>답변내용</th>
+            </tr>
+            <template v-for="reply in QnaContentReply" :key="reply.reply_no">
+            <tr class="reply-item">
+              <td>{{ reply.name }}</td>
+              <td>{{ reply.reply_created_at }}</td>
+              <td>{{ reply.reply_content }}</td>
+            </tr>
+          </template>
+        </tbody>
+      </template>
+      <template v-else>
+        <tbody>
+          <tr style="text-align: center">
+            <td colspan="2">아직 답변되지 않았습니다.</td>
+          </tr>
+        </tbody>
+      </template>
+    </v-table>
     </v-card>
   </v-container>
 </template>
@@ -104,51 +113,47 @@ export default {
       questionContent: "",
       questionCreatedAt: "",
       questionAnswered: "",
-      questionReplyContent: "",
+      QnaContentReply: [],
+      sQnaSelectedReply: [],
     };
   },
   mounted() {
     this.sQnaSelected();
-    this.sQnaReplyContent();
+    //this.sQnaReplyContent();
   },
   methods: {
 
     sQnaSelected() {
       let params = new URLSearchParams();
-      params.append("pSuggestionNo", this.pSuggestionNo);
+      params.append("SelectedQuestionNo", this.SelectedQuestionNo);
+      params.append("reply_no", this.reply_no);
+      params.append("reply_content", this.reply_content);
+      params.append("reply_created_at", this.reply_created_at);
+      params.append("reply_name", this.name);
 
       this.axios
-        .post("/sAlert/sQnaSelected.do", params)
-        .then((response) => {
-          console.log(JSON.stringify(response));
-          console.log(response.data);
-
-          this.name = response.data.result.name;
-          this.questionTitle = response.data.result.question_title;
-          this.questionContent = response.data.result.question_content;
-          this.questionCreatedAt = response.data.result.question_created_at;
-          this.questionAnswered = response.data.result.reply_no;
-        })
-        .catch(function (error) {
-          alert("sQnaSelected에서 오류나수다 " + error);
+      .post("/sAlert/sQnaSelected.do", params)
+      .then((response) => {
+        console.log("JSON.stringify(response) : " + JSON.stringify(response));
+        console.log(response.data);
+        
+        this.QnaContentReply = response.data.sQnaSelectedReply; // 배열을 직접 할당
+        
+        response.data.sQnaSelectedReply.forEach(reply => {
+            this.replyContent = reply.reply_content;
+            this.replyName = reply.name;
+            this.replyCreatedAt = reply.reply_created_at;
+            this.replyNo = reply.reply_no;
         });
-    },
+        
+        this.name = response.data.result.name;
+        this.questionTitle = response.data.result.question_title;
+        this.questionContent = response.data.result.question_content;
+        this.questionCreatedAt = response.data.result.question_created_at;
 
-    sQnaReplyContent() {
-      let params = new URLSearchParams();
-      params.append("SQuestionNo", this.SQuestionNo);
-
-      this.axios
-        .post("/sAlert/sQnaSelectedReply.do", params)
-        .then((response) => {
-          console.log(JSON.stringify(response));
-          console.log(response.data);
-
-          this.QnaContentReply =
-            response.data.result.question_reply_content;
         })
         .catch(function (error) {
-          alert("에러! API 요청에 오류가 있습니다. " + error);
+          alert("sQnaSelected에서 오류 " + error);
         });
     },
   },
@@ -162,7 +167,7 @@ export default {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   margin-top: 16px;
-  max-width: 800px;
+  max-width: 1500px;
   margin: auto;
 }
 
@@ -210,4 +215,50 @@ export default {
   justify-content: flex-end;
   margin-top: 10px;
 }
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.reply-section {
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.reply-section th, .reply-section td {
+  padding: 8px;
+  text-align: left;
+}
+
+.reply-section th {
+  background-color: #f2f2f2;
+}
+
+.reply-section tr:nth-child(even) th {
+  background-color: #e6e6e6;
+}
+
+.reply-section tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.reply-section tr:last-child {
+  border-bottom: none;
+}
+
+tbody tr:not(.reply-section) {
+  text-align: center;
+}
+
+tbody tr:not(.reply-section) td {
+  text-align: center;
+  padding: 16px;
+  border: 1px solid #ddd;
+}
+
+tbody th {
+  text-align: center;
+}
+
+
 </style>

@@ -3,6 +3,18 @@
     <h2 class="title">질의응답 등록</h2>
 
     <form id="submitting">
+      <div class="form-group">
+      <div class="form-label">과목명</div>
+      <select
+        class="form-input">
+        <option disabled value="">선택하숑</option>
+        <option>JAVA</option>
+        <option>SQL</option>
+        <option v-for="course in enrolledCourses" :key="course.course_no">
+          {{ course.course_name }}
+        </option>
+      </select>
+    </div>
     <div class="form-group">
       <div class="form-label">제목</div>
       <input type="text"
@@ -14,11 +26,11 @@
       <div class="form-label">내용</div>
       <textarea 
         name="questionContent"
-        v-model="questionConcent"
+        v-model="questionContent"
          class="form-textarea"></textarea>
     </div>
-    <!-- CKEditor 사용 -->
-    <!-- 첨부파일 input 추가 -->
+    <!-- CKEditor 사용
+     code mirror 사용 예정-->
 
     <div class="button-group">
       <template v-if="paction === 'D'">
@@ -44,6 +56,8 @@ export default {
       questionContent: "",
       sSQuestionNo: this.sQuestionNo,
       name: "",
+      enrolledCourses: [],
+      enrolledCourse: [],
     };
   },
   methods: {
@@ -57,10 +71,19 @@ export default {
       data.append("questionTitle", this.questionTitle);
       data.append("questionContent", this.questionContent);
 
+
       this.axios
-        .post("/sAlert/sQnaInsert.do")
+        .post("/sAlert/sQnaInsert.do", data)
         .then((response) => {
           console.log(JSON.stringify(response));
+
+          this.enrolledCourses = response.data.enrolledCourse;
+
+          response.data.enrolledCourse.forEach(enroll => {
+            this.enrolledCourseNo = enroll.course_no;
+            this.enrollName = enroll.name;
+            this.enrollCourseName = enroll.course_name;
+        });
 
           if (response.data.result > 0) {
             alert(response.data.resultMsg);

@@ -30,18 +30,18 @@
             </tr>
             </thead>
             <tbody>
-              <template v-if="totalCount > 0">
-              <!--해당 게시글에 대한 세부정보는 SQnaSelectModal로 열기-->
-              <template v-for="item in sQnaList" :key="item.question_no">
-              <tr class="table_row" @click="openSelectedModal(item.question_no)">
-                <td>{{ item.course_name }}</td>
-                <td>{{ item.question_title }}</td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.question_created_at }}</td>
-                <td>{{ item.reply_no > 0 ? 'Y' : 'N' }}</td>
-              </tr>
-            </template>
-          </template>
+              <template v-if="totalCnt > 0">
+                <!--해당 게시글에 대한 세부정보는 SQnaSelectModal로 열기-->
+                <template v-for="item in listQna" :key="item.question_no">
+                  <tr class="table_row" @click="sQnaSelected(item.question_no)">
+                    <td>{{ item.course_name }}</td>
+                    <td>{{ item.question_title }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.question_created_at }}</td>
+                    <td>{{ item.reply_no > 0 ? 'Y' : 'N' }}</td>
+                  </tr>
+                </template>
+              </template>
             <template v-else>
               <tr style="text-align: center">
                 <td>조회된 데이터가 없습니다.</td>
@@ -73,7 +73,6 @@
     <v-dialog v-model="sQnaSubmitModal" max-width="600px">
       <v-card>
         <v-card-text>
-          
           <sQnaSubmitModal 
             @close-modal="closeSubmitModal"
             :action="action"
@@ -82,7 +81,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="sQnaSelectedModal" width="600px" height="1000px">
+    <v-dialog v-model="sQnaSelectedModal" width="1800px" height="3000px">
       <v-card>
         <v-card-text>
           <sQnaSelectedModal :action="action"
@@ -115,7 +114,7 @@ export default {
       sQnaSelectedModal: false,
       action: "",
       activeFilter: "all",
-      sQnaList: [],
+      listQna: [],
       sQuestionNo: 0,
       currentPage: 1,
       totalCnt: 0,
@@ -123,7 +122,6 @@ export default {
     };
   },
   mounted(){
-    alert("질의응답 페이지 들어와수다");
     this.qna_list();
   },
   methods: {
@@ -138,10 +136,21 @@ export default {
       this.sQnaSubmitModal = false;
       this.qna_list();
     },
+
+    // 질의응답 세부조회 모달 열기
+    sQnaSelected(sQuestionNo){
+      this.sQnaSelectedModal = true;
+      this.sQuestionNo = sQuestionNo;
+      this.action = "S";
+    },
+
+    closeSelectedModal(){
+      this.sQnaSelectedModal = false;
+      this.qna_list();
+    },
     
     // Qna 리스트 조회 which will be mounted.
     qna_list : function(){
-      alert("qna_list 조회해보잰 햄수다");
 
       // qna로 넘겨줄 parameter 정리
       let vm = this; // axios에서 this를 사용하기 위해 vm에 담아봄
@@ -151,24 +160,21 @@ export default {
       qnaParams.append("question_no", this.question_no);
       qnaParams.append("question_content", this.question_content);
       qnaParams.append("question_created_at", this.question_created_at);
-      qnaParams.append("reply_no", this.reply_no);
-      qnaParams.append("reply_content", this.reply_content);
+      //qnaParams.append("reply_no", this.reply_no);
+      //qnaParams.append("reply_content", this.reply_content);
       qnaParams.append("name", this.name);
       qnaParams.append("currentPage", this.currentPage);
+      qnaParams.append("pageSize", this.pageSize);
 
-      alert("append 해수다");
-      
       this.axios
-        .post("/sAlert/qna.do", qnaParams)
+        .post("/sAlert/sQnaList.do", qnaParams)
         .then((response) => {
-          alert("axios 와수다");
-          vm.sListQna = response.data.listQna;
+          vm.totalCnt = response.data.totalCnt;
+          vm.listQna = response.data.listQna;
           console.log(response.data.listQna);
-          alert("response.data.listQna : " + response.data.listQna);
-          alert("sListQna : " + vm.sListQna);
         })
         .catch(function (error){
-          alert("ERROR 나수다!!!!!!! 확인해줍써!!!!!!!!!" + error);
+          alert("ERROR" + error);
         });
     },
 
