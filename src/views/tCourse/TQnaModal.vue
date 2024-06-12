@@ -188,7 +188,14 @@ export default {
           },
         })
         .then((response) => {
-          this.listdata = response.data.listdata;
+          this.listdata = response.data.listdata.map((reply) => {
+            console.log(reply);
+            // 날짜에 "수정됨"을 추가
+            if (reply.is_updated) {
+              reply.reply_created_at += " (수정됨)";
+            }
+            return reply;
+          });
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
