@@ -38,7 +38,7 @@
                 <!-- 여기서 index를 사용합니다 -->
               </td>
               <td>{{ item.reply_content }}</td>
-              <td style="text-align: center">{{ item.replier_name }}</td>
+              <td style="text-align: center">{{ item.name }}</td>
               <td style="text-align: center">
                 {{ item.reply_created_at }}
               </td>
@@ -84,6 +84,8 @@ export default {
     question_created_at: String,
     name: String,
     question_no: Number,
+    loginID: String,
+    loginNM: String,
   },
   data() {
     return {
@@ -92,7 +94,6 @@ export default {
       flag_seleted: false,
       reply_num: null,
       reply_no: this.reply_no,
-      loginID: "",
       reply_content: "",
       reply_created_at: "",
       course_no: 0,
@@ -100,6 +101,7 @@ export default {
   },
   mounted() {
     this.selectQuestion();
+    console.log(name);
   },
   methods: {
     flag_changed(stat, reply_no) {
@@ -118,7 +120,7 @@ export default {
         .post("/tCourse/insertquestionreply.do", {
           question_no: this.question_no,
           loginID: this.loginID,
-          name: this.name,
+          name: this.loginNM,
           reply_content: this.reply_content,
           reply_created_at: this.reply_created_at,
           course_no: this.course_no,

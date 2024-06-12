@@ -94,6 +94,7 @@
             :question_title="question_title"
             :loginID="loginID"
             :name="name"
+            :loginNM="loginNM"
           />
         </v-card-text>
       </v-card>
@@ -130,7 +131,8 @@ export default {
       name: "",
       reply_no: "",
       reply_content: "",
-      loginID: "",
+      loginID: sessionStorage.getItem("loginId"),
+      loginNM: JSON.parse(sessionStorage.getItem("loginInfo")).userNm,
     };
   },
   // methods: {
@@ -143,7 +145,6 @@ export default {
   // findTeacher() {
   //   this.activeFilter = "teacher";
   // },
-
   mounted() {
     this.searchList();
   },
