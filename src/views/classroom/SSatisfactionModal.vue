@@ -34,27 +34,17 @@
     <div class="button-group">
       <v-btn class="submit-button" @click="submitSurvey">제출</v-btn>
     </div>
-
-    <!-- <div class="button-group">
-      <template v-if="paction === 'U'">
-        <v-btn class="update-button" @click="updateNotice">수정</v-btn>
-        <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
-      </template>
-      <template v-else>
-        <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
-      </template>
-    </div> -->
   </div>
 </template>
 
 <script>
 export default {
   props: {
-    action: String,
+    courseNo: Number,
   },
   data() {
     return {
-      paction: this.action,
+      pCourseNo: this.courseNo,
       objectiveAnswers: {
         q1: null,
         q2: null,
@@ -65,9 +55,9 @@ export default {
     };
   },
   methods: {
-    updateNotice() {},
-    deleteNotice() {},
-    insertNotice() {},
+    submitSurvey() {
+      alert(this.pCourseNo);
+    },
   },
 };
 </script>

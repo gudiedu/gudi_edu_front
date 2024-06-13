@@ -124,6 +124,8 @@ export default {
             this.fileName = response.data.result.file_origin;
 
             let ext = response.data.result.file_extension;
+            let localpath = response.data.result.file_local_path;
+            console.log(localpath);
 
             if (
               ext.toLowerCase() == "jpg" ||

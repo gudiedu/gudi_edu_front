@@ -25,11 +25,9 @@ const routes = [
       },
       {
         path: "/myPage",
-        name:"mypage",
+        name: "mypage",
         component: () => import("../views/MyPage.vue"),
-
-        
-      }, 
+      },
       {
         path: "/tCourse/course",
         name: "tCourseDetail",
@@ -39,6 +37,11 @@ const routes = [
         path: "/classroom/course",
         name: "sLectureDetail",
         component: () => import("@/views/classroom/SLectureDetail.vue"),
+      },
+      {
+        path: "/classroom/course",
+        name: "sLectureSatisfaction",
+        component: () => import("@/views/classroom/SSatisfactionModal.vue"),
       },
       {
         path: "/classroom/enroll",
@@ -55,19 +58,16 @@ const routes = [
         name: "aSurveyManagement",
         component: () => import("@/views/information/ASurveyManagement.vue"),
       },
-      
-      
     ],
     component: Dashboard,
   },
-  
+
   {
     path: "/test",
     name: "test",
     component: () =>
       import(/* webpackChunkName: "about" */ "@/components/ChatApp.vue"),
   },
-
 ];
 
 const router = createRouter({
