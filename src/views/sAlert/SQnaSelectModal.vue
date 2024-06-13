@@ -96,6 +96,11 @@
     </v-table>
     </v-card>
   </v-container>
+  <div class="button-group">
+      <template v-if="replyNo == 0">
+        <v-btn class="delete-button" @click="deleteQuestion">삭제</v-btn>
+      </template>
+  </div>
 </template>
 
 <script>
@@ -155,6 +160,27 @@ export default {
         .catch(function (error) {
           alert("sQnaSelected에서 오류 " + error);
         });
+    },
+
+    sQnaDelete() {
+      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      params.append("pSuggestionNo", this.pSuggestionNo);
+
+      this.axios
+        .post("/sAlert/sDeleteSuggestion.do", params)
+        .then((response) => {
+          //console.log(JSON.stringify(response));
+
+          if (response.data.result > 0) {
+            alert(response.data.resultMsg);
+            this.$emit("close-modal"); // 모달 닫기 이벤트 발생
+          }
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+
+
     },
   },
 };

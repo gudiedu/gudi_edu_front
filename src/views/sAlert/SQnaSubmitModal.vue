@@ -4,39 +4,35 @@
 
     <form id="submitting">
       <div class="form-group">
-      <div class="form-label">과목명</div>
-      <select
-        class="form-input">
-        <option disabled value="">선택하숑</option>
-        <option>JAVA</option>
-        <option>SQL</option>
-        <option v-for="course in enrolledCourses" :key="course.course_no">
-          {{ course.course_name }}
-        </option>
-      </select>
-    </div>
-    <div class="form-group">
-      <div class="form-label">제목</div>
-      <input type="text"
-        name="questionTitle"
-        v-model="questionTitle"
-        class="form-input" />
-    </div>
-    <div class="form-group">
-      <div class="form-label">내용</div>
-      <textarea 
-        name="questionContent"
-        v-model="questionContent"
-         class="form-textarea"></textarea>
-    </div>
+        <div class="form-label">과목명</div>
+        <select
+          class="form-input">
+          <option disabled value="">선택하세요</option>
+          <option v-for="course in enrolledCourses" :key="course.course_no">
+            {{ course.course_name }}
+          </option>
+        </select>
+        <input type="hidden" v-model="selectedCourseNo">
+      </div>
+      <div class="form-group">
+        <div class="form-label">제목</div>
+        <input type="text"
+          name="questionTitle"
+          v-model="questionTitle"
+          class="form-input" />
+      </div>
+      <div class="form-group">
+        <div class="form-label">내용</div>
+        <textarea 
+          name="questionContent"
+          v-model="questionContent"
+          class="form-textarea"></textarea>
+      </div>
     <!-- CKEditor 사용
      code mirror 사용 예정-->
 
     <div class="button-group">
-      <template v-if="paction === 'D'">
-        <v-btn class="delete-button" @click="deleteQuestion">삭제</v-btn>
-      </template>
-      <template v-else>
+      <template >
         <v-btn class="insert-button" @click="submitQuestion">등록</v-btn>
       </template>
     </div>
@@ -57,14 +53,45 @@ export default {
       sSQuestionNo: this.sQuestionNo,
       name: "",
       enrolledCourses: [],
-      enrolledCourse: [],
+      sQnaGetCourseName: [],
+      selectedCourseNo: "",
     };
   },
+  mounted(){
+    this.init();
+  },
   methods: {
-    deleteQuestion() {
 
-      
+    init(){
+      let courseParams = new URLSearchParams();
+      courseParams.append("courseNo", this.course_no);
+      courseParams.append("studentName", this.name);
+      courseParams.append("courseName", this.course_name);
+      courseParams.append("loginID", this.loginID);
+
+      this.axios
+      .post("sAlert/sQnaGetCourseName.do", courseParams)
+      .then((response) => {
+        console.log("JSON.stringify(response)", JSON.stringify(response));
+
+        this.enrolledCourses = response.data.sQnaGetCourseName;
+
+        response.data.sQnaGetCourseName.forEach(each => {
+            this.courseName = each.course_name;
+            this.name = each.name;
+            this.courseNo = each.course_no;
+        });
+
+        this.name = response.data.sQnaGetCourseName.name;
+        this.courseName = response.data.sQnaGetCourseName.course_name;
+        this.courseNo = response.data.sQnaGetCourseName.course_no;
+       
+      })
+      .catch(function (error) {
+          alert("init에서 오류 발생!" + error);
+        });
     },
+
     submitQuestion() {
       let formTag = document.getElementById("submitting");
       let data = new FormData(formTag);
@@ -77,13 +104,7 @@ export default {
         .then((response) => {
           console.log(JSON.stringify(response));
 
-          this.enrolledCourses = response.data.enrolledCourse;
-
-          response.data.enrolledCourse.forEach(enroll => {
-            this.enrolledCourseNo = enroll.course_no;
-            this.enrollName = enroll.name;
-            this.enrollCourseName = enroll.course_name;
-        });
+          this.enrolledCourses = response.data.sQnaGetCourseName;
 
           if (response.data.result > 0) {
             alert(response.data.resultMsg);
