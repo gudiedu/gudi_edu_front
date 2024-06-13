@@ -12,10 +12,10 @@
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" />
+            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" @keyup.enter="onEnterKey" />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchList">검색</button>
+            <button class="search-button" @click="searchList" ref="searchButton">검색</button>
           </div>
         </div>
       </div>
@@ -37,9 +37,8 @@
             <template v-for="item in questionList" :key="item.question_no">
               <tr>
                 <td>
-                  {{ item.question_no }}
+                  {{ item.display_no }}
                 </td>
-                <!--<td @click="questionModifyFile(item.question_no)">-->
                 <td>{{ item.name }}</td>
                 <td @click="questionModify(item)">
                   {{ item.question_title }}
@@ -79,9 +78,6 @@
       ></paginate>
     </div>
 
-    <!--<div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
-    </div>-->
     <v-dialog v-model="addModal" max-width="800px" max-height="1000px">
       <v-card>
         <v-card-text>
@@ -135,21 +131,18 @@ export default {
       loginNM: JSON.parse(sessionStorage.getItem("loginInfo")).userNm,
     };
   },
-  // methods: {
-  // findAll() {
-  //   this.activeFilter = "all";
-  // },
-  // findAdmin() {
-  //   this.activeFilter = "admin";
-  // },
-  // findTeacher() {
-  //   this.activeFilter = "teacher";
-  // },
+
   mounted() {
     this.searchList();
   },
 
   methods: {
+    onEnterKey() {
+      this.$refs.searchButton.click(); // 엔터 키를 누르면 검색 버튼을 클릭
+    },
+
+    // 기존 methods...
+
     searchList: function () {
       // 화살표 함수 대신 일반 함수 사용 , ES6문법을 사용해서 에러..
       //alert('searchlist')
@@ -162,24 +155,23 @@ export default {
       params.append("stitle", this.stitle);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
-      // params.append("question_title", this.question_title);
-      // params.append("question_no", this.question_no);
-      // params.append("question_content", this.question_content);
-      // params.append("question_created_at", this.question_created_at);
-      // params.append("reply_no", this.reply_no);
-      // params.append("reply_content", this.reply_content);
-      // params.append("name", this.name);
 
       this.axios
         .post("/tCourse/listquestion.do", params)
         .then((response) => {
           console.log(JSON.stringify(response));
 
-          vm.questionList = response.data.listData;
-          vm.totalCnt = response.data.totalCnt;
+          vm.questionList = response.data.listdata || [];
+          vm.totalCnt = response.data.totalcnt || 0;
 
-          this.questionList = response.data.listdata;
-          this.totalCnt = response.data.totalcnt;
+          // 전체 데이터의 인덱스를 기반으로 글 번호를 매김 (오래된 순으로 번호 매기기)
+          let totalData = vm.questionList.map((item, index) => {
+            item.display_no = vm.totalCnt - ((vm.currentPage - 1) * vm.pageSize + index);
+            return item;
+          });
+
+          // 페이지 내에서는 최신 글이 위로 오도록 함
+          vm.questionList = totalData;
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
@@ -211,11 +203,10 @@ export default {
       var xx = total % page;
       var result = parseInt(total / page);
 
-      if (xx == 0) {
+      if (xx === 0) {
         return result;
       } else {
-        result = result + 1;
-        return result;
+        return result + 1;
       }
     },
   },
