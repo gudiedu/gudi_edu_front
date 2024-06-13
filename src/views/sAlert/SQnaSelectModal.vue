@@ -1,9 +1,9 @@
 <template>
   <v-container>
     <v-card class="lecture-detail">
-      <!-- <v-btn class="close-button" icon @click="$emit('close-modal')">
+       <v-btn class="close-button" icon @click="$emit('close-modal')">
         <v-icon>mdi-close</v-icon>
-      </v-btn> -->
+      </v-btn>
       <h2 class="title">질문/답변조회</h2>
 
       <v-row>

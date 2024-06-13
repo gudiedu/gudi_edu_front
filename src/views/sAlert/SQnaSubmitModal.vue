@@ -1,6 +1,9 @@
 <template>
   <div class="lecture-detail">
     <h2 class="title">질의응답 등록</h2>
+    <v-btn class="close-button" icon @click="$emit('close-modal')">
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
 
     <form id="submitting">
       <div class="form-group">
@@ -213,5 +216,11 @@ export default {
 .delete-button:hover {
   background-color: #e57373;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
+.close-button {
+  position: absolute;
+  top: 0; /* 상단 여백 조정 */
+  right: 0; /* 오른쪽 여백 조정 */
+  margin: 8px; /* 버튼과 모달의 경계 사이에 약간의 여백 추가 */
 }
 </style>
