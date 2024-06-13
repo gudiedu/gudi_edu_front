@@ -68,7 +68,7 @@
             <td>2024.05.01</td>
             <td>20</td>
             <td @click="classSatisfaction">수업만족도</td>
-            <td @click="attendance">출결</td>
+            <td @click="attendance(18)">출결</td>
           </tr>
           <tr>
             <td @click="lectureModify('Vue')">Vue</td>
@@ -78,7 +78,7 @@
             <td>2024.05.01</td>
             <td>20</td>
             <td @click="classSatisfaction">수업만족도</td>
-            <td @click="attendance">출결</td>
+            <td @click="attendance(18)">출결</td>
           </tr>
         </tbody>
       </v-table>
@@ -108,7 +108,7 @@
     <v-dialog v-model="attendanceModal" max-width="800px">
       <v-card>
         <v-card-text>
-          <AttendanceModal :action="action" />
+          <AttendanceModal :courseNo="courseNo" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -127,33 +127,12 @@ export default {
       selectedNotice: null,
       activeFilter: "all",
       stitle: "",
+      courseNo: 0,
       satisfactionModal: false,
       attendanceModal: false,
     };
   },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
-    searchMethod() {},
-    // lectureModify(lecture) {
-    //   this.selectedNotice = lecture;
-    //   this.action = "U";
-    //   this.addModal = true;
-    // },
-    // openAddModal() {
-    //   this.action = "";
-    //   this.addModal = true;
-    // },
-    // closeAddModal() {
-    //   this.addModal = false;
-    // },
     lectureModify(lectureName) {
       this.$router.push({
         name: "sLectureDetail",
@@ -163,7 +142,8 @@ export default {
     classSatisfaction() {
       this.satisfactionModal = true;
     },
-    attendance() {
+    attendance(courseNo) {
+      this.courseNo = courseNo;
       this.attendanceModal = true;
     },
   },
@@ -253,6 +233,7 @@ export default {
   width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
+  cursor: pointer;
 }
 
 .dashboard-table th,
