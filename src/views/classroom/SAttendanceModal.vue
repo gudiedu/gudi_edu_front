@@ -16,7 +16,7 @@
               <th>출석일</th>
               <th>결석일</th>
               <th>출석률(일수)</th>
-              <!-- <th>총수당지급액</th> -->
+              <th>총수당지급액</th>
             </tr>
           </thead>
           <tbody>
@@ -25,7 +25,7 @@
               <td>{{ attendanceDays }}일</td>
               <td>{{ absenceDays }}일</td>
               <td>{{ attendanceRate }}%</td>
-              <!-- <td>{{ totalAllowanceAmount }}원</td> -->
+              <td>{{ totalAllowanceAmount }}원</td>
             </tr>
           </tbody>
         </v-table>
@@ -114,6 +114,7 @@ export default {
       attendanceRate: "",
       totalAllowanceAmount: "",
       attendanceNotes: [],
+      dayoffInfo: [],
     };
   },
   mounted() {
@@ -136,6 +137,12 @@ export default {
             response.data.sStudentCourseInfo.course_start_date;
           this.courseEndDate = response.data.sStudentCourseInfo.course_end_date;
 
+          // dayoffInfo 배열의 dayoff_date 속성을 Date 객체로 변환하여 저장
+          vm.dayoffInfo = response.data.sDayoffInfo.map(
+            (item) => item.dayoff_date
+          );
+          //console.log("Dayoff Info:", vm.dayoffInfo);
+
           this.calculateTotalCourseDays();
 
           this.attendanceDays = response.data.attendanceDays;
@@ -143,8 +150,9 @@ export default {
 
           this.calculateAttendanceRate();
 
+          this.calculateTotalAllowanceAmount();
+
           vm.attendanceNotes = response.data.sAttendanceNotes;
-          console.log(vm.attendanceNotes);
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
@@ -154,12 +162,32 @@ export default {
     calculateTotalCourseDays() {
       const startDate = new Date(this.courseStartDate);
       const endDate = new Date(this.courseEndDate);
+      const dayoffInfo = this.dayoffInfo;
 
-      const timeDifference = endDate - startDate;
+      console.log("잘 가져오고 있니?" + dayoffInfo);
 
-      const dayDifference = timeDifference / (1000 * 3600 * 24);
+      let totalDays = 0;
 
-      this.totalCourseDays = dayDifference + 1;
+      for (
+        let d = new Date(startDate);
+        d <= endDate;
+        d.setDate(d.getDate() + 1)
+      ) {
+        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+        const formattedDate = d.toISOString().split("T")[0]; // YYYY-MM-DD 형식으로 변환
+        const isHoliday = dayoffInfo.includes(formattedDate);
+
+        // // 디버깅 로그 추가
+        // console.log(
+        //   `Date: ${formattedDate}, IsWeekend: ${isWeekend}, IsHoliday: ${isHoliday}`
+        // );
+
+        if (!isWeekend && !isHoliday) {
+          totalDays++;
+        }
+      }
+
+      this.totalCourseDays = totalDays;
     },
 
     calculateAttendanceRate() {
@@ -171,6 +199,16 @@ export default {
       } else {
         this.attendanceRate = 0;
       }
+    },
+
+    calculateTotalAllowanceAmount() {
+      const attendanceAmount = this.attendanceDays * 25000;
+      const absenceAmount = this.absenceDays * 25000;
+
+      this.totalAllowanceAmount = attendanceAmount - absenceAmount;
+
+      // 쉼표를 포함하여 금액을 한눈에 알아보기 쉽게 포맷팅
+      this.totalAllowanceAmount = this.totalAllowanceAmount.toLocaleString();
     },
   },
 };
