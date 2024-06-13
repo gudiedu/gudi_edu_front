@@ -39,7 +39,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="searchList">검색</button>
           </div>
         </div>
       </div>
@@ -51,39 +51,59 @@
           <tr>
             <th>글번호</th>
             <th>강의명</th>
-            <th>작성자</th>
             <th>제목</th>
+            <th>작성자</th>
             <th>등록일</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Java 기초</td>
-            <td>강사</td>
-            <td @click="learningMaterialsModify">학습자료입니다.</td>
-            <td>2024.01.01</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Vue</td>
-            <td>강사</td>
-            <td @click="learningMaterialsModify">학습자료2입니다.</td>
-            <td>2024.01.01</td>
-          </tr>
+          <template v-if="totalCnt > 0">
+            <template v-for="item in resourceList" :key="item.resource_no">
+              <tr class="table_row" @click="resourceModify(item.resource_no)">
+                <td>{{ item.resource_no }}</td>
+                <td>{{ item.course_name }}</td>
+                <td>
+                  {{ item.resource_title }}
+                </td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.resource_created_at }}</td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
+            <tr>
+              <td colspan="10" style="text-align: center">
+                조회된 데이터가 없습니다.
+              </td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
 
     <!-- 페이지네이션 추가-->
-
-    <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+    <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
     </div>
-    <v-dialog v-model="addModal" max-width="600px">
+
+    <!-- <div class="button-group">
+      <button class="insert-button" @click="openAddModal">등록</button>
+    </div> -->
+    <v-dialog v-model="resourceModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <SLearningMaterialsModal :action="action" />
+          <ResourceModal :action="action" :resourceNo="resourceNo" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -91,49 +111,84 @@
 </template>
 
 <script>
-import SLearningMaterialsModal from "../sAlert/SResourcesModal.vue";
+import ResourceModal from "../sAlert/SResourcesModal.vue";
+import Paginate from "vuejs-paginate-next";
 export default {
   components: {
-    SLearningMaterialsModal,
+    ResourceModal,
+    Paginate,
   },
   data() {
     return {
       titleText: "학습자료",
-      addModal: false,
+      resourceModal: false,
       action: "",
       selectedNotice: null,
       activeFilter: "all",
       stitle: "",
+      resourceList: [],
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
+      resourceNo: 0,
     };
   },
+  mounted() {
+    this.searchList();
+  },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
-    searchMethod() {},
-    learningMaterialsModify(materials) {
-      this.selectedNotice = materials;
-      this.action = "U";
-      this.addModal = true;
+    resourceModify(resourceNo) {
+      // this.selectedNotice = materials;
+      // this.action = "U";
+      this.resourceModal = true;
+      this.resourceNo = resourceNo;
     },
-    openAddModal() {
-      this.action = "";
-      this.addModal = true;
+
+    searchList() {
+      let vm = this;
+
+      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+
+      this.axios
+        .post("/sAlert/sListResources.do", params)
+        .then((response) => {
+          //console.log(JSON.stringify(response));
+
+          vm.resourceList = response.data.listData;
+          vm.totalCnt = response.data.totalCnt;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
-    closeAddModal() {
-      this.addModal = false;
+
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var xx = total % page;
+      var result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+      // var result = Math.ceil(this.totalCnt / this.pageSize);
+      // return result;
     },
   },
 };
 </script>
 
 <style scoped>
+.table_row {
+  cursor: pointer;
+}
+
 .dashboard-card {
   margin: 20px;
   padding: 20px;

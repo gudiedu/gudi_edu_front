@@ -7,27 +7,6 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >강사</v-btn
-          >
-        </div> -->
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -39,7 +18,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="searchList">검색</button>
           </div>
         </div>
       </div>
@@ -50,40 +29,78 @@
         <thead>
           <tr>
             <th>글번호</th>
-            <th>작성자</th>
             <th>제목</th>
+            <th>작성자</th>
             <th>등록일</th>
-            <th>답변</th>
+            <th>답변여부</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>관리자</td>
-            <td @click="suggestionModify">건의사항입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>강사</td>
-            <td @click="suggestionModify">건의사항2입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변대기</td>
-          </tr>
+          <template v-if="totalCnt > 0">
+            <template v-for="item in suggestionList" :key="item.suggestion_no">
+              <tr
+                class="table_row"
+                @click="suggestionModify(item.suggestion_no)"
+              >
+                <td>{{ item.suggestion_no }}</td>
+                <td>
+                  {{ item.suggestion_title }}
+                </td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.suggestion_created_at }}</td>
+                <td>{{ item.suggestion_answered ? "완료" : "대기중" }}</td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
+            <tr>
+              <td colspan="10" style="text-align: center">
+                조회된 데이터가 없습니다.
+              </td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
 
-    <!-- 페이지네이션 추가-->
+    <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
+    </div>
 
     <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+      <button class="insert-button" @click="insertSuggestion">등록</button>
     </div>
-    <v-dialog v-model="addModal" max-width="600px">
+
+    <v-dialog v-model="suggestionInsertModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <SSuggestionsModal :action="action" />
+          <SSuggestionsInsertModal
+            @close-modal="closeInsertModal"
+            :action="action"
+          />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="suggestionModifyModal" max-width="600px">
+      <v-card>
+        <v-card-text>
+          <SSuggestionsModifyModal
+            @close-modal="closeModifyModal"
+            :action="action"
+            :suggestionNo="suggestionNo"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -91,49 +108,99 @@
 </template>
 
 <script>
-import SSuggestionsModal from "./SSuggestionsModal.vue";
+import SSuggestionsInsertModal from "./SSuggestionsInsertModal.vue";
+import SSuggestionsModifyModal from "./SSuggestionsModifyModal.vue";
+import Paginate from "vuejs-paginate-next";
+
 export default {
   components: {
-    SSuggestionsModal,
+    SSuggestionsInsertModal,
+    SSuggestionsModifyModal,
+    Paginate,
   },
   data() {
     return {
       titleText: "건의사항",
-      addModal: false,
+      suggestionInsertModal: false,
+      suggestionModifyModal: false,
       action: "",
-      selectedNotice: null,
       activeFilter: "all",
       stitle: "",
+      suggestionList: [],
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
+      suggestionNo: 0,
+      // selectedSuggestion: [],
     };
   },
+  mounted() {
+    this.searchList();
+  },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
-    searchMethod() {},
-    suggestionModify(suggestion) {
-      this.selectedNotice = suggestion;
-      this.action = "U";
-      this.addModal = true;
+    suggestionModify(suggestionNo) {
+      this.suggestionNo = suggestionNo;
+      this.suggestionModifyModal = true;
     },
-    openAddModal() {
-      this.action = "";
-      this.addModal = true;
+
+    insertSuggestion() {
+      this.action = "I";
+      this.suggestionInsertModal = true;
     },
-    closeAddModal() {
-      this.addModal = false;
+
+    closeInsertModal() {
+      this.suggestionInsertModal = false;
+      this.searchList();
+    },
+
+    closeModifyModal() {
+      this.suggestionModifyModal = false;
+      this.searchList();
+    },
+
+    searchList() {
+      let params = new URLSearchParams();
+      params.append("stitle", this.stitle);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+
+      this.axios
+        .post("/sAlert/sSuggestionList.do", params)
+        .then((response) => {
+          //console.log(JSON.stringify(response));
+
+          this.suggestionList = response.data.listData;
+          console.log(this.suggestionList);
+
+          this.totalCnt = response.data.totalCnt;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var xx = total % page;
+      var result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
     },
   },
 };
 </script>
 
 <style scoped>
+.table_row {
+  cursor: pointer;
+}
+
 .dashboard-card {
   margin: 20px;
   padding: 20px;
