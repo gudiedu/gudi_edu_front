@@ -1,6 +1,9 @@
 <template>
   <v-container>
     <v-card class="lecture-detail">
+      <!-- <v-btn class="close-button" icon @click="$emit('close-modal')">
+        <v-icon>mdi-close</v-icon>
+      </v-btn> -->
       <h2 class="title">질문/답변조회</h2>
 
       <v-row>
@@ -23,8 +26,8 @@
             <input
               readonly
               type="text"
-              name="name"
-              v-model="name"
+              name="qName"
+              v-model="qName"
               class="form-input"
             />
           </div>
@@ -69,15 +72,16 @@
           </div>
         </v-col>
       </v-row>
+      <v-divider></v-divider>
     <v-table class="dashboard-table">
-      <template v-if="replyNo != 0">
+      <template v-if="replyNo > 0">
         <tbody class="reply-section">
           <tr class="reply-item">
             <th>작성자</th>
             <th>답변일</th>
             <th>답변내용</th>
             </tr>
-            <template v-for="reply in QnaContentReply" :key="reply.reply_no">
+            <template v-for="reply in QnaContentReply" :key="reply.replyNo">
             <tr class="reply-item">
               <td>{{ reply.name }}</td>
               <td>{{ reply.reply_created_at }}</td>
@@ -98,7 +102,7 @@
   </v-container>
   <div class="button-group">
       <template v-if="replyNo == 0">
-        <v-btn class="delete-button" @click="deleteQuestion">삭제</v-btn>
+        <v-btn class="delete-button" @click="sQnaDelete">삭제</v-btn>
       </template>
   </div>
 </template>
@@ -113,13 +117,17 @@ export default {
     return {
       paction: this.action,
       SelectedQuestionNo: this.sQuestionNo,
-      name: "",
+      qName: "",
       questionTitle: "",
       questionContent: "",
       questionCreatedAt: "",
       questionAnswered: "",
       QnaContentReply: [],
       sQnaSelectedReply: [],
+      replyNo: 0,
+      replyContent:"",
+      replyCreatedAt:"",
+
     };
   },
   mounted() {
@@ -131,10 +139,8 @@ export default {
     sQnaSelected() {
       let params = new URLSearchParams();
       params.append("SelectedQuestionNo", this.SelectedQuestionNo);
-      params.append("reply_no", this.reply_no);
-      params.append("reply_content", this.reply_content);
-      params.append("reply_created_at", this.reply_created_at);
-      params.append("reply_name", this.name);
+      //params.append("replyNo", this.reply_no);
+
 
       this.axios
       .post("/sAlert/sQnaSelected.do", params)
@@ -142,20 +148,29 @@ export default {
         console.log("JSON.stringify(response) : " + JSON.stringify(response));
         console.log(response.data);
         
-        this.QnaContentReply = response.data.sQnaSelectedReply; // 배열을 직접 할당
         
-        response.data.sQnaSelectedReply.forEach(reply => {
-            this.replyContent = reply.reply_content;
-            this.replyName = reply.name;
-            this.replyCreatedAt = reply.reply_created_at;
-            this.replyNo = reply.reply_no;
-        });
         
-        this.name = response.data.result.name;
         this.questionTitle = response.data.result.question_title;
+        this.qName = response.data.result.name; // 질문 작성자 이름
         this.questionContent = response.data.result.question_content;
         this.questionCreatedAt = response.data.result.question_created_at;
+        
+        
+        this.QnaContentReply = response.data.sQnaSelectedReply; // 배열을 직접 할당
+        // console.log("this.questionTitle: ", this.questionTitle);
 
+        response.data.sQnaSelectedReply.forEach(reply => {
+          this.replyNo = reply.reply_no;
+          this.replyContent = reply.reply_content;
+          this.replyCreatedAt = reply.reply_created_at;
+
+        });
+
+        console.log("QnaContentReply: ", this.QnaContentReply[0]);
+        console.log("1st replyContent: ", this.replyContent);
+        console.log("1st replyNo: ", this.replyNo);
+        alert("this.replyNo: " + this.replyNo);
+        
         })
         .catch(function (error) {
           alert("sQnaSelected에서 오류 " + error);
@@ -164,12 +179,14 @@ export default {
 
     sQnaDelete() {
       let params = new URLSearchParams(); //파라미터를 넘길 때 사용
-      params.append("pSuggestionNo", this.pSuggestionNo);
+      params.append("SelectedQuestionNo", this.SelectedQuestionNo);
+      
+      console.log("this.SelectedQuestionNo", this.SelectedQuestionNo);
 
       this.axios
-        .post("/sAlert/sDeleteSuggestion.do", params)
+        .post("/sAlert/sQnaDelete.do", params)
         .then((response) => {
-          //console.log(JSON.stringify(response));
+          console.log(JSON.stringify(response));
 
           if (response.data.result > 0) {
             alert(response.data.resultMsg);
@@ -182,6 +199,10 @@ export default {
 
 
     },
+
+    // closeModal(){
+    //   this.$emit('close-modal');
+    // },
   },
 };
 </script>
@@ -195,6 +216,12 @@ export default {
   margin-top: 16px;
   max-width: 1500px;
   margin: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
 }
 
 .title {
@@ -285,6 +312,41 @@ tbody tr:not(.reply-section) td {
 tbody th {
   text-align: center;
 }
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
 
+.delete-button,
+.insert-button{
+  /* padding: 10px 16px; */
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
 
+.insert-button,
+.goBack-button {
+  background-color: #407bff;
+}
+
+.insert-button:hover,
+.goBack-button:hover {
+  background-color: #5a9bff;
+  box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
+}
+
+.delete-button {
+  background-color: #d32f2f;
+  margin: 0;
+}
+
+.delete-button:hover {
+  background-color: #e57373;
+  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
 </style>

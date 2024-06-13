@@ -6,44 +6,6 @@
         <v-spacer></v-spacer>
       </v-card-title>
 
-      <!-- <div class="container">
-        <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >강사</v-btn
-          >
-        </div>
-
-        <div class="search">
-          <div class="search-container">
-            <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input
-              type="text"
-              class="search-input"
-              placeholder="검색어를 입력해주세요."
-              v-model="stitle"
-            />
-          </div>
-          <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
-          </div>
-        </div>
-      </div> -->
-
       <v-divider></v-divider>
 
       <v-table class="dashboard-table">
@@ -51,15 +13,14 @@
           <tr>
             <th>강의명</th>
             <th>강사명</th>
-            <th>강의실</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th>수강인원</th>
-            <th></th>
-            <th></th>
+            <th>출결현황</th>
+            <th>만족도조사</th>
           </tr>
         </thead>
         <tbody>
+          <!--v-for로 가져오기-->
           <tr>
             <td @click="lectureModify('Java 기초')">Java 기초</td>
             <td>강사</td>
@@ -86,17 +47,6 @@
 
     <!-- 페이지네이션 추가-->
 
-    <!-- <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
-    </div>
-    <v-dialog v-model="addModal" max-width="600px">
-      <v-card>
-        <v-card-text>
-          <SLearningMaterialsModal :action="action" />
-        </v-card-text>
-      </v-card>
-    </v-dialog> -->
-
     <v-dialog v-model="satisfactionModal" max-width="600px">
       <v-card>
         <v-card-text>
@@ -116,10 +66,9 @@
 </template>
 
 <script>
-import SatisfactionModal from "./SSatisfactionModal.vue";
 import AttendanceModal from "./SAttendanceModal.vue";
 export default {
-  components: { SatisfactionModal, AttendanceModal },
+  components: { AttendanceModal },
   data() {
     return {
       titleText: "강의관리",
@@ -140,6 +89,10 @@ export default {
       });
     },
     classSatisfaction() {
+      this.$router.push({
+        name: "sLectureSatisfaction",
+        // params: { name: lectureName },
+      });
       this.satisfactionModal = true;
     },
     attendance(courseNo) {

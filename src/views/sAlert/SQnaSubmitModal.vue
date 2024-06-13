@@ -5,14 +5,14 @@
     <form id="submitting">
       <div class="form-group">
         <div class="form-label">과목명</div>
-        <select
+        <select v-model="selectedCourseNo"
           class="form-input">
           <option disabled value="">선택하세요</option>
-          <option v-for="course in enrolledCourses" :key="course.course_no">
+          <option v-for="course in enrolledCourses" :key="course.course_no" :value="course.course_no">
             {{ course.course_name }}
           </option>
         </select>
-        <input type="hidden" v-model="selectedCourseNo">
+        <input type="hidden" v-model="studentName">
       </div>
       <div class="form-group">
         <div class="form-label">제목</div>
@@ -28,15 +28,13 @@
           v-model="questionContent"
           class="form-textarea"></textarea>
       </div>
-    <!-- CKEditor 사용
-     code mirror 사용 예정-->
+        <!-- CKEditor 사용
+        code mirror 사용 예정-->
 
-    <div class="button-group">
-      <template >
-        <v-btn class="insert-button" @click="submitQuestion">등록</v-btn>
-      </template>
-    </div>
-  </form>
+        <div class="button-group">
+          <v-btn class="insert-button" @click="submitQuestion">등록</v-btn>
+        </div>
+    </form>
   </div>
 </template>
 
@@ -51,7 +49,7 @@ export default {
       questionTitle: "",
       questionContent: "",
       sSQuestionNo: this.sQuestionNo,
-      name: "",
+      studentName: "",
       enrolledCourses: [],
       sQnaGetCourseName: [],
       selectedCourseNo: "",
@@ -65,7 +63,6 @@ export default {
     init(){
       let courseParams = new URLSearchParams();
       courseParams.append("courseNo", this.course_no);
-      courseParams.append("studentName", this.name);
       courseParams.append("courseName", this.course_name);
       courseParams.append("loginID", this.loginID);
 
@@ -78,13 +75,16 @@ export default {
 
         response.data.sQnaGetCourseName.forEach(each => {
             this.courseName = each.course_name;
-            this.name = each.name;
+            this.studentName = each.name;
             this.courseNo = each.course_no;
+
+            console.log("this.studentName:", this.studentName);
         });
 
-        this.name = response.data.sQnaGetCourseName.name;
         this.courseName = response.data.sQnaGetCourseName.course_name;
         this.courseNo = response.data.sQnaGetCourseName.course_no;
+
+        console.log("두번째 studentName확인이지롱 : ", this.studentName);
        
       })
       .catch(function (error) {
@@ -97,7 +97,13 @@ export default {
       let data = new FormData(formTag);
       data.append("questionTitle", this.questionTitle);
       data.append("questionContent", this.questionContent);
+      data.append("selectedCourseNo", this.selectedCourseNo);
+      data.append("studentName", this.studentName);
 
+      // FormData에 값을 잘 추가했는지 확인하는 alert
+      for (let [key, value] of data.entries()) {
+        alert(`${key}: ${value}`);
+      }
 
       this.axios
         .post("/sAlert/sQnaInsert.do", data)

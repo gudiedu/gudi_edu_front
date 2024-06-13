@@ -84,8 +84,10 @@
     <v-dialog v-model="sQnaSelectedModal" width="1800px" height="3000px">
       <v-card>
         <v-card-text>
-          <sQnaSelectedModal :action="action"
-            :sQuestionNo="sQuestionNo"
+          <sQnaSelectedModal
+           :action="action"
+           :sQuestionNo="sQuestionNo"
+           @close-modal="closeSelectedModal"
           />
         </v-card-text>
       </v-card>
@@ -142,6 +144,12 @@ export default {
       this.sQnaSelectedModal = true;
       this.sQuestionNo = sQuestionNo;
       this.action = "S";
+    },
+
+    // 질의응답 세부조회 모달 닫기
+    sQnaSelectedClosed(){
+      this.sQnaSelectedModal = false;
+      this.qna_list();
     },
 
     closeSelectedModal(){
