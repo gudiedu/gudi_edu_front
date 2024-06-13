@@ -112,12 +112,12 @@ export default {
       notice_created_at: "",
       notice_no: 0,
       typeList: [],
-      user_type: "",
     };
   },
 
   mounted() {
     this.searchList();
+    this.page();
   },
 
   methods: {
@@ -134,8 +134,10 @@ export default {
       params.append("pageSize", this.pageSize);
 
       if (this.activeFilter !== "all") {
-        params.append("userType", this.activeFilter); // 필터링된 데이터 가져오기 위해 userType 추가
+        params.append("user_type", this.activeFilter); // 필터링된 데이터 가져오기 위해 userType 추가
       }
+
+      console.log("Search Params:", params.toString());
 
       this.axios
         .post("/tAlert/searchNotice.do", params)
