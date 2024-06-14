@@ -100,7 +100,7 @@
       <v-btn
         class="delete-button"
         @click="deleteSuggestion"
-        v-if="!suggestionAnswered"
+        v-if="isMySuggestion && !suggestionAnswered"
         >삭제</v-btn
       >
       <v-btn class="goBack-button" @click="goBack">뒤로가기</v-btn>
@@ -119,6 +119,8 @@ export default {
     return {
       paction: this.action,
       pSuggestionNo: this.suggestionNo,
+      sessionLoginId: "",
+      userLoginId: "",
       name: "",
       suggestionCreatedAt: "",
       suggestionTitle: "",
@@ -132,30 +134,43 @@ export default {
       //suggestionAnswered: this.selectedSuggestion.suggestion_answered === true,
     };
   },
+  computed: {
+    isMySuggestion() {
+      // 세션에서 가져온 사용자의 로그인 ID와 건의사항 작성자의 로그인 ID 비교
+      // console.log(
+      //   "세션: " + this.sessionLoginId,
+      //   "작성자: " + this.userLoginId
+      // );
+      return this.sessionLoginId === this.userLoginId;
+    },
+  },
   mounted() {
     this.selectSuggestion();
     this.selectSuggestionReply();
   },
   methods: {
     deleteSuggestion() {
-      // let vm = this;
+      //let vm = this;
 
-      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
-      params.append("pSuggestionNo", this.pSuggestionNo);
+      // 사용자가 작성한 건의사항인지 확인
+      if (this.isMySuggestion) {
+        let params = new URLSearchParams();
+        params.append("pSuggestionNo", this.pSuggestionNo);
 
-      this.axios
-        .post("/sAlert/sDeleteSuggestion.do", params)
-        .then((response) => {
-          //console.log(JSON.stringify(response));
-
-          if (response.data.result > 0) {
-            alert(response.data.resultMsg);
-            this.$emit("close-modal"); // 모달 닫기 이벤트 발생
-          }
-        })
-        .catch(function (error) {
-          alert("에러! API 요청에 오류가 있습니다. " + error);
-        });
+        this.axios
+          .post("/sAlert/sDeleteSuggestion.do", params)
+          .then((response) => {
+            if (response.data.result > 0) {
+              alert(response.data.resultMsg);
+              this.$emit("close-modal"); // 모달 닫기 이벤트 발생
+            }
+          })
+          .catch((error) => {
+            alert("에러! API 요청에 오류가 있습니다. " + error);
+          });
+      } else {
+        alert("본인이 작성한 건의사항만 삭제할 수 있습니다.");
+      }
     },
 
     goBack() {
@@ -173,6 +188,8 @@ export default {
           //console.log(JSON.stringify(response));
           console.log(response.data);
 
+          this.sessionLoginId = response.data.loginId;
+          this.userLoginId = response.data.result.loginID;
           this.name = response.data.result.name;
           this.suggestionCreatedAt = response.data.result.suggestion_created_at;
           this.suggestionTitle = response.data.result.suggestion_title;

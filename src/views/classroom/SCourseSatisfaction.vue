@@ -41,6 +41,8 @@ export default {
       surveyQuestions: [],
       courseName: "",
       surveyName: "",
+      surveyNo: 0,
+      //sCourseNo: 0,
     };
   },
   computed: {
@@ -62,10 +64,13 @@ export default {
         .post("/classroom/sStudentSatisfaction.do", params)
         .then((response) => {
           //console.log(JSON.stringify(response));
+          //vm.sCourseNo = response.data.sSatisfactionQuestion[0].course_no;
           vm.courseName = response.data.sSatisfactionQuestion[0].course_name;
           vm.surveyName = response.data.sSatisfactionQuestion[0].survey_name;
+          vm.surveyNo = response.data.sSatisfactionQuestion[0].survey_no;
 
           let questions = response.data.sSatisfactionQuestion;
+          console.log(questions);
           let answers = response.data.sSatisfactionAnswer;
           console.log(answers);
 
@@ -87,7 +92,41 @@ export default {
     },
 
     submitSurvey() {
-      alert(this.courseNo);
+      let params = [];
+      this.surveyQuestions.forEach((question) => {
+        let param = {
+          courseNo: this.courseNo,
+          surveyNo: this.surveyNo,
+          surveyQuestionNo: question.survey_question_no,
+          questionChoiced: question.question_choiced,
+          choiceNo:
+            question.survey_question_type === "written"
+              ? null
+              : question.selectedAnswer,
+          writtenAnswer:
+            question.survey_question_type === "written"
+              ? question.selectedAnswer
+              : null,
+        };
+        params.push(param);
+      });
+
+      this.axios
+        .post("/classroom/sInsertSurvey.do", params, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          if (response.data.result >= 0) {
+            alert("설문이 저장되었습니다.");
+          } else {
+            alert("설문 저장 실패: " + response.data.resultMsg);
+          }
+        })
+        .catch((error) => {
+          alert("에러! 설문 저장에 실패했습니다. " + error);
+        });
     },
   },
 };
