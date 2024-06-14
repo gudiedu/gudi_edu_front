@@ -4,10 +4,14 @@ export default createStore({
   state: {
     counter: 1,
     loginInfo:null,
+    studentInfo: null,
   },
   getters: {
     getCounter(state) {
       return state.counter
+    },
+    getStudentInfo(state) {
+      return state.studentInfo
     },
   },
   mutations: {
@@ -20,8 +24,14 @@ export default createStore({
     setLogout(state) {
       state.loginInfo=null;
     },
+    setStudentInfo(state, payload) {
+      state.studentInfo = payload;
+    },
   },
   actions: {
+    updateStudentInfo({ commit }, data){
+      commit('setStudentInfo', data);
+    },
   },
   modules: {
   }

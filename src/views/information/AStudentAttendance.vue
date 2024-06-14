@@ -15,31 +15,9 @@
       <v-divider></v-divider>
 
       <v-card class="dashboard-card">
-        <div class="titletext">학생 정보</div>
-        <v-table class="dashboard-table">
-          <thead>
-            <tr>
-              <th>이름</th>
-              <th>학생명</th>
-              <th>휴대전화</th>
-              <th>성별</th>
-              <th>생년월일</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>홍길동</td>
-              <td>010-1234-5678</td>
-              <td>남</td>
-              <td>1990.01.01</td>
-            </tr>
-          </tbody>
-        </v-table>
-      </v-card>
-
-      <v-card class="dashboard-card">
-        <div class="titletext">강의 목록</div>
+        <div class="titletext">
+          {{ getStudentInfo.name }}({{ getStudentInfo.loginID }})님의 강의 목록
+        </div>
         <v-table class="dashboard-table">
           <thead>
             <tr>
@@ -52,13 +30,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td @click="showAttendance('Java 기초')">Java 기초</td>
-              <td>강사</td>
-              <td>101호</td>
-              <td>2024.01.02</td>
-              <td>2024.05.01</td>
-              <td>20</td>
+            <tr v-for="item in lectureList" :key="item.course_id">
+              <td @click="showAttendance(item)">{{ item.course_name }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.course_loc }}</td>
+              <td>{{ item.course_start_date }}</td>
+              <td>{{ item.course_end_date }}</td>
+              <td>{{ item.course_quota }}</td>
             </tr>
           </tbody>
         </v-table>
@@ -66,7 +44,10 @@
 
       <v-card v-if="attendance" class="dashboard-card">
         <div class="titletext">출석 현황</div>
-        <Attendance />
+        <Attendance
+          :selectedLecture="selectedLecture"
+          :attendanceList="attendanceList"
+        />
       </v-card>
     </v-card>
 
@@ -85,15 +66,53 @@ export default {
   data() {
     return {
       titleText: "학생출결",
-      selectedLecture: null,
+      selectedLecture: "",
       attendance: false,
+      lectureList: [],
     };
+  },
+  computed: {
+    getStudentInfo() {
+      return this.$store.getters.getStudentInfo;
+    },
+  },
+  mounted() {
+    this.searchLecture();
   },
   methods: {
     lectureRegistration() {},
-    showAttendance(lectureName) {
-      this.selectedLecture = lectureName;
-      this.attendance = true;
+    searchLecture() {
+      let vm = this;
+
+      let params = new URLSearchParams();
+      params.append("studentId", this.getStudentInfo.loginID);
+
+      this.axios
+        .post("/aInformation/student", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+          this.lectureList = response.data;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+    showAttendance(lecture) {
+      this.selectedLecture = lecture.course_name;
+      let params = new URLSearchParams();
+      params.append("studentId", this.getStudentInfo.loginID);
+      params.append("courseNo", lecture.course_no);
+
+      this.axios
+        .post("/aInformation/student/attendance", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+          this.attendanceList = response.data;
+          this.attendance = true;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
   },
 };

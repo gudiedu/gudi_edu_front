@@ -223,7 +223,6 @@ export default {
       this.typeList = this.noticeList.filter((e) => e.user_type === "t");
       this.totalCnt = this.typeList.length;
     },
-    searchMethod() {},
     noticeModify() {
       this.selectedNotice = notice;
       this.action = "U";

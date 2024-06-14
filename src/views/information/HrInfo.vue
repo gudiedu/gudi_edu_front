@@ -110,7 +110,7 @@
             <td>{{student.email}}</td>
             <td>{{student.hp}}</td>
             <td><button id="edit" @click="EditMemberModal(student.loginID, student.hp, student.name, student.email)" >편집</button></td>
-            <td><a href=""></a></td>
+            <td @click="navigateToStudentAttendance(student)">이동</td>
           </tr>
         </tbody>
         <!-- 검색 -->
@@ -259,6 +259,10 @@ export default {
     },
     closeAddModal() {
       this.RegMemberModall = false;
+    },
+    navigateToStudentAttendance(student){
+      this.$store.dispatch('updateStudentInfo', student);
+      this.$router.push({ name : 'aStudentAttendance' });
     },
   },
 };
