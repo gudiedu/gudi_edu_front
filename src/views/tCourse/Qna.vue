@@ -47,7 +47,7 @@
                   {{ item.question_created_at }}
                 </td>
                 <td>
-                  {{ item.reply_no > 0 ? "Y" : "N" }}
+                  {{ item.reply_no > 0 ? "완료" : "대기중" }}
                 </td>
               </tr>
             </template>

@@ -47,7 +47,7 @@
         </template>
         <template v-else>
           <tr>
-            <td colspan="4">답변이 없습니다.</td>
+            <td style="text-align: center" colspan="4">답변이 없습니다.</td>
           </tr>
         </template>
       </tbody>

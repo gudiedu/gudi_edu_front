@@ -75,11 +75,9 @@
       <button class="insert-button" @click="openAddModal">등록</button>
     </div>
 
-    <v-dialog v-model="addModal" max-width="600px">
+    <v-dialog v-model="addModal" max-width="800px" max-height="1000px">
       <v-card>
-        <v-card-text>
-          <NoticeModal :action="action" />
-        </v-card-text>
+        <v-card-text> <NoticeModal @close-modal="closeAddModal" :action="action" loginID="loginID" /> </v-card-text>
       </v-card>
     </v-dialog>
   </v-container>
@@ -106,12 +104,12 @@ export default {
       totalCnt: 0,
       pageSize: 10,
       currentPage: 1,
-      notice_title: "",
-      loginID: "",
-      notice_content: "",
-      notice_created_at: "",
-      notice_no: 0,
-      typeList: [],
+      // notice_title: "",
+      // loginID: "",
+      // notice_content: "",
+      // notice_created_at: "",
+      noticeNo: 0,
+      loginID: sessionStorage.getItem("loginId"),
     };
   },
 
@@ -145,7 +143,7 @@ export default {
           console.log(JSON.stringify(response));
 
           vm.noticeList = response.data.listdata || [];
-          vm.totalCnt = response.data.totalcnt || 0;
+          vm.totalCnt = response.data.totalcnt || vm.noticeList.length;
 
           // 전체 데이터의 인덱스를 기반으로 글 번호를 매김 (오래된 순으로 번호 매기기)
           let totalData = vm.noticeList.map((item, index) => {
@@ -204,6 +202,7 @@ export default {
 
     closeAddModal() {
       this.addModal = false;
+      this.searchList();
     },
 
     page() {
