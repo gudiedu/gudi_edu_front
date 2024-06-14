@@ -22,7 +22,7 @@
         <tbody>
           <template v-for="item in sCourseList" :key="item.course_no">
             <tr>
-              <td @click="lectureModify(item.course_no)">
+              <td @click="courseDetailed(item.course_no)">
                 {{ item.course_name }}
               </td>
               <td>{{ item.teacher_name }}</td>
@@ -72,10 +72,10 @@ export default {
     this.courseList();
   },
   methods: {
-    lectureModify(courseNo) {
+    courseDetailed(courseNo) {
       this.$router.push({
-        name: "sLectureDetail",
-        params: { name: courseNo },
+        name: "sCourseDetail",
+        params: { courseNo },
       });
     },
 

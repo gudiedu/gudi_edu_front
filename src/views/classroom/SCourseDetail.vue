@@ -15,7 +15,7 @@
       <v-divider></v-divider>
 
       <v-card class="dashboard-card">
-        <div class="titletext">강의 정보</div>
+        <div class="titletext">강의정보</div>
         <v-table class="dashboard-table">
           <thead>
             <tr>
@@ -24,10 +24,11 @@
               <th>강의실</th>
               <th>시작일</th>
               <th>종료일</th>
-              <th>수강인원</th>
+              <th>수강정원</th>
             </tr>
           </thead>
           <tbody>
+            <!-- <template v-for="" :key=""> -->
             <tr>
               <td>Java 기초</td>
               <td>강사</td>
@@ -36,6 +37,7 @@
               <td>2024.05.01</td>
               <td>20</td>
             </tr>
+          <!-- </template> -->
           </tbody>
         </v-table>
       </v-card>
@@ -64,8 +66,6 @@
               <th>주차</th>
               <th>학습목표</th>
               <th>학습내용</th>
-              <th>시험</th>
-              <th>시험점수</th>
             </tr>
           </thead>
           <tbody>
@@ -73,75 +73,86 @@
               <td>1주차</td>
               <td>java</td>
               <td>배열</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>2주차</td>
-              <td>java</td>
-              <td>문법</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>3주차</td>
-              <td>java</td>
-              <td>문법</td>
-              <td @click="takeExam">test</td>
-              <td>100점</td>
-            </tr>
-          </tbody>
-        </v-table>
-      </v-card>
-
-      <v-card class="dashboard-card">
-        <div class="titletext">진도 현황</div>
-        <v-table class="dashboard-table">
-          <thead>
-            <tr>
-              <th>총 수업 일</th>
-              <th>현 수업 일</th>
-              <th>진행률</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>100일</td>
-              <td>2일</td>
-              <td>2%</td>
             </tr>
           </tbody>
         </v-table>
       </v-card>
     </v-card>
   </v-container>
-
-  <v-dialog v-model="examModal" max-width="600px">
-    <v-card>
-      <v-card-text>
-        <ExamModal :action="action" />
-      </v-card-text>
-    </v-card>
-  </v-dialog>
 </template>
 
 <script>
-import ExamModal from "./ExamModal.vue";
 export default {
-  components: { ExamModal },
   data() {
     return {
       titleText: "강의상세",
-      examModal: false,
+      sCourseInfo: [],
+      sCourseDetail: [],
+      currentLoginID:"",
     };
   },
-  methods: {
-    takeExam() {
-      this.examModal = true;
+  mounted() {
+    this.sCourseInfoList();
+    this.sCourseDetailList();
+  },
+  computed: {
+    // route에서 강의번호 가져오기
+    courseNo() {
+      return this.$route.params.courseNo;
     },
+  },
+  methods: {
+    // 강의번호에 대한 강의 정보 조회 - mounted 되야함
+    sCourseInfoList() {
+
+      let courseParams = new URLSearchParams();
+      courseParams.append("courseNo", this.courseNo);
+
+      console.log("courseNo나오니안나오니 : "+ this.courseNo);
+
+      // axios 요청 설정
+      this.axios
+        .post("/classroom/sCourseInfo.do", courseParams)
+        .then((response) => {
+          console.log("JSON.stringify(response) : " + JSON.stringify(response));
+          console.log("여기다 여기야: " + response.data.infoResult.course_no);
+
+          this.courseName = response.data.infoResult.course_name;
+          this.teacherName = response.data.infoResult.name;
+          this.courseBegins = response.data.infoResult.course_start_date;
+          this.courseEnds = response.data.infoResult.course_end_date;
+          this.courseQuota = response.data.infoResult.course_quota;
+          this.courseNo = response.data.infoResult.course_no;
+
+
+        })
+        .catch(function (error) {
+          alert("ERROR" + error);
+        });
+    },
+
+    sCourseDetailList(){
+
+      let detailParams = new URLSearchParams();
+      detailParams.append("courseNo", this.courseNo);
+
+      console.log("detail에서도 courseNo가 나오니: " + this.courseNo);
+
+      this.axios
+        .post("/classroom/sCourseDetail.do", detailParams)
+        .then((response) => {
+          console.log("DETAIL_JSON :  "+ JSON.stringify(response));
+          
+        })
+        .catch(function (error){
+          alert("ERROR" + error);
+        });
+    },
+
   },
 };
 </script>
+
 
 <style scoped>
 .textarea {

@@ -141,7 +141,6 @@ export default {
       params.append("SelectedQuestionNo", this.SelectedQuestionNo);
       //params.append("replyNo", this.reply_no);
 
-
       this.axios
       .post("/sAlert/sQnaSelected.do", params)
       .then((response) => {
