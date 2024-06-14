@@ -77,10 +77,10 @@
     <div class="button-group">
       <button class="insert-button" @click="openAddModal">등록</button>
     </div>
-    <v-dialog v-model="addModal" max-width="600px">
+    <v-dialog v-model="addModal" max-width="600px" persistent @click:outside="closeAddModal">
       <v-card>
         <v-card-text>
-          <ALectureLCodeModal :action="action" :detail_code="detail_code" @close="closeAddModal" />
+          <ALectureLCodeModal :action="action" :detail_code="detail_code" :detail_name="detail_name" @close="closeAddModal" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -100,6 +100,7 @@ export default {
       selectedNotice: null,
       stitle: "",
       detail_code: "",
+      detail_name: "", // detail_name 추가
       courseList: [] // 강의 코드 목록을 저장할 배열
     };
   },
@@ -128,15 +129,35 @@ export default {
     findTeacher() {
       this.activeFilter = "teacher";
     },
-    searchMethod() {},
+    searchMethod() {
+      console.log(this.stitle);
+      axios.get('/acourse/codeSearch.do', {
+          params: {
+            word: this.stitle
+          }
+        })
+    .then(response => {
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+      this.courseList = response.data.listdate; // 데이터 바인딩
+      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching course list:', error);
+    });
+
+
+    },
     
     lectureCodeModify(lecture) {
       this.selectedNotice = lecture;
+      this.detail_code = lecture.detail_code;
+      this.detail_name = lecture.detail_name;
       this.action = "U";
       this.addModal = true;
     },
+    
     openAddModal() {
-      axios.get('/acourse/codeSelect')
+      axios.get('/acourse/nextCodeSelect.do')
         .then(response => {
           this.detail_code = response.data; // 새로운 강의 코드 저장
           this.action = "";
@@ -147,8 +168,15 @@ export default {
         });
     },
     closeAddModal() {
+      this.detail_name = '';
+      console.log("모달닫힘");
       this.addModal = false;
-      this.getCourseList(); // 모달이 닫힐 때 강의 목록을 갱신합니다.
+      if(this.stitle == ''){
+        this.getCourseList(); // 모달이 닫힐 때 강의 목록을 갱신합니다.
+      }else{
+        this.searchMethod();
+      }
+
     },
   },
 };
