@@ -39,9 +39,9 @@ const routes = [
         component: () => import("@/views/classroom/SLectureDetail.vue"),
       },
       {
-        path: "/classroom/course",
-        name: "sLectureSatisfaction",
-        component: () => import("@/views/classroom/SSatisfactionModal.vue"),
+        path: "/classroom/course/:courseNo",
+        name: "sCourseSatisfaction",
+        component: () => import("@/views/classroom/SCourseSatisfaction.vue"),
       },
       {
         path: "/classroom/enroll",

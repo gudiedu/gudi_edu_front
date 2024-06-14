@@ -20,16 +20,25 @@
           </tr>
         </thead>
         <tbody>
-          <template v-for="item in sCourseList" :key="item.course_no">
+          <template v-if="totalCnt > 0">
+            <template v-for="item in sCourseList" :key="item.course_no">
+              <tr>
+                <td @click="lectureModify(item.course_no)">
+                  {{ item.course_name }}
+                </td>
+                <td>{{ item.teacher_name }}</td>
+                <td>{{ item.course_start_date }}</td>
+                <td>{{ item.course_end_date }}</td>
+                <td @click="classSatisfaction(item.course_no)">수업만족도</td>
+                <td @click="attendance(item.course_no)">출결</td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
             <tr>
-              <td @click="lectureModify(item.course_no)">
-                {{ item.course_name }}
+              <td colspan="10" style="text-align: center">
+                조회된 데이터가 없습니다.
               </td>
-              <td>{{ item.teacher_name }}</td>
-              <td>{{ item.course_start_date }}</td>
-              <td>{{ item.course_end_date }}</td>
-              <td @click="classSatisfaction(item.course_no)">수업만족도</td>
-              <td @click="attendance(item.course_no)">출결</td>
             </tr>
           </template>
         </tbody>
@@ -37,6 +46,20 @@
     </v-card>
 
     <!-- 페이지네이션 추가-->
+    <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
+    </div>
 
     <!-- <v-dialog v-model="satisfactionModal" max-width="600px">
       <v-card>
@@ -58,14 +81,18 @@
 
 <script>
 import AttendanceModal from "./SAttendanceModal.vue";
+import Paginate from "vuejs-paginate-next";
 export default {
-  components: { AttendanceModal },
+  components: { AttendanceModal, Paginate },
   data() {
     return {
       titleText: "강의관리",
       courseNo: 0,
       sCourseList: [],
       attendanceModal: false,
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
     };
   },
   mounted() {
@@ -81,7 +108,7 @@ export default {
 
     classSatisfaction(courseNo) {
       this.$router.push({
-        name: "sLectureSatisfaction",
+        name: "sCourseSatisfaction",
         params: { courseNo },
       });
     },
@@ -96,17 +123,35 @@ export default {
 
       let params = new URLSearchParams(); //파라미터를 넘길 때 사용
       params.append("pCourseNo", this.pCourseNo);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
 
       this.axios
-        .post("/classroom/sStudentAttendance.do", params)
+        .post("/classroom/sStudentCourseList.do", params)
         .then((response) => {
           //console.log(JSON.stringify(response));
           vm.sCourseList = response.data.sStudentCourseInfo;
-          console.log(vm.sCourseList);
+          vm.totalCnt = response.data.totalCnt;
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
+    },
+
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var xx = total % page;
+      var result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+      // var result = Math.ceil(this.totalCnt / this.pageSize);
+      // return result;
     },
   },
 };
