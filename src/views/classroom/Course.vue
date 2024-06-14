@@ -15,45 +15,36 @@
             <th>강사명</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th>출결현황</th>
-            <th>만족도조사</th>
+            <th></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          <!--v-for로 가져오기-->
-          <tr>
-            <td @click="lectureModify('Java 기초')">Java 기초</td>
-            <td>강사</td>
-            <td>101호</td>
-            <td>2024.01.02</td>
-            <td>2024.05.01</td>
-            <td>20</td>
-            <td @click="classSatisfaction">수업만족도</td>
-            <td @click="attendance(18)">출결</td>
-          </tr>
-          <tr>
-            <td @click="lectureModify('Vue')">Vue</td>
-            <td>강사</td>
-            <td>101호</td>
-            <td>2024.01.02</td>
-            <td>2024.05.01</td>
-            <td>20</td>
-            <td @click="classSatisfaction">수업만족도</td>
-            <td @click="attendance(18)">출결</td>
-          </tr>
+          <template v-for="item in sCourseList" :key="item.course_no">
+            <tr>
+              <td @click="lectureModify(item.course_no)">
+                {{ item.course_name }}
+              </td>
+              <td>{{ item.teacher_name }}</td>
+              <td>{{ item.course_start_date }}</td>
+              <td>{{ item.course_end_date }}</td>
+              <td @click="classSatisfaction(item.course_no)">수업만족도</td>
+              <td @click="attendance(item.course_no)">출결</td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
 
     <!-- 페이지네이션 추가-->
 
-    <v-dialog v-model="satisfactionModal" max-width="600px">
+    <!-- <v-dialog v-model="satisfactionModal" max-width="600px">
       <v-card>
         <v-card-text>
           <SatisfactionModal :action="action" />
         </v-card-text>
       </v-card>
-    </v-dialog>
+    </v-dialog> -->
 
     <v-dialog v-model="attendanceModal" max-width="800px">
       <v-card>
@@ -72,32 +63,50 @@ export default {
   data() {
     return {
       titleText: "강의관리",
-      action: "",
-      selectedNotice: null,
-      activeFilter: "all",
-      stitle: "",
       courseNo: 0,
-      satisfactionModal: false,
+      sCourseList: [],
       attendanceModal: false,
     };
   },
+  mounted() {
+    this.courseList();
+  },
   methods: {
-    lectureModify(lectureName) {
+    lectureModify(courseNo) {
       this.$router.push({
         name: "sLectureDetail",
-        params: { name: lectureName },
+        params: { name: courseNo },
       });
     },
-    classSatisfaction() {
+
+    classSatisfaction(courseNo) {
       this.$router.push({
         name: "sLectureSatisfaction",
-        // params: { name: lectureName },
+        params: { courseNo },
       });
-      this.satisfactionModal = true;
     },
+
     attendance(courseNo) {
       this.courseNo = courseNo;
       this.attendanceModal = true;
+    },
+
+    courseList() {
+      let vm = this;
+
+      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      params.append("pCourseNo", this.pCourseNo);
+
+      this.axios
+        .post("/classroom/sStudentAttendance.do", params)
+        .then((response) => {
+          //console.log(JSON.stringify(response));
+          vm.sCourseList = response.data.sStudentCourseInfo;
+          console.log(vm.sCourseList);
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
   },
 };

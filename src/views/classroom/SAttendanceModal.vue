@@ -51,46 +51,6 @@
           </tbody>
         </v-table>
       </v-card>
-
-      <!-- <div class="bottom">
-        <v-card class="dashboard-card half-width">
-          <div class="titletext">특이사항</div>
-
-          <v-table class="dashboard-table">
-            <thead>
-              <tr>
-                <th>결석일자</th>
-                <th>출석상태</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2024.05.22</td>
-                <td>결석</td>
-              </tr>
-            </tbody>
-          </v-table>
-        </v-card>
-
-        <v-card class="dashboard-card half-width">
-          <div class="titletext">수당지급내역</div>
-
-          <v-table class="dashboard-table">
-            <thead>
-              <tr>
-                <th>지급일자</th>
-                <th>금액</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2024.05.24</td>
-                <td>250,000</td>
-              </tr>
-            </tbody>
-          </v-table>
-        </v-card>
-      </div> -->
     </div>
   </div>
 </template>
@@ -98,12 +58,10 @@
 <script>
 export default {
   props: {
-    action: String,
     courseNo: Number,
   },
   data() {
     return {
-      paction: this.action,
       pCourseNo: this.courseNo,
       courseName: "",
       courseStartDate: "",
@@ -132,10 +90,12 @@ export default {
         .then((response) => {
           //console.log(JSON.stringify(response));
 
-          this.courseName = response.data.sStudentCourseInfo.course_name;
+          this.courseName =
+            response.data.sStudentSelectedCourseInfo.course_name;
           this.courseStartDate =
-            response.data.sStudentCourseInfo.course_start_date;
-          this.courseEndDate = response.data.sStudentCourseInfo.course_end_date;
+            response.data.sStudentSelectedCourseInfo.course_start_date;
+          this.courseEndDate =
+            response.data.sStudentSelectedCourseInfo.course_end_date;
 
           // dayoffInfo 배열의 dayoff_date 속성을 Date 객체로 변환하여 저장
           vm.dayoffInfo = response.data.sDayoffInfo.map(
@@ -163,8 +123,6 @@ export default {
       const startDate = new Date(this.courseStartDate);
       const endDate = new Date(this.courseEndDate);
       const dayoffInfo = this.dayoffInfo;
-
-      console.log("잘 가져오고 있니?" + dayoffInfo);
 
       let totalDays = 0;
 
