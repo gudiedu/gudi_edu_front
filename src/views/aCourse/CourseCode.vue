@@ -73,6 +73,24 @@
     </v-card>
 
     <!-- 페이지네이션 추가-->
+    <div id="Pagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage" 
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="handlePageClick"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'">
+      </paginate>
+     </div>
+
+
+
+
 
     <div class="button-group">
       <button class="insert-button" @click="openAddModal">등록</button>
@@ -90,8 +108,13 @@
 <script>
 import axios from 'axios';
 import ALectureLCodeModal from "./ACourseCodeModal.vue";
+import Paginate from "vuejs-paginate-next";
+
 export default {
-  components: { ALectureLCodeModal },
+  components: { 
+    ALectureLCodeModal,
+    Paginate,
+   },
   data() {
     return {
       titleText: "강의코드관리",
@@ -101,7 +124,10 @@ export default {
       stitle: "",
       detail_code: "",
       detail_name: "", // detail_name 추가
-      courseList: [] // 강의 코드 목록을 저장할 배열
+      courseList: [] ,// 강의 코드 목록을 저장할 배열
+      currentPage: 1,
+      totalCnt: 0,
+      pageSize: 10,
     };
   },
   mounted() {
@@ -109,17 +135,39 @@ export default {
     this.getCourseList();
   },
   methods: {
+    handlePageClick(pageNumber) {
+    this.currentPage = pageNumber;
+    this.getCourseList();
+  },
     getCourseList() {
-  axios.get('/acourse/aCourseList.do')
+      let vm = this;
+      let courseParams = new URLSearchParams();
+      courseParams.append("currentPage", this.currentPage);
+      courseParams.append("pageSize", this.pageSize);
+      courseParams.append("detail_name", this.detail_name);
+      courseParams.append("detail_code", this.detail_code);
+
+    //   let courseParams = {
+    //   currentPage: this.currentPage,
+    //   pageSize: this.pageSize,
+    //   detail_name: this.detail_name,
+    //   detail_code: this.detail_code
+    // }; 위와 같은 코드임
+
+  axios.post('/acourse/aCourseList.do', courseParams)
     .then(response => {
       console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
-      this.courseList = response.data.listdate; // 데이터 바인딩
+      vm.courseList = response.data.listdate; // 데이터 바인딩
+      vm.totalCnt = response.data.totalCnt;
       console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+      console.log("JSON.stringify(response) : " + JSON.stringify(response));
     })
     .catch(error => {
       console.error('Error fetching course list:', error);
     });
 },
+
+
     findAll() {
       this.activeFilter = "all";
     },
@@ -178,6 +226,20 @@ export default {
       }
 
     },
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var remaining = total % page;
+      var result = parseInt(total / page);
+
+      if (remaining == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+    },
+
   },
 };
 </script>

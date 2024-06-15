@@ -57,7 +57,7 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>글번호</th>
+            <th>번호</th>
             <th>강의명</th>
             <th>강사명</th>
             <th>수강인원</th>
@@ -69,32 +69,25 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Vue</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행중</td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>Java</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행예정</td>
+          <tr v-for="(item, index) in courseList" :key="item.course_no">
+            <td>{{ index + 1 }}</td>
+            <td>{{ item.course_name }}</td>
+            <td>{{ item.user_name }}</td>
+            <td>{{ item.course_quota }}명</td>
+            <td>{{ item.course_period }}일</td>
+            <td>{{ item.course_start_date }}</td>
+            <td>{{ item.course_end_date }}</td>
+            <td>{{ item.course_loc }}</td>
+            <td>
+              <span v-if="new Date() > new Date(item.course_end_date)">진행완료</span>
+              <span v-else-if="new Date() < new Date(item.course_start_date)">진행예정</span>
+              <span v-else>진행중</span>
+            </td>
           </tr>
         </tbody>
       </v-table>
     </v-card>
-
+    
     <!-- 페이지네이션 추가-->
 
     <!-- <div class="button-group">
@@ -111,6 +104,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   components: {},
   data() {
@@ -121,9 +115,25 @@ export default {
       selectedNotice: null,
       activeFilter: "all",
       stitle: "",
+      courseList: [], // 강의 코드 목록을 저장할 배열
     };
   },
+  mounted() {
+    // 페이지 로드될 때 강의 코드 목록을 가져오는 메서드 호출
+    this.getCourseList();
+  },
   methods: {
+    getCourseList() {
+  axios.get('/course/CourseList.do')
+    .then(response => {
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+      this.courseList = response.data.listdate; // 데이터 바인딩
+      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching course list:', error);
+    });
+},
     findAll() {
       this.activeFilter = "all";
     },
