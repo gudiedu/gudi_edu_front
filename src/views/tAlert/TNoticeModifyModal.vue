@@ -3,31 +3,29 @@
     <h2 class="title">공지사항</h2>
 
     <table class="info-table">
-      <tr>
+      <!-- <tr>
         <td class="label">번호</td>
         <td class="content">
           <input readonly type="text" pNoticeNo="pNoticeNo" v-model="pNoticeNo" class="form-input" />
         </td>
+      </tr> -->
+
+      <tr>
+        <td class="label">제목</td>
+        <td class="content">{{ noticeTitle }}</td>
       </tr>
 
       <tr>
         <td class="label">작성자</td>
         <td class="content">
-          <input readonly type="text" userLoginId=" userLoginId" v-model="userLoginId" class="form-input" />
+          {{ userLoginId }}
         </td>
       </tr>
 
       <tr>
         <td class="label">등록일</td>
         <td class="content">
-          <input readonly type="text" noticeCreatedAt="noticeCreatedAt" v-model="noticeCreatedAt" class="form-input" />
-        </td>
-      </tr>
-
-      <tr>
-        <td class="label">제목</td>
-        <td class="content">
-          <input readonly type="text" noticeTitle="noticeTitle" v-model="noticeTitle" class="form-input" />
+          {{ noticeCreatedAt }}
         </td>
       </tr>
 
@@ -41,11 +39,12 @@
       <tr class="content" v-if="fileName">
         <td class="label">첨부파일</td>
         <td class="content">
-          <div id="preview" v-html="previewHtml" @click="downLoad"></div>
+          <div id="preview" @click="downLoad">{{ fileName }}</div>
         </td>
       </tr>
     </table>
     <div class="button-group">
+      <v-btn class="update-button" @click="updateNotice" v-if="isMyNotice">수정</v-btn>
       <v-btn class="delete-button" @click="deleteNotice" v-if="isMyNotice">삭제</v-btn>
       <v-btn class="cancel-button" @click="cancel" v-if="isMyNotice">취소</v-btn>
     </div>
@@ -104,27 +103,27 @@ export default {
 
           this.ext = response.data.result.file_extension;
 
-          //response.data.result.file_name //파일이름
-          //response.data.result.logical_path //논리경로
-          //response.data.result.phygical_path //물리경로
-          //response.data.result.file_size //파일크기
-          //response.data.result.file_ext //파일확장자
+          // //파일 이미지 보여주거나, 파일 이름 보여주기
+          // if (response.data.result.file_origin === "" || response.data.result.file_origin === null) {
+          //   this.previewHtml = "";
+          //   this.fileName = "";
+          // } else {
+          //   this.previewHtml = response.data.result.file_origin;
+          //   this.fileName = response.data.result.file_origin;
 
-          //파일 이미지 보여주거나, 파일 이름 보여주기
-          if (response.data.result.file_origin === "" || response.data.result.file_origin === null) {
-            this.previewHtml = "";
-            this.fileName = "";
-          } else {
-            this.previewHtml = response.data.result.file_origin;
+          //   let ext = response.data.result.file_extension;
+
+          //   if (["jpg", "jpeg", "png", "gif"].includes(ext.toLowerCase())) {
+          //     this.previewHtml = "<img src='" + response.data.result.file_local_path + "' id 'imgFile' style='width:100px; height 100px;' />";
+          //   } else {
+          //     this.previewHtml = response.data.result.file_origin;
+          //   }
+          // }
+
+          if (response.data.result.file_origin) {
             this.fileName = response.data.result.file_origin;
-
-            let ext = response.data.result.file_extension;
-
-            if (["jpg", "jpeg", "png", "gif"].includes(ext.toLowerCase())) {
-              this.previewHtml = "<img src='" + response.data.result.file_local_path + "' id 'imgFile' style='width:100px; height 100px;' />";
-            } else {
-              this.previewHtml = response.data.result.file_origin;
-            }
+          } else {
+            this.fileName = "";
           }
         })
         .catch(function (error) {
@@ -286,13 +285,11 @@ export default {
   transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-.update-button,
-.cancel-button {
+.update-button {
   background-color: #407bff;
 }
 
-.update-button:hover,
-.cancel-button:hover {
+.update-button:hover {
   background-color: #5a9bff;
   box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
 }
@@ -305,5 +302,23 @@ export default {
 .delete-button:hover {
   background-color: #e57373;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
+
+.cancel-button {
+  background-color: #686767;
+  margin: 0;
+}
+
+.cancel-button:hover {
+  background-color: #c2c2c2;
+  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
+
+#preview {
+  cursor: pointer;
+  color: #407bff;
+  text-decoration: underline;
+  display: inline-block;
+  margin-top: 10px;
 }
 </style>
