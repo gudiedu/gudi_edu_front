@@ -7,13 +7,13 @@
         <tr>
           <td class="label">제목</td>
           <td class="content">
-            <input type="text" name="notice_title" v-model="notice_title" class="form-input" />
+            <input type="text" name="noticeTitle" v-model="noticeTitle" class="form-input" />
           </td>
         </tr>
         <tr class="content">
           <td class="label">내용</td>
           <td class="content">
-            <textarea name="notice_content" v-model="notice_content" class="form-textarea"></textarea>
+            <textarea name="noticeContent" v-model="noticeContent" class="form-textarea"></textarea>
           </td>
         </tr>
         <tr>
@@ -24,13 +24,7 @@
         </tr>
       </table>
       <div class="button-group">
-        <template v-if="paction === 'U'">
-          <v-btn class="update-button" @click="updateNotice">수정</v-btn>
-          <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
-        </template>
-        <template v-else>
-          <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
-        </template>
+        <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
       </div>
     </form>
   </div>
@@ -40,27 +34,27 @@
 export default {
   props: {
     action: String,
-    loginID: String,
+    //loginID: String,
   },
   data() {
     return {
       paction: this.action,
-      notice_title: "",
-      notice_content: "",
+      noticeTitle: "",
+      noticeContent: "",
       selectedFile: null,
     };
   },
 
   methods: {
     insertNotice() {
-      console.log("Notice Title: ", this.notice_title);
-      console.log("Notice Content: ", this.notice_content);
+      console.log("Notice Title: ", this.noticeTitle);
+      console.log("Notice Content: ", this.noticeContent);
 
       let formTag = document.getElementById("file-form");
       let dataWithFile = new FormData(formTag);
-      dataWithFile.append("notice_title", this.notice_title);
-      dataWithFile.append("notice_content", this.notice_content);
-      dataWithFile.append("loginID", this.loginID);
+      dataWithFile.append("noticeTitle", this.noticeTitle);
+      dataWithFile.append("noticeContent", this.noticeContent);
+      // dataWithFile.append("loginID", this.loginID);
 
       if (this.selectedFile) {
         dataWithFile.append("file", this.selectedFile);
@@ -176,8 +170,6 @@ export default {
   gap: 8px;
 }
 
-.update-button,
-.delete-button,
 .insert-button {
   /* padding: 10px 16px; */
   color: #ffffff;
@@ -188,24 +180,12 @@ export default {
   transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-.update-button,
 .insert-button {
   background-color: #407bff;
 }
 
-.update-button:hover,
 .insert-button:hover {
   background-color: #5a9bff;
   box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
-}
-
-.delete-button {
-  background-color: #d32f2f;
-  margin: 0;
-}
-
-.delete-button:hover {
-  background-color: #e57373;
-  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 </style>

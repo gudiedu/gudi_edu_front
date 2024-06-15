@@ -88,9 +88,7 @@
             :reply_no="reply_no"
             :question_no="question_no"
             :question_title="question_title"
-            :loginID="loginID"
             :name="name"
-            :loginNM="loginNM"
           />
         </v-card-text>
       </v-card>
@@ -127,8 +125,6 @@ export default {
       name: "",
       reply_no: "",
       reply_content: "",
-      loginID: sessionStorage.getItem("loginId"),
-      loginNM: JSON.parse(sessionStorage.getItem("loginInfo")).userNm,
     };
   },
 

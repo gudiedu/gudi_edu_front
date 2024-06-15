@@ -77,7 +77,17 @@
 
     <v-dialog v-model="addModal" max-width="800px" max-height="1000px">
       <v-card>
-        <v-card-text> <NoticeModal @close-modal="closeAddModal" :action="action" loginID="loginID" /> </v-card-text>
+        <v-card-text>
+          <NoticeModal @close-modal="closeAddModal" :action="action" />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="modifyModal" max-width="800px" max-height="1000px">
+      <v-card>
+        <v-card-text>
+          <NoticeModifyModal @close-modal="closeModifyModal" :action="action" :noticeNo="noticeNo" />
+        </v-card-text>
       </v-card>
     </v-dialog>
   </v-container>
@@ -85,17 +95,20 @@
 
 <script>
 import NoticeModal from "./TNoticeModal.vue";
+import NoticeModifyModal from "./TNoticeModifyModal.vue";
 import Paginate from "vuejs-paginate-next";
 
 export default {
   components: {
     NoticeModal,
+    NoticeModifyModal,
     Paginate,
   },
   data() {
     return {
       titleText: "공지사항",
       addModal: false,
+      modifyModal: false,
       action: "",
       selectedNotice: null,
       activeFilter: "all",
@@ -104,12 +117,7 @@ export default {
       totalCnt: 0,
       pageSize: 10,
       currentPage: 1,
-      // notice_title: "",
-      // loginID: "",
-      // notice_content: "",
-      // notice_created_at: "",
       noticeNo: 0,
-      loginID: sessionStorage.getItem("loginId"),
     };
   },
 
@@ -189,19 +197,21 @@ export default {
       this.searchList();
     },
 
-    noticeModify(notice) {
-      this.selectedNotice = notice;
-      this.action = "U";
-      this.addModal = true;
+    noticeModify(item) {
+      this.noticeNo = item.notice_no;
+      this.modifyModal = true;
     },
 
     openAddModal() {
-      this.action = "";
       this.addModal = true;
     },
 
     closeAddModal() {
       this.addModal = false;
+      this.searchList();
+    },
+    closeModifyModal() {
+      this.modifyModal = false;
       this.searchList();
     },
 

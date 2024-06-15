@@ -84,8 +84,6 @@ export default {
     question_created_at: String,
     name: String,
     question_no: Number,
-    loginID: String,
-    loginNM: String,
   },
   data() {
     return {
@@ -119,8 +117,7 @@ export default {
       this.axios
         .post("/tCourse/insertquestionreply.do", {
           question_no: this.question_no,
-          loginID: this.loginID,
-          name: this.loginNM,
+
           reply_content: this.reply_content,
           reply_created_at: this.reply_created_at,
           course_no: this.course_no,
