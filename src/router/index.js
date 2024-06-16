@@ -55,6 +55,12 @@ const routes = [
         name: "aSurveyManagement",
         component: () => import("@/views/information/ASurveyManagement.vue"),
       },
+      {
+        path: "/information/surveyRegister/:survey_no",
+        name: "aSurveyManagementAdd",
+        component: () => import("@/views/information/ASurveyManagementAdd.vue"),
+        props: true, // 이 부분이 파라미터를 컴포넌트의 props로 전달하도록 함
+      },
       
       
     ],

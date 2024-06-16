@@ -143,7 +143,25 @@ export default {
     findTeacher() {
       this.activeFilter = "teacher";
     },
-    searchMethod() {},
+    searchMethod() {
+      console.log(this.stitle);
+      axios.get('/course/courseSearch.do', {
+          params: {
+            word: this.stitle
+          }
+        })
+    .then(response => {
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+      this.courseList = response.data.listdate; // 데이터 바인딩
+      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching course list:', error);
+    });
+
+
+
+    },
     noticeModify(notice) {
       this.selectedNotice = notice;
       this.action = "U";

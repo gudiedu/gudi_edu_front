@@ -59,20 +59,22 @@
           <tr>
             <th>번호</th>
             <th>설문코드</th>
-            <th>설문조사명</th>
-            <th>총문항수</th>
-            <th>객관식문항수</th>
-            <th>주관식문항수</th>
+            <th>상세질문번호</th>
+            <th>필수여부</th>
+            <th>질문내용</th>
+            <th>질문선택지</th>
+            <th>질문유형</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in surveyList" :key="item.survey_no">
+          <tr v-for="(item, index) in questionList" :key="item.survey_question_no">
             <td>{{ index + 1 }}</td>
             <td>{{ item.survey_no }}</td>
-            <td  @click="surveyRegister(item.survey_no)">{{ item.survey_name }}</td>
-            <td>{{ item.total_questions }}</td>
-            <td>{{ item.choice_questions }}</td>
-            <td>{{ item.written_questions }}</td>
+            <td>{{ item.survey_question_no }}</td>
+            <td>{{ item.survey_question_essential }}</td>
+            <td>{{ item.survey_question_text }}</td>
+            <td>{{ item.question_choiced }}</td>
+            <td>{{ item.survey_question_type }}</td>
           </tr>
          
         </tbody>
@@ -83,7 +85,7 @@
     <!-- 설문지 세트 만들기 추가 -->
 
     <div class="button-group">
-      <button class="insert-button" @click="surveyRegister">등록</button>
+      <button class="insert-button" @click="openAddModal">등록</button>
     </div>
     <v-dialog v-model="addModal" max-width="800px">
       <v-card>
@@ -100,31 +102,44 @@ import axios from 'axios';
 import ASurveyManagementModal from "./ASurveyManagementModal.vue";
 export default {
   components: { ASurveyManagementModal },
+  props: ['survey_no'],
   data() {
     return {
-      titleText: "설문지관리",
+      titleText: "질문관리",
       addModal: false,
       action: "",
       activeFilter: "all",
       stitle: "",
-      surveyList: [], //설문지 리스트 목록 저장할 배열
+      questionList: [], //설문지 리스트 목록 저장할 배열
     };
   },
+  created() {
+    console.log("Received survey_no:", this.survey_no);
+    // survey_no을 이용한 추가적인 로직
+  },
+
+
+
   mounted(){
-    this.getSurveyList();
+    this.getQuestionList();
   },
 
 
   methods: {
-    getSurveyList(){
-      axios.get('/survey/SurveyList.do')
+    getQuestionList(){
+      let surveyParams = new URLSearchParams();
+      surveyParams.append("survey_no", this.survey_no);
+      console.log(this.survey_no);
+
+      axios.post('/survey/QuestionList.do', surveyParams)
       .then(response => {
-      console.log('SurveyList response:', response.data); // 전체 응답 데이터 콘솔 출력
-      this.surveyList = response.data.listdate; // 데이터 바인딩
-      console.log('SurveyList:', this.surveyList); // 바인딩된 데이터 콘솔 출력
+
+      console.log('QuestionList response:', response.data); // 전체 응답 데이터 콘솔 출력
+      this.questionList = response.data.listdate; // 데이터 바인딩
+      console.log('QuestionList:', this.questionList); // 바인딩된 데이터 콘솔 출력
     })
     .catch(error => {
-      console.error('Error fetching surveyList:', error);
+      console.error('Error fetching QuestionList:', error);
     });
 
     },
@@ -138,13 +153,6 @@ export default {
       this.activeFilter = "teacher";
     },
     searchMethod() {},
-    surveyRegister(survey_no) {
-      this.$router.push({
-        name: "aSurveyManagementAdd",
-        params: { survey_no },
-      });
-    },
-
     surveyModify() {
       this.action = "U";
       this.addModal = true;
