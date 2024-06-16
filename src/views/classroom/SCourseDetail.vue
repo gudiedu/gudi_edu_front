@@ -28,34 +28,21 @@
             </tr>
           </thead>
           <tbody>
-            <!-- <template v-for="" :key=""> -->
-            <tr>
-              <td>Java 기초</td>
-              <td>강사</td>
-              <td>101호</td>
-              <td>2024.01.02</td>
-              <td>2024.05.01</td>
-              <td>20</td>
-            </tr>
-          <!-- </template> -->
+            <template v-for="info in sCourseInfo" :key="info.course_no">
+              <tr>
+                <td>{{ info.course_name }}</td>
+                <td>{{ info.name }}</td>
+                <td>{{ info.course_loc}}</td>
+                <td>{{ info.course_start_date }}</td>
+                <td>{{ info.course_end_date }}</td>
+                <td>{{ info.course_quota }}</td>
+              </tr>
+              <tr colspan="6">
+                {{ info.course_description }}
+              </tr>
+            </template>
           </tbody>
         </v-table>
-      </v-card>
-
-      <v-card class="dashboard-card">
-        <div class="titletext">강의 소개</div>
-
-        <v-textarea
-          class="textarea"
-          label="강의소개"
-          model-value="안녕하세요 Java강의에 오신걸 환영합니다."
-          readonly
-          row-height="30"
-          rows="5"
-          variant="outlined"
-          auto-grow
-          shaped
-        ></v-textarea>
       </v-card>
 
       <v-card class="dashboard-card">
@@ -69,11 +56,13 @@
             </tr>
           </thead>
           <tbody>
+            <template v-for="detail in courseDetailResult" :key="detail.course_detail_week_no">
             <tr>
-              <td>1주차</td>
-              <td>java</td>
-              <td>배열</td>
+              <td>{{ detail.course_detail_week_no }}주차</td>
+              <td>{{ detail.course_detail_goal }}</td>
+              <td>{{ detail.course_detail_content }}</td>
             </tr>
+          </template>
           </tbody>
         </v-table>
       </v-card>
@@ -89,6 +78,8 @@ export default {
       sCourseInfo: [],
       sCourseDetail: [],
       currentLoginID:"",
+      infoResult:[],
+      courseDetailResult:[],
     };
   },
   mounted() {
@@ -101,6 +92,7 @@ export default {
       return this.$route.params.courseNo;
     },
   },
+
   methods: {
     // 강의번호에 대한 강의 정보 조회 - mounted 되야함
     sCourseInfoList() {
@@ -117,14 +109,29 @@ export default {
           console.log("JSON.stringify(response) : " + JSON.stringify(response));
           console.log("여기다 여기야: " + response.data.infoResult.course_no);
 
+          this.sCourseInfo = response.data.infoResult;
+
+          response.data.infoResult.forEach(each => {
+            this.courseName = each.course_name;
+            this.teacherName = each.name;
+            this.courseBegins = each.course_start_date;
+            this.courseEnds = each.course_end_date;
+            this.courseQuota = each.course_quota;
+            this.courseNo = each.course_no;
+            this.courseLoc = each.course_loc;
+            this.courseDescription = each.course_description;
+          });
+
           this.courseName = response.data.infoResult.course_name;
           this.teacherName = response.data.infoResult.name;
           this.courseBegins = response.data.infoResult.course_start_date;
           this.courseEnds = response.data.infoResult.course_end_date;
           this.courseQuota = response.data.infoResult.course_quota;
           this.courseNo = response.data.infoResult.course_no;
+          this.courseLoc = response.data.infoResult.course_loc;
 
-
+          console.log("정체가무엇이냐: " + typeof response.data.infoResult);
+          console.log("상세 타입이 무엇이냐: ", response.data.infoResult);
         })
         .catch(function (error) {
           alert("ERROR" + error);
@@ -142,6 +149,17 @@ export default {
         .post("/classroom/sCourseDetail.do", detailParams)
         .then((response) => {
           console.log("DETAIL_JSON :  "+ JSON.stringify(response));
+
+          this.courseDetailResult = response.data.detailResult;
+
+          response.data.detailResult.forEach(each => {
+            this.courseWeekNo = each.course_detail_week_no;
+            this.courseDetailContent = each.course_detail_content;
+            this.courseDetailGoal = each.course_detail_goal;
+          });
+
+          console.log("courseWeekNo: ", this.courseWeekNo);
+
           
         })
         .catch(function (error){
@@ -267,4 +285,5 @@ export default {
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
 }
+
 </style>

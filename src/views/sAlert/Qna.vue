@@ -168,8 +168,6 @@ export default {
       qnaParams.append("question_no", this.question_no);
       qnaParams.append("question_content", this.question_content);
       qnaParams.append("question_created_at", this.question_created_at);
-      //qnaParams.append("reply_no", this.reply_no);
-      //qnaParams.append("reply_content", this.reply_content);
       qnaParams.append("name", this.name);
       qnaParams.append("currentPage", this.currentPage);
       qnaParams.append("pageSize", this.pageSize);

@@ -15,8 +15,8 @@
             <th>강사명</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th></th>
-            <th></th>
+            <th>수업만족도</th>
+            <th>출결</th>
           </tr>
         </thead>
         <tbody>
@@ -25,9 +25,9 @@
               <td @click="courseDetailed(item.course_no)">
                 {{ item.course_name }}
               </td>
-              <td>{{ item.teacher_name }}</td>
-              <td>{{ item.course_start_date }}</td>
-              <td>{{ item.course_end_date }}</td>
+              <td @click="courseDetailed(item.course_no)">{{ item.teacher_name }}</td>
+              <td @click="courseDetailed(item.course_no)">{{ item.course_start_date }}</td>
+              <td @click="courseDetailed(item.course_no)">{{ item.course_end_date }}</td>
               <td @click="classSatisfaction(item.course_no)">수업만족도</td>
               <td @click="attendance(item.course_no)">출결</td>
             </tr>

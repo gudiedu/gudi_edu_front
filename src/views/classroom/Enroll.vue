@@ -7,27 +7,6 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >강사</v-btn
-          >
-        </div> -->
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -46,36 +25,36 @@
 
       <v-divider></v-divider>
 
+      <form id="enrollment">
       <v-table class="dashboard-table">
         <thead>
           <tr>
+            <th>과목명</th>
             <th>강의명</th>
             <th>강사명</th>
             <th>강의실</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th>수강인원</th>
+            <th>수강정원</th>
+            <th>수강신청</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td @click="lectureModify('Java 기초')">Java 기초</td>
-            <td>강사</td>
-            <td>101호</td>
-            <td>2024.01.02</td>
-            <td>2024.05.01</td>
-            <td>20</td>
-          </tr>
-          <tr>
-            <td @click="lectureModify('Vue')">Vue</td>
-            <td>강사</td>
-            <td>101호</td>
-            <td>2024.01.02</td>
-            <td>2024.05.01</td>
-            <td>20</td>
-          </tr>
+          <template v-for="course in enrollAvailable" :key="course.course_no">
+            <tr>
+              <td @click="courseDetail(course.course_no)">{{ course.course_subject }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.course_name }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.name }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.course_loc }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.course_start_date }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.course_end_date }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.course_quota }}</td>
+              <td @click="courseEnroll()">신청하기</td>
+            </tr>
+        </template>
         </tbody>
       </v-table>
+    </form>
     </v-card>
 
     <!-- 페이지네이션 추가-->
@@ -100,48 +79,77 @@ export default {
     return {
       titleText: "수강신청",
       action: "",
-      selectedNotice: null,
-      activeFilter: "all",
-      stitle: "",
-      satisfactionModal: false,
-      attendanceModal: false,
+      sEnrollList: [],
+      enrollAvailable: [],
+      courseNo:"",
+      studentSignedID : "",
     };
   },
+  mounted(){
+    this.enrollList();
+
+  },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
-    searchMethod() {},
-    // lectureModify(lecture) {
-    //   this.selectedNotice = lecture;
-    //   this.action = "U";
-    //   this.addModal = true;
-    // },
-    // openAddModal() {
-    //   this.action = "";
-    //   this.addModal = true;
-    // },
-    // closeAddModal() {
-    //   this.addModal = false;
-    // },
-    lectureModify(lectureName) {
+    enrollList(){
+
+      let enrollListParams = new URLSearchParams();
+
+      this.axios
+        .post("/classroom/sEnrollList.do", enrollListParams)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+
+          this.enrollAvailable = response.data.enrollList;
+
+          response.data.enrollList.forEach(each => {
+            this.openedNo = each.course_no;
+            this.openedSubject = each.course_subject;
+            this.openedName = each.course_name;
+            this.openedQuota = each.course_quota;
+            this.openedBegins = each.course_start_date;
+            this.openedEnds = each.course_end_date;
+            this.teacherName = each.name;
+
+          });
+
+        })
+    },
+
+    searchMethod() {
+
+    },
+    courseDetail(courseNo) {
       this.$router.push({
-        name: "sLectureDetailRegister",
-        params: { name: lectureName },
+        name: 'sCourseDetail',
+        params: { courseNo: courseNo },
       });
     },
-    classSatisfaction() {
-      this.satisfactionModal = true;
+
+    courseEnroll(){
+
+      let enrollInfo = document.getElementById("enrollment");
+      let data = new FormData(enrollInfo);
+      data.append("openedNo", this.openedNo);
+      data.append("studentSignedID", this.studentSignedID);
+
+
+      console.log("수강신청번호: ", this.openedNo);
+
+
+      this.axios
+        .post("/classroom/sEnrollInsert.do", data)
+        .then((response) => {
+          console.log("수강신청JSON: ", JSON.stringify(response));
+
+          if(response.data.result > 0){
+            alert(response.data.resultMsg);
+            console.log("너왜안나오냐: ", response.data.resultMsg);
+          }
+        });
+
+
     },
-    attendance() {
-      this.attendanceModal = true;
-    },
+
   },
 };
 </script>
