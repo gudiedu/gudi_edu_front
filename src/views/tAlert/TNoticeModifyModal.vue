@@ -44,9 +44,9 @@
       </tr>
     </table>
     <div class="button-group">
-      <v-btn class="update-button" @click="updateNotice" v-if="isMyNotice">수정</v-btn>
+      <!-- <v-btn class="update-button" @click="updateNotice" v-if="isMyNotice">수정</v-btn> -->
       <v-btn class="delete-button" @click="deleteNotice" v-if="isMyNotice">삭제</v-btn>
-      <v-btn class="cancel-button" @click="cancel" v-if="isMyNotice">취소</v-btn>
+      <v-btn class="cancel-button" @click="cancel">닫기</v-btn>
     </div>
   </div>
 </template>
@@ -259,7 +259,7 @@ export default {
   border-radius: 4px;
   font-size: 14px;
   color: #34495e;
-  resize: vertical;
+  resize: none;
 }
 
 .content-input {

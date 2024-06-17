@@ -25,6 +25,7 @@
       </table>
       <div class="button-group">
         <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
+        <v-btn class="cancel-button" @click="cancel">닫기</v-btn>
       </div>
     </form>
   </div>
@@ -73,6 +74,11 @@ export default {
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
+    },
+
+    cancel() {
+      // 취소 로직을 여기에 추가
+      this.$emit("close-modal");
     },
 
     handleFileChange(event) {
@@ -156,7 +162,7 @@ export default {
   border-radius: 4px;
   font-size: 14px;
   color: #34495e;
-  resize: vertical;
+  resize: none;
 }
 
 .content-input {
@@ -170,7 +176,8 @@ export default {
   gap: 8px;
 }
 
-.insert-button {
+.insert-button,
+.cancel-button {
   /* padding: 10px 16px; */
   color: #ffffff;
   border: none;
@@ -187,5 +194,15 @@ export default {
 .insert-button:hover {
   background-color: #5a9bff;
   box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
+}
+
+.cancel-button {
+  background-color: #686767;
+  margin: 0;
+}
+
+.cancel-button:hover {
+  background-color: #c2c2c2;
+  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 </style>
