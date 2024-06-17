@@ -34,12 +34,55 @@
           </div>
 
           <div class="form-group">
-            <div class="form-label">비밀번호</div>
+            <div class="form-label">현재 비밀번호</div>
             <input
               type="password"
-              name="userPw"
-              v-model="userPw"
+              name="currentPassword"
+              v-model="currentPassword"
               class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">새 비밀번호</div>
+            <input
+              type="password"
+              name="newPassword"
+              v-model="newPassword"
+              class="form-input"
+              :class="{
+                'password-mismatch':
+                  newPassword !== confirmNewPassword &&
+                  confirmNewPassword !== '',
+              }"
+            />
+            <span
+              v-if="
+                newPassword !== confirmNewPassword && confirmNewPassword !== ''
+              "
+              class="mismatch-text"
+              >새 비밀번호와 확인이 일치하지 않습니다.</span
+            >
+            <span
+              v-if="
+                newPassword === confirmNewPassword && confirmNewPassword !== ''
+              "
+              class="match-text"
+              >일치합니다.</span
+            >
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">새 비밀번호 확인</div>
+            <input
+              type="password"
+              name="confirmNewPassword"
+              v-model="confirmNewPassword"
+              class="form-input"
+              :class="{
+                'password-mismatch':
+                  newPassword !== confirmNewPassword && newPassword !== '',
+              }"
             />
           </div>
 
@@ -64,7 +107,16 @@
           </div>
 
           <div class="button-group">
-            <v-btn class="update-button" @click="updateMyPage">수정</v-btn>
+            <v-btn
+              class="update-button"
+              @click="updateMyPage"
+              :disabled="
+                newPassword !== confirmNewPassword ||
+                newPassword === '' ||
+                currentPassword !== userPw
+              "
+              >수정</v-btn
+            >
           </div>
         </v-card>
       </v-form>
@@ -81,6 +133,9 @@ export default {
       userPw: "",
       userEmail: "",
       userPhone: "",
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
     };
   },
   mounted() {
@@ -88,13 +143,12 @@ export default {
   },
   methods: {
     myPageInfo() {
-      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
 
       this.axios
         .post("/sAlert/sMyPage.do", params)
         .then((response) => {
           console.log(JSON.stringify(response));
-          // console.log(response.data.listData);
 
           this.name = response.data.listData.name;
           this.userId = response.data.listData.loginID;
@@ -108,9 +162,14 @@ export default {
     },
 
     updateMyPage() {
-      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      if (this.currentPassword !== this.userPw) {
+        alert("현재 비밀번호가 일치하지 않습니다.");
+        return;
+      }
 
-      params.append("userPw", this.userPw);
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
+
+      params.append("userPw", this.newPassword); // 새 비밀번호로 변경
       params.append("userEmail", this.userEmail);
       params.append("userPhone", this.userPhone);
 
@@ -121,6 +180,8 @@ export default {
 
           if (response.data.result > 0) {
             alert(response.data.resultMsg);
+
+            this.$router.push({ name: "dashboard" });
           }
         })
         .catch(function (error) {
@@ -206,5 +267,19 @@ export default {
 
 .update-button:hover {
   background-color: #0056b3;
+}
+
+.password-mismatch {
+  border-color: red;
+}
+
+.mismatch-text {
+  color: red;
+  font-size: 12px;
+}
+
+.match-text {
+  color: green;
+  font-size: 12px;
 }
 </style>

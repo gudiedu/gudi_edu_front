@@ -5,7 +5,6 @@
         <div class="titletext">{{ titleText }}</div>
         <v-spacer></v-spacer>
       </v-card-title>
-
       <v-divider></v-divider>
 
       <v-table class="dashboard-table">
@@ -15,8 +14,8 @@
             <th>강사명</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th></th>
-            <th></th>
+            <th>설문조사</th>
+            <th>출결</th>
           </tr>
         </thead>
         <tbody>
@@ -29,7 +28,16 @@
                 <td>{{ item.teacher_name }}</td>
                 <td>{{ item.course_start_date }}</td>
                 <td>{{ item.course_end_date }}</td>
-                <td @click="classSatisfaction(item.course_no)">수업만족도</td>
+                <td>
+                  <span v-if="isAfterEndDate(item.course_end_date)">
+                    <span v-if="item.survey_completed === 'Y'"
+                      >설문조사완료</span
+                    >
+                    <span v-else @click="classSatisfaction(item.course_no)"
+                      >설문조사미완료</span
+                    >
+                  </span>
+                </td>
                 <td @click="attendance(item.course_no)">출결</td>
               </tr>
             </template>
@@ -62,12 +70,12 @@
     </div>
 
     <!-- <v-dialog v-model="satisfactionModal" max-width="600px">
-      <v-card>
-        <v-card-text>
-          <SatisfactionModal :action="action" />
-        </v-card-text>
-      </v-card>
-    </v-dialog> -->
+  <v-card>
+    <v-card-text>
+      <SatisfactionModal :action="action" />
+    </v-card-text>
+  </v-card>
+</v-dialog> -->
 
     <v-dialog v-model="attendanceModal" max-width="800px">
       <v-card>
@@ -78,7 +86,6 @@
     </v-dialog>
   </v-container>
 </template>
-
 <script>
 import AttendanceModal from "./SAttendanceModal.vue";
 import Paginate from "vuejs-paginate-next";
@@ -138,6 +145,11 @@ export default {
         });
     },
 
+    isAfterEndDate(courseEndDate) {
+      // 현재 날짜와 비교하여 강좌 종료일이 이미 지났는지 확인
+      return new Date() > new Date(courseEndDate);
+    },
+
     page: function () {
       var total = this.totalCnt;
       var page = this.pageSize;
@@ -156,10 +168,9 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .dashboard-card {
-  margin: 20px;
+  margin-bottom: 20px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -237,7 +248,8 @@ export default {
 }
 
 .dashboard-table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
   cursor: pointer;
@@ -245,10 +257,12 @@ export default {
 
 .dashboard-table th,
 .dashboard-table td {
-  padding: 12px;
-  text-align: left;
+  padding: 12px 8px;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dashboard-table th {
