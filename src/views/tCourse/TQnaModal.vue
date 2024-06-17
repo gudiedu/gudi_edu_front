@@ -69,6 +69,7 @@
       </template>
       <template v-else>
         <v-btn class="insert-button" @click="insertReply">등록</v-btn>
+        <v-btn class="close-button" @click="close">닫기</v-btn>
       </template>
     </div>
   </div>
@@ -111,6 +112,11 @@ export default {
       } else {
         this.reply_content = "";
       }
+    },
+
+    close() {
+      // 취소 로직을 여기에 추가
+      this.$router.go(-1);
     },
 
     insertReply() {
@@ -284,7 +290,8 @@ export default {
 .update-button,
 .delete-button,
 .insert-button,
-.cancel-button {
+.cancel-button,
+.close-button {
   /* padding: 10px 16px; */
   color: #ffffff;
   border: none;
@@ -315,12 +322,14 @@ export default {
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 
-.cancel-button {
+.cancel-button,
+.close-button {
   background-color: #686767;
   margin: 0;
 }
 
-.cancel-button:hover {
+.cancel-button,
+.close-button:hover {
   background-color: #c2c2c2;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }

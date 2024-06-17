@@ -151,6 +151,7 @@ export default {
       params.append("stitle", this.stitle);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
+      params.append("loginID", sessionStorage.getItem("loginId"));
 
       this.axios
         .post("/tCourse/listquestion.do", params)
@@ -162,6 +163,7 @@ export default {
 
           // 전체 데이터의 인덱스를 기반으로 글 번호를 매김 (오래된 순으로 번호 매기기)
           let totalData = vm.questionList.map((item, index) => {
+            console.log(vm.totalCnt, vm.currentPage, vm.pageSize, index);
             item.display_no = vm.totalCnt - ((vm.currentPage - 1) * vm.pageSize + index);
             return item;
           });
