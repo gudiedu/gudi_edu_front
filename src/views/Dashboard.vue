@@ -38,7 +38,17 @@ export default {
       this.menu = to.params.menu;
     },
   },
+    mounted:function(){
+    //sessioin
+    console.log("세션 loginId ?")
+    console.log(sessionStorage.getItem("loginID"))
+    //cookie 값
+    console.log("쿠키 값:")
+    console.log(document.cookie);    //LOGIN_ID=admin10
+  },
   components: {Menu},
+  
+
 }
 </script>
 

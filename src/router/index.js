@@ -5,6 +5,7 @@ import Login from "../views/Login.vue";
 import Dashboard from "../views/Dashboard.vue";
 
 const routes = [
+  /**/
   {
     path: "/",
     name: "home",
@@ -26,9 +27,7 @@ const routes = [
       {
         path: "/myPage",
         name:"mypage",
-        component: () => import("../views/MyPage.vue"),
-
-        
+        component: () => import("../views/MyPage.vue"),        
       }, 
       {
         path: "/tCourse/course",
@@ -46,9 +45,14 @@ const routes = [
         component: () => import("@/views/classroom/SLectureDetailRegister.vue"),
       },
       {
-        path: "/information/student",
+        path: "/information/student/:studentId",
         name: "aStudentAttendance",
         component: () => import("@/views/information/AStudentAttendance.vue"),
+      },
+      {
+        path: "information/hrinfo",  // / 주의 
+        name: "hrInfo",
+        component: () => import("@/views/information/HrInfo.vue"),
       },
       {
         path: "/information/survey",
