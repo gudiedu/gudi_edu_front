@@ -7,47 +7,13 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >진행중</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >진행완료</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >진행예정</v-btn
-          >
-        </div> -->
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input
-              type="text"
-              class="search-input"
-              placeholder="검색어를 입력해주세요."
-              v-model="stitle"
-            />
+            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="searchList">검색</button>
           </div>
         </div>
       </div>
@@ -59,53 +25,60 @@
           <tr>
             <th>글번호</th>
             <th>강의명</th>
-            <th>강사명</th>
-            <th>수강인원</th>
-            <th>수강기간</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th>강의실</th>
             <th>현황</th>
-            <th></th>
+            <th>결과</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Vue</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행중</td>
-
-            <td @click="viewSurveyResult">결과확인</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Java</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행완료</td>
-
-            <td @click="viewSurveyResult">결과확인</td>
-          </tr>
+          <template v-if="totalCnt > 0">
+            <template v-for="(item, index) in ClassSurveyList" :key="item.ClassSurvey_no">
+              <tr>
+                <td>
+                  {{ totalCnt - ((currentPage - 1) * pageSize + index) }}
+                </td>
+                <td>{{ item.course_name }}</td>
+                <td>
+                  {{ item.course_start_date }}
+                </td>
+                <td>
+                  {{ item.course_end_date }}
+                </td>
+                <td>({{ item.respondent_count || 0 }} / {{ item.course_quota }})</td>
+                <td @click="viewSurveyResult(item)">결과확인</td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
+            <tr>
+              <td colspan="6">진행중인 만족도 조사가 없습니다.</td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
-
     <!-- 페이지네이션 추가-->
 
-    <v-dialog v-model="viewServeyResultModal" max-width="600px">
+    <div id="ClassSurveyPagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
+    </div>
+
+    <v-dialog v-model="viewSurveyResultModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ViewSurveyResult :action="action" />
+          <ViewSurveyResultModal :action="action" :survey="selectedClassSurvey" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -113,47 +86,82 @@
 </template>
 
 <script>
-import ViewSurveyResult from "./TClassSurveyModal.vue";
+import ViewSurveyResultModal from "./TClassSurveyModal.vue";
+import Paginate from "vuejs-paginate-next";
 
 export default {
-  components: { ViewSurveyResult },
+  components: {
+    ViewSurveyResultModal,
+    Paginate,
+  },
+
   data() {
     return {
       titleText: "수업만족도관리",
       createSurveyModal: false,
-      viewServeyResultModal: false,
+      viewSurveyResultModal: false,
       action: "",
-      selectedNotice: null,
+      selectedClassSurvey: null,
       activeFilter: "all",
       stitle: "",
+      ClassSurveyList: [],
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
     };
   },
+
+  mounted() {
+    this.searchList();
+    this.page();
+  },
+
   methods: {
-    findAll() {
-      this.activeFilter = "all";
+    onEnterKey() {
+      this.$refs.searchButton.click(); // 엔터 키를 누르면 검색 버튼을 클릭
     },
-    findAdmin() {
-      this.activeFilter = "admin";
+
+    // 기존 methods...
+
+    searchList: function () {
+      let vm = this;
+
+      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+      params.append("loginID", sessionStorage.getItem("loginId"));
+
+      this.axios
+        .post("/support/searchClassSurvey.do", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+
+          vm.ClassSurveyList = response.data.listdata || [];
+          vm.totalCnt = response.data.totalcnt || 0;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
-    findTeacher() {
-      this.activeFilter = "teacher";
-    },
-    searchMethod() {},
-    noticeModify(notice) {
-      this.selectedNotice = notice;
-      this.action = "U";
-      this.addModal = true;
-    },
+
     openAddModal() {
-      this.action = "";
       this.addModal = true;
     },
     closeAddModal() {
       this.addModal = false;
     },
 
-    viewSurveyResult() {
-      this.viewServeyResultModal = true;
+    viewSurveyResult(item) {
+      this.selectedClassSurvey = item;
+      this.viewSurveyResultModal = true;
+    },
+
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var result = Math.ceil(total / page);
+      return result;
     },
   },
 };
