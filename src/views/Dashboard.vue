@@ -24,13 +24,13 @@
 </template>
 
 <script>
-import Menu from '@/components/LeftMenu.vue'
+import Menu from "@/components/LeftMenu.vue";
 export default {
-  data: function() {
+  data: function () {
     return {
       type: this.$route.params.type,
       menu: this.$route.params.menu,
-    }
+    };
   },
   watch: {
     $route(to) {
@@ -38,10 +38,8 @@ export default {
       this.menu = to.params.menu;
     },
   },
-  components: {Menu},
-}
+  components: { Menu },
+};
 </script>
 
-<style>
-
-</style>
+<style></style>

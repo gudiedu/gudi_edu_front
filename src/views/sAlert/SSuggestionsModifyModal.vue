@@ -42,7 +42,9 @@
             />
           </div>
         </v-col>
+      </v-row>
 
+      <v-row>
         <v-col cols="12" class="box1">
           <div class="form-group">
             <div class="form-label">카테고리</div>
@@ -73,7 +75,9 @@
             </template>
           </div>
         </v-col>
+      </v-row>
 
+      <v-row>
         <v-col cols="12" class="box1">
           <div class="form-group">
             <div class="form-label">제목</div>
@@ -86,7 +90,9 @@
             />
           </div>
         </v-col>
+      </v-row>
 
+      <v-row>
         <v-col cols="12" class="box1">
           <div class="form-group">
             <div class="form-label">내용</div>
@@ -99,12 +105,16 @@
             />
           </div>
         </v-col>
+      </v-row>
 
+      <v-row>
         <v-col cols="12" class="box1" v-if="fileName">
           <div class="form-label">첨부파일</div>
           <div id="preview" v-html="previewHtml" @click="downLoad"></div>
         </v-col>
+      </v-row>
 
+      <v-row>
         <v-col cols="12" class="box1">
           <form id="file-form" enctype="multipart/form-data">
             <input
@@ -132,8 +142,10 @@
             </v-btn>
           </form>
         </v-col>
+      </v-row>
 
-        <template v-if="suggestionAnswered">
+      <template v-if="suggestionAnswered">
+        <v-row>
           <v-col cols="12" class="box1">
             <div class="form-group">
               <div class="form-label">답변</div>
@@ -146,13 +158,15 @@
               />
             </div>
           </v-col>
+        </v-row>
 
+        <v-row>
           <v-col cols="12" class="box1" v-if="fileName2">
             <div class="form-label">첨부파일</div>
             <div id="preview" v-html="previewHtml2" @click="downLoad2"></div>
           </v-col>
-        </template>
-      </v-row>
+        </v-row>
+      </template>
     </v-card>
 
     <div class="button-group">

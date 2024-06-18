@@ -1,5 +1,13 @@
 <template>
   <div id="background_board">
+    <div v-if="loading">
+      <div class="loading-screen">
+        <div class="loading-content">
+          <img src="@/assets/images/admin/login/duck.png" />
+          <p class="typing-text">Loading...</p>
+        </div>
+      </div>
+    </div>
     <div class="login_form shadow" align="center">
       <div class="login-form-right-side" style="font-size: 15px">
         <div class="top-logo-wrap">
@@ -60,6 +68,7 @@ export default {
       loginId: "",
       pwd: "",
       saveId: false,
+      loading: false,
     };
   },
   mounted() {
@@ -90,6 +99,8 @@ export default {
         return false;
       }
 
+      this.loading = true;
+
       const params = new URLSearchParams();
       params.append("lgn_Id", this.loginId);
       params.append("pwd", this.pwd);
@@ -107,12 +118,17 @@ export default {
             });
             sessionStorage.setItem("loginInfo", JSON.stringify(data));
             sessionStorage.setItem("loginId", data.loginId);
-            this.$router.push("/dashboard");
+            setTimeout(() => {
+              this.loading = true;
+              this.$router.push("/dashboard");
+            }, 2000);
           } else {
+            this.loading = false;
             alert("ID 혹은 비밀번호가 틀립니다.");
           }
         })
         .catch((error) => {
+          this.loading = false;
           console.log(error);
         });
     },
@@ -163,5 +179,63 @@ export default {
   padding: 14.3px 0 15.5px 16.9px;
   width: 380px;
   box-sizing: border-box;
+}
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+}
+.loading-content {
+  text-align: center;
+  animation: jump 1s infinite;
+}
+.loading-content img {
+  width: 200px;
+  margin-bottom: 10px;
+}
+.typing-text {
+  font-size: 24px;
+  color: #fff;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid;
+  animation: typing 2s steps(20), blink 0.5s step-end infinite alternate;
+}
+@keyframes typing {
+  0% {
+    width: 0;
+  }
+  50% {
+    width: 6ch;
+  }
+  100% {
+    width: 12ch;
+  }
+}
+@keyframes blink {
+  from {
+    border-color: transparent;
+  }
+  to {
+    border-color: #fff;
+  }
+}
+@keyframes jump {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 </style>
