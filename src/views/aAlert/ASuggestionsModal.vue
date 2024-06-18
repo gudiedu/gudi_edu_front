@@ -1,121 +1,137 @@
 <template>
-  <div class="lecture-detail">
-    <h2 class="title">건의사항</h2>
-
-    <div class="form-group">
-      <div class="form-label">글번호</div>
-      <input
-        type="text"
-        name="title"
-        class="form-input"
-        disabled
-        v-model="responseSuggestion.suggestion_no"
-      />
-    </div>
-    <div class="form-group">
-      <div class="form-label">작성자</div>
-      <input
-        type="text"
-        name="author"
-        class="form-input"
-        disabled
-        v-model="responseSuggestion.loginID"
-      />
-    </div>
-    <div class="form-group">
-      <div class="form-label">등록일</div>
-      <input
-        type="text"
-        name="date"
-        class="form-input"
-        disabled
-        v-model="responseSuggestion.suggestion_created_at"
-      />
-    </div>
-    <div class="form-group">
-      <div class="form-label">제목</div>
-      <input
-        type="text"
-        name="title"
-        class="form-input"
-        disabled
-        v-model="responseSuggestion.suggestion_title"
-      />
-    </div>
-    <div class="form-group">
-      <div class="form-label">내용</div>
-      <textarea
-        name="content"
-        class="form-textarea"
-        disabled
-        v-model="responseSuggestion.suggestion_content"
-      >
-      </textarea>
-    </div>
-    <div class="form-group" v-if="responseSuggestion.file_no">
-      <div class="form-label">첨부파일</div>
-      <div
-        id="preview"
-        v-html="suggestionPreviewHtml"
-        @click="download(responseSuggestion.file_no, suggestionFileName)"
-      ></div>
-    </div>
-    <div class="button-group">
-      <v-btn class="delete-button" @click="deleteSuggestion">건의삭제</v-btn>
-    </div>
-    <div class="form-group" v-if="action === 'U' || action === 'I'">
-      <div class="form-label">답변</div>
-      <textarea name="content" class="form-textarea" v-model="replyContent">
-      </textarea>
-    </div>
-    <div class="form-group" v-else>
-      <div class="form-label">답변</div>
-      <textarea
-        name="content"
-        class="form-textarea"
-        v-model="replyContent"
-        disabled
-      >
-      </textarea>
-    </div>
-    <div class="form-group" v-if="responseReply.file_no">
-      <div class="form-label">첨부파일</div>
-      <div
-        id="preview"
-        v-html="replyPreviewHtml"
-        @click="download(responseReply.file_no, replyFileName)"
-      ></div>
-    </div>
-    <!-- 첨부파일 input 추가 -->
-
-    
+  <v-container>
+    <div class="lecture-detail">
+      <h2 class="title">건의사항</h2>
+      <v-row>
+        <v-col cols="12" sm="2" class="box1">
+          <div class="form-group">
+            <div class="form-label">글번호</div>
+            <input
+              type="text"
+              name="title"
+              class="form-input"
+              disabled
+              v-model="responseSuggestion.suggestion_no"
+            />
+          </div>
+        </v-col>
+        <v-col cols="12" sm="5" class="box1">
+          <div class="form-group">
+            <div class="form-label">작성자</div>
+            <input
+              type="text"
+              name="author"
+              class="form-input"
+              disabled
+              v-model="responseSuggestion.loginID"
+            />
+          </div>
+        </v-col>
+        <v-col cols="12" sm="5" class="box1">
+          <div class="form-group">
+            <div class="form-label">등록일</div>
+            <input
+              type="text"
+              name="date"
+              class="form-input"
+              disabled
+              v-model="responseSuggestion.suggestion_created_at"
+            />
+          </div>
+        </v-col>
+      </v-row>
+      <div class="form-group">
+        <div class="form-label">제목</div>
+        <input
+          type="text"
+          name="title"
+          class="form-input"
+          disabled
+          v-model="responseSuggestion.suggestion_title"
+        />
+      </div>
+      <div class="form-group">
+        <div class="form-label">내용</div>
+        <textarea
+          name="content"
+          class="form-textarea"
+          disabled
+          v-model="responseSuggestion.suggestion_content"
+        >
+        </textarea>
+      </div>
+      <div class="form-group" v-if="responseSuggestion.file_no">
+        <div class="form-label">첨부파일</div>
+        <div
+          id="preview"
+          v-html="suggestionPreviewHtml"
+          @click="download(responseSuggestion.file_no, suggestionFileName)"
+        ></div>
+      </div>
+      <div class="button-group">
+        <v-btn class="delete-button" @click="deleteSuggestion">건의삭제</v-btn>
+      </div>
+      <div class="form-group" v-if="action === 'U' || action === 'I'">
+        <div class="form-label">답변</div>
+        <textarea name="content" class="form-textarea" v-model="replyContent">
+        </textarea>
+      </div>
+      <div class="form-group" v-else>
+        <div class="form-label">답변</div>
+        <textarea
+          name="content"
+          class="form-textarea"
+          v-model="replyContent"
+          disabled
+        >
+        </textarea>
+      </div>
+      <div class="form-group" v-if="replyFileName">
+        <div class="form-label">첨부파일</div>
+        <div
+          id="preview"
+          clsss="preview"
+          v-html="replyPreviewHtml"
+          @click="download(responseReply.file_no, replyFileName)"
+        ></div>
+        <div
+          v-if="action === 'U' || action === 'I'"
+          class="x-box"
+          @click.prevent="deleteFile"
+        >
+          X
+        </div>
+      </div>
       <template v-if="action === 'I'">
-        <form id="file-form" enctype="multipart/form-data">
-          <input
-            type="file"
-            id="file-insert"
-            name="file-insert"
-            class="insert-button"
-            @change="handleFileChange"
-          />
-          <v-btn class="insert-button" @click.prevent="deleteFile">첨부파일 삭제</v-btn>
+        <div class="button-group">
+          <form id="file-form" class="file-form" enctype="multipart/form-data">
+            <input
+              type="file"
+              id="file-insert"
+              name="file-insert"
+              @change="handleFileChange"
+            />
+          </form>
           <v-btn class="insert-button" @click.prevent="insertSuggestion"
             >등록</v-btn
           >
-        </form>
+        </div>
       </template>
       <template v-else-if="action === 'U'">
-        <form id="file-form" enctype="multipart/form-data">
-          <input
-            type="file"
-            id="file-insert"
-            name="file-insert"
-            @change="handleFileChange"
-          />
-        </form>
         <div class="button-group">
-          <v-btn class="delete-button" @click.prevent="deleteFile">첨부파일 삭제</v-btn>
-          <v-btn class="insert-button" @click.prevent="updateSuggestion">등록</v-btn>
+          <form id="file-form" class="file-form" enctype="multipart/form-data">
+            <input
+              type="file"
+              id="file-insert"
+              name="file-insert"
+              @change="handleFileChange"
+            />
+          </form>
+          <div class="button-group">
+            <v-btn class="insert-button" @click.prevent="updateSuggestion"
+              >등록</v-btn
+            >
+          </div>
         </div>
       </template>
       <template v-else>
@@ -124,8 +140,8 @@
           <v-btn class="delete-button" @click="deleteReply">답변삭제</v-btn>
         </div>
       </template>
-    
-  </div>
+    </div>
+  </v-container>
 </template>
 
 <script>
@@ -185,6 +201,7 @@ export default {
             this.action = "";
           } else {
             this.action = "I";
+            this.replyFileName = null;
           }
         })
         .catch(function (error) {
@@ -196,7 +213,7 @@ export default {
       let dataWithFile = new FormData(formTag);
 
       dataWithFile.append("suggestion_reply_content", this.replyContent);
-      console.log(this.replyContent)
+      console.log(this.replyContent);
       dataWithFile.append(
         "suggestion_reply_no",
         this.responseReply.suggestion_reply_no
@@ -220,7 +237,10 @@ export default {
     },
     deleteReply() {
       let params = new URLSearchParams();
-      params.append("suggestion_reply_no", this.responseReply.suggestion_reply_no);
+      params.append(
+        "suggestion_reply_no",
+        this.responseReply.suggestion_reply_no
+      );
       params.append("suggestion_no", this.responseSuggestion.suggestion_no);
 
       this.axios
@@ -272,16 +292,17 @@ export default {
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
-        this.action = "";
+      this.action = "";
     },
     handleFileChange(event) {
       this.selectedFile = event.target.files[0];
     },
     deleteFile() {
       this.replyPreviewHtml = "";
+      this.replyFileName = null;
       this.removeFile = "Y";
     },
-    toggleUpdate(){
+    toggleUpdate() {
       this.action = "U";
     },
     previewHtml(suggestion) {
@@ -419,4 +440,18 @@ export default {
   background-color: #e57373;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
+
+.x-box {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.preview{
+  display: inline-block;
+}
+
+.file-form {
+  margin-right: auto;
+}
+
 </style>

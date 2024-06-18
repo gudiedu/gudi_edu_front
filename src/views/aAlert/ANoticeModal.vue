@@ -1,121 +1,153 @@
 <template>
-  <div class="lecture-detail">
-    <h2 class="title">공지사항</h2>
-    <template v-if="paction !== 'I'">
-      <div class="form-group">
-        <div class="form-label">글번호</div>
-        <input
-          type="text"
-          name="title"
-          class="form-input"
-          v-model="notice_no"
-          disabled
-        />
-      </div>
-    </template>
-    <template v-if="paction === 'I' || paction === 'U'">
-      <div class="form-group">
-        <div class="form-label">제목</div>
-        <input
-          type="text"
-          name="author"
-          class="form-input"
-          v-model="notice_title"
-        />
-      </div>
-    </template>
-    <template v-else>
-      <div class="form-group">
-        <div class="form-label">제목</div>
-        <input
-          type="text"
-          name="author"
-          class="form-input"
-          v-model="notice_title"
-          disabled
-        />
-      </div>
-    </template>
-    <template v-if="paction !== 'I'">
-      <div class="form-group">
-        <div class="form-label">작성자</div>
-        <input
-          type="text"
-          name="date"
-          class="form-input"
-          :value="loginID"
-          disabled
-        />
-      </div>
-    </template>
-    <template v-if="paction !== 'I'">
-      <div class="form-group">
-        <div class="form-label">등록일</div>
-        <input
-          type="text"
-          name="title"
-          class="form-input"
-          disabled
-          :value="notice_created_at"
-        />
-      </div>
-    </template>
-    <template v-if="paction === 'I' || paction === 'U'">
-      <div class="form-group">
-        <div class="form-label">내용</div>
-        <textarea name="content" class="form-textarea" v-model="notice_content">
-        </textarea>
-      </div>
-      <div class="form-group" v-if="fileName">
-        <div class="form-label">첨부파일</div>
-        <div id="preview" v-html="previewHtml" @click="download"></div>
-      </div>
-    </template>
-    <template v-else>
-      <div class="form-group">
-        <div class="form-label">내용</div>
-        <textarea
-          name="content"
-          class="form-textarea"
-          v-model="notice_content"
-          disabled
-        >
-        </textarea>
-      </div>
-      <div class="form-group" v-if="fileName">
-        <div class="form-label">첨부파일</div>
-        <div id="preview" v-html="previewHtml" @click="download"></div>
-      </div>
-    </template>
-    <div class="button-group">
-      <template v-if="paction === 'I'">
-        <form id="file-form" enctype="multipart/form-data">
-          <input
-            type="file"
-            id="file-insert"
-            name="file-insert"
-            class="insert-button"
-            @change="handleFileChange"
-          />
+  <v-container>
+    <div class="lecture-detail">
+      <h2 class="title">공지사항</h2>
+      <v-row>
+        <v-col cols="12" sm="2" class="box1">
+          <template v-if="paction !== 'I'">
+            <div class="form-group">
+              <div class="form-label">글번호</div>
+              <input
+                type="text"
+                name="title"
+                class="form-input"
+                v-model="notice_no"
+                disabled
+              />
+            </div>
+          </template>
+        </v-col>
+        <v-col cols="12" sm="5" class="box1">
+          <template v-if="paction !== 'I'">
+            <div class="form-group">
+              <div class="form-label">작성자</div>
+              <input
+                type="text"
+                name="date"
+                class="form-input"
+                :value="loginID"
+                disabled
+              />
+            </div>
+          </template>
+        </v-col>
+        <v-col cols="12" sm="5" class="box1">
+          <template v-if="paction !== 'I'">
+            <div class="form-group">
+              <div class="form-label">등록일</div>
+              <input
+                type="text"
+                name="title"
+                class="form-input"
+                disabled
+                :value="notice_created_at"
+              />
+            </div>
+          </template>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" sm="12" class="box1">
+          <template v-if="paction === 'I' || paction === 'U'">
+            <div class="form-group">
+              <div class="form-label">제목</div>
+              <input
+                type="text"
+                name="author"
+                class="form-input"
+                v-model="notice_title"
+              />
+            </div>
+          </template>
+          <template v-else>
+            <div class="form-group">
+              <div class="form-label">제목</div>
+              <input
+                type="text"
+                name="author"
+                class="form-input"
+                v-model="notice_title"
+                disabled
+              />
+            </div>
+          </template>
+        </v-col>
+      </v-row>
+      <template v-if="paction === 'I' || paction === 'U'">
+        <v-row>
+          <v-col cols="12" sm="12" class="box1">
+            <div class="form-group">
+              <div class="form-label">내용</div>
+              <textarea
+                name="content"
+                class="form-textarea"
+                v-model="notice_content"
+              >
+              </textarea>
+            </div>
+          </v-col>
+        </v-row>
+        <div class="form-group" v-if="fileName">
+          <div class="form-label">첨부파일</div>
+          <v-row>
+            <v-col cols="12" sm="3" class="box1">
+              <div id="preview" v-html="previewHtml" @click="download"></div>
+            </v-col>
+            <div class="x-box" @click.prevent="deleteFile">X</div>
+          </v-row>
+        </div>
+      </template>
+      <template v-else>
+        <v-row>
+          <v-col cols="12" sm="12" class="box1">
+            <div class="form-group">
+              <div class="form-label">내용</div>
+              <textarea
+                name="content"
+                class="form-textarea"
+                v-model="notice_content"
+                disabled
+              >
+              </textarea>
+            </div>
+          </v-col>
+        </v-row>
+        <div class="form-group" v-if="fileName">
+          <div class="form-label">첨부파일</div>
+          <v-row>
+            <v-col cols="12" sm="3" class="box1">
+              <div id="preview" v-html="previewHtml" @click="download"></div>
+            </v-col>
+          </v-row>
+        </div>
+      </template>
+      <div class="button-group">
+        <template v-if="paction === 'I'">
+          <form id="file-form" class="file-form" enctype="multipart/form-data">
+            <input
+              type="file"
+              id="file-insert"
+              name="file-insert"
+              class="file-insert"
+              @change="handleFileChange"
+            />
+          </form>
           <v-btn
             class="insert-button"
             @click.prevent="insertNotice(notice_title, notice_content)"
             >등록</v-btn
           >
-        </form>
-      </template>
-      <template v-else-if="paction === 'U'">
-        <form id="file-form" enctype="multipart/form-data">
-          <input
-            type="file"
-            id="file-insert"
-            name="file-insert"
-            class="insert-button"
-            @change="handleFileChange"
-          />
-          <v-btn class="insert-button" @click.prevent="deleteFile"
-            >첨부파일 삭제</v-btn
-          >
+        </template>
+        <template v-else-if="paction === 'U'">
+          <form id="file-form" class="file-form" enctype="multipart/form-data">
+            <input
+              type="file"
+              id="file-insert"
+              name="file-insert"
+              class="file-insert"
+              @change="handleFileChange"
+            />
+          </form>
           <v-btn
             class="insert-button"
             @click.prevent="
@@ -123,18 +155,18 @@
             "
             >수정</v-btn
           >
-        </form>
-      </template>
-      <template v-else>
-        <v-btn class="update-button" @click="changeNotice(notice_no)"
-          >수정</v-btn
-        >
-        <v-btn class="delete-button" @click="deleteNotice(notice_no)"
-          >삭제</v-btn
-        >
-      </template>
+        </template>
+        <template v-else>
+          <v-btn class="update-button" @click="changeNotice(notice_no)"
+            >수정</v-btn
+          >
+          <v-btn class="delete-button" @click="deleteNotice(notice_no)"
+            >삭제</v-btn
+          >
+        </template>
+      </div>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script>
@@ -236,6 +268,7 @@ export default {
     deleteFile() {
       this.previewHtml = "";
       this.removeFile = "Y";
+      this.fileName = null;
     },
     download: function () {
       let params = new URLSearchParams();
@@ -351,5 +384,11 @@ export default {
 .delete-button:hover {
   background-color: #e57373;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
+.x-box {
+  cursor: pointer;
+}
+.file-form {
+  margin-right: auto;
 }
 </style>

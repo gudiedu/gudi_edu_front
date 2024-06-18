@@ -191,6 +191,8 @@ export default {
         });
     },
     addNotice() {
+      this.previewHtml = null;
+      this.fileName = null;
       this.action = "I";
       this.addModal = true;
       this.notice_title = "";
