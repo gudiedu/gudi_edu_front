@@ -46,7 +46,7 @@
               <td>{{ test.course_loc }}</td>
               <td>{{ test.test_category }}</td>
               <td>
-                {{ test.result_no > 0 && (test.test_category === '중간' || test.test_category === '기말') ? `응시 / ${test.result_score}` : '미응시' }}
+                {{ test.result_no != 0  && (test.test_category === '1차' || test.test_category === '2차' || test.test_category === '테스트') ? `응시 / ${test.result_score}` : '미응시' }}
               </td>
             </tr>
         </template>
@@ -115,9 +115,9 @@ export default {
   },
   mounted(){
     this.courseTestList();
-
   },
   methods: {
+    // 수강 강의 리스트 불러오기
     courseTestList(){
 
       let testListParams = new URLSearchParams();
@@ -125,7 +125,7 @@ export default {
       this.axios
         .post("/classroom/sTestList.do", testListParams)
         .then((response) => {
-          console.log("요기를알려죵: ",JSON.stringify(response));
+          console.log("강의리스트불러오는JSON이닷: ",JSON.stringify(response));
 
           this.sTestList = response.data.testList;
 
@@ -147,9 +147,36 @@ export default {
         })
     },
 
+    testResult(courseNo, testCategory){
+
+      this.courseNo = courseNo;
+      this.testCategory = testCategory;
+      console.log("courseNo: ", this.courseNo);
+      console.log("testCategory : ", this.testCategory);
+
+      let testResultParam = new URLSearchParams();
+
+      this.axios
+        .post("/classroom/sTestCalculate.do", testResultParam)
+        .then((response) => {
+          console.log("여기를찾아쥬세유: ",JSON.stringify(response));
+
+          response.data.sTestResultList.forEach(each => {
+             this.testCourseNo = each.course_no;
+             this.testSubject = each.course_subject;
+             this.testResultNo = each.result_no;
+             this.testResultScore = each.result_score;
+             this.testCategory = each.test_category;
+
+           });
+
+        })
+
+    },
     searchMethod() {
 
     },
+
     testDetail(courseNo, testCategory) {
       this.courseNo = courseNo;
       this.testCategory = testCategory;
@@ -162,30 +189,6 @@ export default {
       this.testModal = false;
     },
 
-    // courseEnroll(){
-
-    //   let enrollInfo = document.getElementById("enrollment");
-    //   let data = new FormData(enrollInfo);
-    //   data.append("openedNo", this.openedNo);
-    //   data.append("studentSignedID", this.studentSignedID);
-
-
-    //   console.log("수강신청번호: ", this.openedNo);
-
-
-    //   this.axios
-    //     .post("/classroom/sEnrollInsert.do", data)
-    //     .then((response) => {
-    //       console.log("수강신청JSON: ", JSON.stringify(response));
-
-    //       if(response.data.result > 0){
-    //         alert(response.data.resultMsg);
-    //         console.log("너왜안나오냐: ", response.data.resultMsg);
-    //       }
-    //     });
-
-
-    // },
     page: function () {
       var total = this.totalCnt;
       var page = this.pageSize;

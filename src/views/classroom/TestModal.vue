@@ -6,38 +6,38 @@
     <h2 class="title">시험</h2>
 
     <!-- 객관식 -->
-    <div class="question-container">
-      <template v-for="question in sTestInfo" :key="question.test_no">
-        <div class="form-label">{{ question.test_question }}</div>
-        <v-radio-group v-model="testSubmit">
-          <v-radio value="1">
-            <template v-slot:label>
-              {{ question.test_choice1 }}
-            </template>
-          </v-radio>
-          <v-radio value="2">
-            <template v-slot:label>
-              {{ question.test_choice2 }}
-            </template>
-          </v-radio>
-          <v-radio value="3">
-            <template v-slot:label>
-              {{ question.test_choice3 }}
-            </template>
-          </v-radio>
-          <v-radio value="4">
-            <template v-slot:label>
-              {{ question.test_choice4 }}
-            </template>
-          </v-radio>
-        </v-radio-group>
-      </template>
-    </div>
-    <div class="button-group">
-      <template v-if="paction === 'I'">
-        <v-btn class="insert-button" @click="insertTest">등록</v-btn>
-      </template>
-    </div>
+     <form id="submitting">
+      <div class="question-container">
+        <template v-for="(question, index) in sTestInfo" :key="question.test_no">          
+          <div class="form-label">{{ index + 1 }}. {{ question.test_question }}</div>
+          <v-radio-group  v-model="selectedChoice[index]">
+            <v-radio value="1">
+              <template v-slot:label>
+                1. {{ question.test_choice1 }}
+              </template>
+            </v-radio>
+            <v-radio value="2">
+              <template v-slot:label>
+                2. {{ question.test_choice2 }}
+              </template>
+            </v-radio>
+            <v-radio value="3">
+              <template v-slot:label>
+                3. {{ question.test_choice3 }}
+              </template>
+            </v-radio>
+            <v-radio value="4">
+              <template v-slot:label>
+                4. {{ question.test_choice4 }}
+              </template>
+            </v-radio>
+          </v-radio-group>
+        </template>
+      </div>
+      <div class="button-group">
+        <v-btn class="insert-button" @click="submitTest">등록</v-btn>
+      </div>
+  </form>
   </div>
 </template>
 
@@ -55,13 +55,14 @@ export default {
       SelectedTestCategory: this.testCategory,
       createTest: [],
       sTestInfo: [],
-      objectiveAnswers: {
-        q1: null,
-        q2: null,
-      },
-      subjectiveAnswers: {
-        improvements: "",
-      },
+      testSubmit: null,
+      selectedChoice:[],
+      testNo : [],
+      choice1: "1",
+      choice2: "2",
+      choice3: "3",
+      choice4: "4",
+      
     };
   },
   mounted(){
@@ -83,18 +84,78 @@ export default {
 
         this.sTestInfo = response.data.createTest;
 
-        response.data.createTest.forEach(each =>{
+        response.data.createTest.forEach((each, index) =>{
           this.testQuestion = each.test_question;
           this.testChoice1 = each.test_choice1;
           this.testChoice2 = each.test_choice2;
           this.testChocie3 = each.test_choice3;
           this.testChoice4 = each.test_choice4;
           this.testScore = each.test_score;
-
+          this.testNo[index] = each.test_no;
         });
+        // // testNo에 값을 잘 추가했는지 확인하는 alert
+        //   for (let [key, value] of this.testNo.entries()) {
+        //     alert(`${key}: ${value}`);
+        //   }
       })
     },
-    insertTest() {},
+    // 시험 채점
+    calculateTest(){
+
+      let testcalcuateParams = new URLSearchParams();
+      testcalcuateParams.append("selectedCourseNo", this.SelectedCourseNo);
+      testcalcuateParams.append("selectedTestCategory", this.SelectedTestCategory);
+      console.log("카테고리왔느뇨 : ", this.SelectedTestCategory);
+      console.log("강의번호왔느뇨: ", this.SelectedCourseNo);
+
+      this.axios
+        .post("/classroom/sTestCalculate.do", testcalcuateParams)
+        .then ((response) => {
+          console.log("시험 채점 JSON : ", JSON.stringify(response));
+
+          if(response.data.calculateResult > 0){
+            alert(response.data.calculateResultMsg);
+          }
+        })
+    },
+    // 시험 결과값 제출
+    submitTest() {
+      let formTag = document.getElementById("submitting");
+      let data = new FormData(formTag);
+
+      data.append("selectedChoice", this.selectedChoice);
+      data.append("selectedCourseNo", this.SelectedCourseNo);
+      data.append("selectedTestCategory", this.SelectedTestCategory);
+      data.append("testScore", this.testScore);
+      data.append("testQuestion", this.testQuestion);
+      data.append("testNo", this.testNo);
+
+      // // FormData에 값을 잘 추가했는지 확인하는 alert
+      // for (let [key, value] of data.entries()) {
+      //   alert(`${key}: ${value}`);
+      // }
+
+      this.axios
+        .post("/classroom/sTestSubmit.do", data)
+        .then((response) => {
+          console.log("너의 정체가 무엇이냐: ",JSON.stringify(response));
+
+          if (response.data.result > 0) {
+            alert(response.data.resultMsg);
+            
+            this.calculateTest();
+            alert("시험 채점 결과가 들어갔겠쬬?@.@");
+            
+            this.$emit("close-modal"); // 모달 닫기 이벤트 발생
+          }
+
+        })
+        .catch(function (error){
+          alert("에러! API 요청에 오류가 있습니다" + error);
+        });
+
+    },
+
   },
 };
 </script>
@@ -106,7 +167,6 @@ export default {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   margin-top: 16px;
-
   margin: auto;
 }
 

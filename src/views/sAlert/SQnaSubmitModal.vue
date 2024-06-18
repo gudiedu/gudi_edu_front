@@ -123,6 +123,7 @@ export default {
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
+
     },
   },
 };
