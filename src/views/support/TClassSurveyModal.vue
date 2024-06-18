@@ -5,13 +5,18 @@
     <div v-if="surveyResults.length > 0">
       <template v-for="(result, index) in surveyResults" :key="result.survey_question_no">
         <div class="modal-content" v-if="index === 0 || surveyResults[index - 1].survey_question_no !== result.survey_question_no">
-          <h2 id="surveyNumber">{{ result.survey_question_no }}번 문항</h2>
-          <p id="qsurveyText">{{ result.survey_question_text }}</p>
-        </div>
-        <div class="chart-container" id="chartContainer">
-          <!-- 조건부로 선택지 및 작성된 답변을 표시 -->
-          <p v-if="result.choice_result">선택지: {{ result.choice_result }} (선택수: {{ result.choice_count }})</p>
-          <p v-if="result.written_answer">{{ result.written_answer }}</p>
+          <h2 id="surveyNumber" class="survey-number">{{ result.survey_question_no }}번 문항</h2>
+          <p id="qsurveyText" class="survey-text">{{ result.survey_question_text }}</p>
+
+          <div v-if="hasChoices(result.survey_question_no)">
+            <BarChart :results="getResultsByQuestionNo(result.survey_question_no)" />
+          </div>
+
+          <div v-else>
+            <div v-for="answer in getResultsByQuestionNo(result.survey_question_no)" :key="answer.survey_question_no">
+              <p v-if="answer.written_answer">{{ answer.written_answer }}</p>
+            </div>
+          </div>
         </div>
       </template>
     </div>
@@ -20,11 +25,17 @@
     </div>
   </div>
 </template>
+
 <script>
+import BarChart from "./BarChart.vue";
+
 export default {
+  components: {
+    BarChart,
+  },
   props: {
     courseNo: {
-      type: String, // String으로 설정
+      type: String,
       required: true,
     },
   },
@@ -52,7 +63,12 @@ export default {
           this.surveyResults = [];
         });
     },
-
+    getResultsByQuestionNo(questionNo) {
+      return this.surveyResults.filter((result) => result.survey_question_no === questionNo);
+    },
+    hasChoices(questionNo) {
+      return this.getResultsByQuestionNo(questionNo).some((result) => result.choice_count > 0);
+    },
     cancel() {
       this.$emit("close");
     },
@@ -61,7 +77,17 @@ export default {
 </script>
 
 <style scoped>
-.lecture-detail {
+.survey-number {
+  font-size: 18px; /* 원하는 크기로 설정 */
+  text-align: center;
+}
+
+.survey-text {
+  font-size: 18px; /* 원하는 크기로 설정 */
+  text-align: center;
+}
+
+#survey-detail {
   padding: 16px;
   background-color: #ffffff;
   border-radius: 8px;
@@ -88,26 +114,5 @@ export default {
   padding: 16px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.cancel-button {
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
-  background-color: #686767;
-}
-
-.cancel-button:hover {
-  background-color: #c2c2c2;
-  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 </style>
