@@ -55,27 +55,16 @@
       <div class="form-label">첨부파일</div>
       <div id="preview" v-html="previewHtml" @click="downLoad"></div>
     </div>
-    <!-- <div class="button-group">
-      <template v-if="paction === 'U'">
-        <v-btn class="update-button" @click="updateNotice">수정</v-btn>
-        <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
-      </template>
-      <template v-else>
-        <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
-      </template>
-    </div> -->
   </div>
 </template>
 
 <script>
 export default {
   props: {
-    action: String,
     noticeNo: Number,
   },
   data() {
     return {
-      paction: this.action,
       pNoticeNo: this.noticeNo,
       name: "",
       noticeCreatedAt: "",
@@ -97,20 +86,11 @@ export default {
       this.axios
         .post("/sAlert/sSelectNotice.do", params)
         .then((response) => {
-          console.log(JSON.stringify(response));
-          console.log(response.data);
-
           this.name = response.data.result.name;
           this.noticeCreatedAt = response.data.result.notice_created_at;
           this.noticeTitle = response.data.result.notice_title;
           this.noticeContent = response.data.result.notice_content;
           this.ext = response.data.result.file_extension;
-
-          //response.data.result.file_name //파일이름
-          //response.data.result.logical_path //논리경로
-          //response.data.result.phygical_path //물리경로
-          //response.data.result.file_size //파일크기
-          //response.data.result.file_ext //파일확장자
 
           //파일 이미지 보여주거나, 파일 이름 보여주기
           if (
@@ -124,8 +104,6 @@ export default {
             this.fileName = response.data.result.file_origin;
 
             let ext = response.data.result.file_extension;
-            let localpath = response.data.result.file_local_path;
-            console.log(localpath);
 
             if (
               ext.toLowerCase() == "jpg" ||
@@ -158,8 +136,8 @@ export default {
         responseType: "blob", //파일에 대한 내용을 받으려면 추가해줘야 한다.
       }).then((response) => {
         //브라우저 있는 자바스크립 버전은 사용안함, node.js꺼 사용 => 그래서 이런 작업을 처리 해야함
-        console.log(response);
-        console.log(response.data);
+        //console.log(response);
+        //console.log(response.data);
         //Blob 데이터를 이진파일로 변환, 파일 데이터를 받아 바이너리 데이터로 만든 후 URL을 만든다.
         let FILE = window.URL.createObjectURL(new Blob([response.data]));
         //a 태그를 만들어서 이 태그 안에 파일 이름을 넣어
@@ -230,38 +208,5 @@ export default {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-}
-
-.update-button,
-.delete-button,
-.insert-button {
-  /* padding: 10px 16px; */
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.update-button,
-.insert-button {
-  background-color: #407bff;
-}
-
-.update-button:hover,
-.insert-button:hover {
-  background-color: #5a9bff;
-  box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
-}
-
-.delete-button {
-  background-color: #d32f2f;
-  margin: 0;
-}
-
-.delete-button:hover {
-  background-color: #e57373;
-  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 </style>

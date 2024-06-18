@@ -95,9 +95,6 @@
       ></paginate>
     </div>
 
-    <!-- <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
-    </div> -->
     <v-dialog v-model="noticeModal" max-width="600px">
       <v-card>
         <v-card-text>
@@ -121,8 +118,6 @@ export default {
     return {
       titleText: "공지사항",
       noticeModal: false,
-      // action: "",
-      // selectedNotice: null,
       activeFilter: "all",
       stitle: "",
       status: "",
@@ -138,7 +133,6 @@ export default {
   },
   methods: {
     noticeModify(noticeNo) {
-      // this.action = "U";
       this.noticeModal = true;
       this.noticeNo = noticeNo;
     },
@@ -155,8 +149,6 @@ export default {
       this.axios
         .post("/sAlert/sNoticeList.do", params)
         .then((response) => {
-          //console.log(JSON.stringify(response));
-
           vm.noticeList = response.data.listData;
           vm.totalCnt = response.data.totalCnt;
         })

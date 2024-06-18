@@ -27,10 +27,10 @@
               v-model="pwd"
               type="password"
               placeholder="비밀번호"
-              onfocus="this.placeholder=''; return true"
               id="userPwd"
               ref="userPwd"
             />
+            <!-- onfocus="this.placeholder=''; return true" -->
           </p>
           <p class="member_info">
             <input v-model="saveId" id="cb_saveId" type="checkbox" />

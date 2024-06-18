@@ -131,7 +131,6 @@ export default {
       pageSize: 10,
       currentPage: 1,
       suggestionNo: 0,
-      // selectedSuggestion: [],
     };
   },
   mounted() {
@@ -144,7 +143,6 @@ export default {
     },
 
     insertSuggestion() {
-      this.action = "I";
       this.suggestionInsertModal = true;
     },
 
@@ -167,11 +165,7 @@ export default {
       this.axios
         .post("/sAlert/sSuggestionList.do", params)
         .then((response) => {
-          //console.log(JSON.stringify(response));
-
           this.suggestionList = response.data.listData;
-          console.log(this.suggestionList);
-
           this.totalCnt = response.data.totalCnt;
         })
         .catch(function (error) {

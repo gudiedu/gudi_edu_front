@@ -63,16 +63,13 @@ export default {
       this.axios
         .post("/classroom/sStudentSatisfaction.do", params)
         .then((response) => {
-          //console.log(JSON.stringify(response));
           //vm.sCourseNo = response.data.sSatisfactionQuestion[0].course_no;
           vm.courseName = response.data.sSatisfactionQuestion[0].course_name;
           vm.surveyName = response.data.sSatisfactionQuestion[0].survey_name;
           vm.surveyNo = response.data.sSatisfactionQuestion[0].survey_no;
 
           let questions = response.data.sSatisfactionQuestion;
-          console.log(questions);
           let answers = response.data.sSatisfactionAnswer;
-          console.log(answers);
 
           // 질문과 그에 해당하는 선택지를 결합
           questions.forEach((question) => {

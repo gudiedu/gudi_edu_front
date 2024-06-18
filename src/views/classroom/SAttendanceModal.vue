@@ -88,8 +88,6 @@ export default {
       this.axios
         .post("/classroom/sStudentAttendance.do", params)
         .then((response) => {
-          //console.log(JSON.stringify(response));
-
           this.courseName =
             response.data.sStudentSelectedCourseInfo.course_name;
           this.courseStartDate =
@@ -101,7 +99,6 @@ export default {
           vm.dayoffInfo = response.data.sDayoffInfo.map(
             (item) => item.dayoff_date
           );
-          //console.log("Dayoff Info:", vm.dayoffInfo);
 
           this.calculateTotalCourseDays();
 
@@ -134,11 +131,6 @@ export default {
         const isWeekend = d.getDay() === 0 || d.getDay() === 6;
         const formattedDate = d.toISOString().split("T")[0]; // YYYY-MM-DD 형식으로 변환
         const isHoliday = dayoffInfo.includes(formattedDate);
-
-        // // 디버깅 로그 추가
-        // console.log(
-        //   `Date: ${formattedDate}, IsWeekend: ${isWeekend}, IsHoliday: ${isHoliday}`
-        // );
 
         if (!isWeekend && !isHoliday) {
           totalDays++;

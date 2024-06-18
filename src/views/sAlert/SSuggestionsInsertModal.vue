@@ -14,12 +14,20 @@
       </div>
       <div class="form-group">
         <div class="form-label">카테고리</div>
-        <input
-          type="text"
+        <select
           name="suggestionCategory"
           v-model="suggestionCategory"
           class="form-input"
-        />
+        >
+          <option value="" disabled>카테고리를 선택하세요.</option>
+          <option
+            v-for="category in categories"
+            :key="category"
+            :value="category"
+          >
+            {{ category }}
+          </option>
+        </select>
       </div>
       <div class="form-group">
         <div class="form-label">내용</div>
@@ -46,16 +54,13 @@
 
 <script>
 export default {
-  props: {
-    action: String,
-  },
   data() {
     return {
-      paction: this.action,
       suggestionTitle: "",
       suggestionContent: "",
       suggestionCategory: "",
       selectedFile: null,
+      categories: ["학사", "시설", "장비", "서비스", "기타"],
     };
   },
   methods: {
@@ -72,8 +77,6 @@ export default {
       this.axios
         .post("/sAlert/sInsertSuggestion.do", dataWithFile)
         .then((response) => {
-          console.log(JSON.stringify(response));
-
           if (response.data.result > 0) {
             alert(response.data.resultMsg);
             this.$emit("close-modal"); // 모달 닫기 이벤트 발생
@@ -151,7 +154,6 @@ export default {
 .update-button,
 .delete-button,
 .insert-button {
-  /* padding: 10px 16px; */
   color: #ffffff;
   border: none;
   border-radius: 4px;

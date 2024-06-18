@@ -7,27 +7,6 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >강사</v-btn
-          >
-        </div> -->
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -97,9 +76,6 @@
       ></paginate>
     </div>
 
-    <!-- <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
-    </div> -->
     <v-dialog v-model="resourceModal" max-width="600px">
       <v-card>
         <v-card-text>
@@ -138,8 +114,6 @@ export default {
   },
   methods: {
     resourceModify(resourceNo) {
-      // this.selectedNotice = materials;
-      // this.action = "U";
       this.resourceModal = true;
       this.resourceNo = resourceNo;
     },
@@ -155,8 +129,6 @@ export default {
       this.axios
         .post("/sAlert/sListResources.do", params)
         .then((response) => {
-          //console.log(JSON.stringify(response));
-
           vm.resourceList = response.data.listData;
           vm.totalCnt = response.data.totalCnt;
         })

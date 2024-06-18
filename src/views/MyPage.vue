@@ -9,8 +9,6 @@
 
       <v-form>
         <v-card class="dashboard-card">
-          <!-- <v-card-title class="subtitletext"></v-card-title> -->
-
           <div class="form-group">
             <div class="form-label">이름</div>
             <input
@@ -148,8 +146,6 @@ export default {
       this.axios
         .post("/sAlert/sMyPage.do", params)
         .then((response) => {
-          console.log(JSON.stringify(response));
-
           this.name = response.data.listData.name;
           this.userId = response.data.listData.loginID;
           this.userPw = response.data.listData.password;
@@ -162,11 +158,6 @@ export default {
     },
 
     updateMyPage() {
-      if (this.currentPassword !== this.userPw) {
-        alert("현재 비밀번호가 일치하지 않습니다.");
-        return;
-      }
-
       let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
 
       params.append("userPw", this.newPassword); // 새 비밀번호로 변경
@@ -176,8 +167,6 @@ export default {
       this.axios
         .post("/sAlert/sUpdateMyPage.do", params)
         .then((response) => {
-          console.log(JSON.stringify(response));
-
           if (response.data.result > 0) {
             alert(response.data.resultMsg);
 

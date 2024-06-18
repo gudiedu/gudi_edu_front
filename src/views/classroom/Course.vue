@@ -69,14 +69,6 @@
       ></paginate>
     </div>
 
-    <!-- <v-dialog v-model="satisfactionModal" max-width="600px">
-  <v-card>
-    <v-card-text>
-      <SatisfactionModal :action="action" />
-    </v-card-text>
-  </v-card>
-</v-dialog> -->
-
     <v-dialog v-model="attendanceModal" max-width="800px">
       <v-card>
         <v-card-text>
@@ -136,7 +128,6 @@ export default {
       this.axios
         .post("/classroom/sStudentCourseList.do", params)
         .then((response) => {
-          //console.log(JSON.stringify(response));
           vm.sCourseList = response.data.sStudentCourseInfo;
           vm.totalCnt = response.data.totalCnt;
         })

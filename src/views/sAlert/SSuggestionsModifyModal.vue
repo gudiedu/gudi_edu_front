@@ -45,9 +45,40 @@
 
         <v-col cols="12" class="box1">
           <div class="form-group">
+            <div class="form-label">카테고리</div>
+            <template v-if="isMySuggestion && !suggestionAnswered">
+              <select
+                name="suggestionCategory"
+                v-model="suggestionCategory"
+                class="form-input"
+              >
+                <option value="" disabled>카테고리를 선택하세요.</option>
+                <option
+                  v-for="category in categories"
+                  :key="category"
+                  :value="category"
+                >
+                  {{ category }}
+                </option>
+              </select>
+            </template>
+            <template v-else>
+              <input
+                readonly
+                type="text"
+                name="suggestionCategory"
+                v-model="suggestionCategory"
+                class="form-input"
+              />
+            </template>
+          </div>
+        </v-col>
+
+        <v-col cols="12" class="box1">
+          <div class="form-group">
             <div class="form-label">제목</div>
             <input
-              readonly
+              :readonly="!isMySuggestion || suggestionAnswered"
               type="text"
               name="suggestionTitle"
               v-model="suggestionTitle"
@@ -60,7 +91,7 @@
           <div class="form-group">
             <div class="form-label">내용</div>
             <textarea
-              readonly
+              :readonly="!isMySuggestion || suggestionAnswered"
               type="text"
               name="suggestionContent"
               v-model="suggestionContent"
@@ -72,6 +103,34 @@
         <v-col cols="12" class="box1" v-if="fileName">
           <div class="form-label">첨부파일</div>
           <div id="preview" v-html="previewHtml" @click="downLoad"></div>
+        </v-col>
+
+        <v-col cols="12" class="box1">
+          <form id="file-form" enctype="multipart/form-data">
+            <input
+              type="file"
+              id="file-insert"
+              name="file-insert"
+              @change="handleFileChange"
+              v-if="
+                isMySuggestion &&
+                !suggestionAnswered &&
+                (!fileName || removeFile === 'Y')
+              "
+            />
+            <v-btn
+              class="delete-button"
+              @click="deleteFile"
+              v-if="
+                isMySuggestion &&
+                !suggestionAnswered &&
+                fileName &&
+                removeFile !== 'Y'
+              "
+            >
+              첨부파일 삭제
+            </v-btn>
+          </form>
         </v-col>
 
         <template v-if="suggestionAnswered">
@@ -103,6 +162,12 @@
         v-if="isMySuggestion && !suggestionAnswered"
         >삭제</v-btn
       >
+      <v-btn
+        class="update-button"
+        @click="updateSuggestion"
+        v-if="isMySuggestion && !suggestionAnswered"
+        >수정</v-btn
+      >
       <v-btn class="goBack-button" @click="goBack">뒤로가기</v-btn>
     </div>
   </v-container>
@@ -111,19 +176,17 @@
 <script>
 export default {
   props: {
-    action: String,
     suggestionNo: Number,
-    // selectedSuggestion: Object,
   },
   data() {
     return {
-      paction: this.action,
       pSuggestionNo: this.suggestionNo,
       sessionLoginId: "",
       userLoginId: "",
       name: "",
       suggestionCreatedAt: "",
       suggestionTitle: "",
+      suggestionCategory: "",
       suggestionContent: "",
       suggestionAnswered: "",
       suggestionContentReply: "",
@@ -131,16 +194,13 @@ export default {
       previewHtml2: "",
       fileName: "",
       fileName2: "",
-      //suggestionAnswered: this.selectedSuggestion.suggestion_answered === true,
+      selectedFile: null,
+      removeFile: "N",
+      categories: ["학사", "시설", "장비", "서비스", "기타"],
     };
   },
   computed: {
     isMySuggestion() {
-      // 세션에서 가져온 사용자의 로그인 ID와 건의사항 작성자의 로그인 ID 비교
-      // console.log(
-      //   "세션: " + this.sessionLoginId,
-      //   "작성자: " + this.userLoginId
-      // );
       return this.sessionLoginId === this.userLoginId;
     },
   },
@@ -149,6 +209,44 @@ export default {
     this.selectSuggestionReply();
   },
   methods: {
+    updateSuggestion() {
+      //let vm = this;
+
+      let formTag = document.getElementById("file-form");
+      let dataWithFile = new FormData(formTag);
+      dataWithFile.append("pSuggestionNo", this.pSuggestionNo);
+      dataWithFile.append("suggestionTitle", this.suggestionTitle);
+      dataWithFile.append("suggestionContent", this.suggestionContent);
+      dataWithFile.append("suggestionCategory", this.suggestionCategory);
+      dataWithFile.append("removeFile", this.removeFile);
+
+      if (this.selectedFile) {
+        dataWithFile.append("file", this.selectedFile);
+      }
+      //console.log(dataWithFile.get("file"));
+
+      this.axios
+        .post("/sAlert/sUpdateSuggestion.do", dataWithFile)
+        .then((response) => {
+          if (response.data.result > 0) {
+            alert(response.data.resultMsg);
+            this.$emit("close-modal"); // 모달 닫기 이벤트 발생
+          }
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+
+    handleFileChange(event) {
+      this.selectedFile = event.target.files[0];
+    },
+
+    deleteFile() {
+      this.previewHtml = "";
+      this.removeFile = "Y";
+    },
+
     deleteSuggestion() {
       //let vm = this;
 
@@ -185,25 +283,16 @@ export default {
       this.axios
         .post("/sAlert/sSelectSuggestion.do", params)
         .then((response) => {
-          //console.log(JSON.stringify(response));
-          console.log(response.data);
-
           this.sessionLoginId = response.data.loginId;
           this.userLoginId = response.data.result.loginID;
           this.name = response.data.result.name;
           this.suggestionCreatedAt = response.data.result.suggestion_created_at;
           this.suggestionTitle = response.data.result.suggestion_title;
+          this.suggestionCategory = response.data.result.suggestion_category;
           this.suggestionContent = response.data.result.suggestion_content;
           this.suggestionAnswered = response.data.result.suggestion_answered;
-          //console.log(this.suggestionAnswered);
 
           this.ext = response.data.result.file_extension;
-
-          //response.data.result.file_name //파일이름
-          //response.data.result.logical_path //논리경로
-          //response.data.result.phygical_path //물리경로
-          //response.data.result.file_size //파일크기
-          //response.data.result.file_ext //파일확장자
 
           //파일 이미지 보여주거나, 파일 이름 보여주기
           if (
@@ -245,13 +334,11 @@ export default {
       this.axios
         .post("/sAlert/sSelectSuggestionReply.do", params)
         .then((response) => {
-          // Ensure response and result exist before accessing properties
           if (response.data && response.data.result) {
             this.suggestionContentReply =
               response.data.result.suggestion_reply_content || "";
             this.ext = response.data.result.file_extension || "";
 
-            // Check for file details before assigning values
             if (
               response.data.result.file_origin &&
               response.data.result.file_origin !== ""
@@ -300,8 +387,8 @@ export default {
         responseType: "blob", //파일에 대한 내용을 받으려면 추가해줘야 한다.
       }).then((response) => {
         //브라우저 있는 자바스크립 버전은 사용안함, node.js꺼 사용 => 그래서 이런 작업을 처리 해야함
-        console.log(response);
-        console.log(response.data);
+        //console.log(response);
+        //console.log(response.data);
         //Blob 데이터를 이진파일로 변환, 파일 데이터를 받아 바이너리 데이터로 만든 후 URL을 만든다.
         let FILE = window.URL.createObjectURL(new Blob([response.data]));
         //a 태그를 만들어서 이 태그 안에 파일 이름을 넣어
@@ -325,8 +412,8 @@ export default {
         responseType: "blob", //파일에 대한 내용을 받으려면 추가해줘야 한다.
       }).then((response) => {
         //브라우저 있는 자바스크립 버전은 사용안함, node.js꺼 사용 => 그래서 이런 작업을 처리 해야함
-        console.log(response);
-        console.log(response.data);
+        //.log(response);
+        //console.log(response.data);
         //Blob 데이터를 이진파일로 변환, 파일 데이터를 받아 바이너리 데이터로 만든 후 URL을 만든다.
         let FILE = window.URL.createObjectURL(new Blob([response.data]));
         //a 태그를 만들어서 이 태그 안에 파일 이름을 넣어
