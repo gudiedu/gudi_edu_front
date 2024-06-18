@@ -46,7 +46,7 @@
                   {{ item.course_end_date }}
                 </td>
                 <td>({{ item.respondent_count || 0 }} / {{ item.course_quota }})</td>
-                <td @click="viewSurveyResult(item)">결과확인</td>
+                <td @click="viewSurveyResult(item.course_no)">결과확인</td>
               </tr>
             </template>
           </template>
@@ -78,7 +78,7 @@
     <v-dialog v-model="viewSurveyResultModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ViewSurveyResultModal :action="action" :survey="selectedClassSurvey" />
+          <ViewSurveyResultModal :courseNo="selectedCourseNo" @close="viewSurveyResultModal = false" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -102,6 +102,7 @@ export default {
       viewSurveyResultModal: false,
       action: "",
       selectedClassSurvey: null,
+      selectedCourseNo: null, // 추가된 부분
       activeFilter: "all",
       stitle: "",
       ClassSurveyList: [],
@@ -152,9 +153,14 @@ export default {
       this.addModal = false;
     },
 
-    viewSurveyResult(item) {
-      this.selectedClassSurvey = item;
-      this.viewSurveyResultModal = true;
+    viewSurveyResult(courseNo) {
+      console.log("Selected course_no: ", courseNo); // 디버깅 로그 추가
+      if (courseNo !== null && courseNo !== undefined && courseNo !== "null") {
+        this.selectedCourseNo = String(courseNo); // 문자열로 변환
+        this.viewSurveyResultModal = true;
+      } else {
+        console.error("Invalid course_no:", courseNo); // course_no가 잘못된 경우 로그 출력
+      }
     },
 
     page: function () {
