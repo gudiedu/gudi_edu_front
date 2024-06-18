@@ -41,7 +41,7 @@
               <tr>
                 <td>{{ item.display_no }}</td>
                 <td>{{ item.loginID }}</td>
-                <td @click="noticeModify(item)">{{ item.notice_title }}</td>
+                <td @click="noticeSelect(item)">{{ item.notice_title }}</td>
                 <td>{{ item.notice_created_at }}</td>
               </tr>
             </template>
@@ -83,10 +83,10 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="modifyModal" max-width="800px" max-height="1000px">
+    <v-dialog v-model="selectModal" max-width="800px" max-height="1000px">
       <v-card>
         <v-card-text>
-          <NoticeModifyModal @close-modal="closeModifyModal" :action="action" :noticeNo="noticeNo" />
+          <NoticeSelectModal @close-modal="closeSelectModal" :action="action" :noticeNo="noticeNo" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -95,20 +95,20 @@
 
 <script>
 import NoticeModal from "./TNoticeModal.vue";
-import NoticeModifyModal from "./TNoticeModifyModal.vue";
+import NoticeSelectModal from "./TNoticeSelectModal.vue";
 import Paginate from "vuejs-paginate-next";
 
 export default {
   components: {
     NoticeModal,
-    NoticeModifyModal,
+    NoticeSelectModal,
     Paginate,
   },
   data() {
     return {
       titleText: "공지사항",
       addModal: false,
-      modifyModal: false,
+      selectModal: false,
       action: "",
       selectedNotice: null,
       activeFilter: "all",
@@ -197,9 +197,9 @@ export default {
       this.searchList();
     },
 
-    noticeModify(item) {
+    noticeSelect(item) {
       this.noticeNo = item.notice_no;
-      this.modifyModal = true;
+      this.selectModal = true;
     },
 
     openAddModal() {
@@ -210,8 +210,8 @@ export default {
       this.addModal = false;
       this.searchList();
     },
-    closeModifyModal() {
-      this.modifyModal = false;
+    closeSelectModal() {
+      this.selectModal = false;
       this.searchList();
     },
 
