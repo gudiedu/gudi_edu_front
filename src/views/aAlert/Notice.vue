@@ -203,10 +203,10 @@ export default {
     addNotice() {
       this.previewHtml = null;
       this.fileName = null;
+      this.noticeTitle = "";
+      this.noticeContent = "";
       this.action = "I";
       this.addModal = true;
-      this.notice_title = "";
-      this.notice_content = "";
     },
     /**
      * 타입별 페이지네이션을 위해 분배하는 메서드
