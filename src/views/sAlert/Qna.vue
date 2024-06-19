@@ -12,10 +12,11 @@
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
+              v-model="searchedWords"
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="qna_list">검색</button>
           </div>
         </div>
       </div>
@@ -121,6 +122,7 @@ export default {
       currentPage: 1,
       totalCnt: 0,
       pageSize: 10,
+      searchedWords: "",
     };
   },
   mounted(){
@@ -169,6 +171,7 @@ export default {
       qnaParams.append("question_content", this.question_content);
       qnaParams.append("question_created_at", this.question_created_at);
       qnaParams.append("name", this.name);
+      qnaParams.append("searchedWords", this.searchedWords);
       qnaParams.append("currentPage", this.currentPage);
       qnaParams.append("pageSize", this.pageSize);
 

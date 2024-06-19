@@ -14,7 +14,7 @@
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
-              v-model="stitle"
+              v-model="searchedWords"
             />
           </div>
           <div class="button-group">
@@ -111,6 +111,7 @@ export default {
       totalCnt: 0,
       pageSize: 10,
       testCategory:"",
+      searchedWords: "",
     };
   },
   mounted(){
@@ -121,6 +122,7 @@ export default {
     courseTestList(){
 
       let testListParams = new URLSearchParams();
+      testListParams.append("searchedWords", this.searchedWords);
 
       this.axios
         .post("/classroom/sTestList.do", testListParams)
@@ -173,9 +175,6 @@ export default {
         })
 
     },
-    searchMethod() {
-
-    },
 
     testDetail(courseNo, testCategory) {
       this.courseNo = courseNo;
@@ -202,7 +201,6 @@ export default {
         return result;
       }
     },
-
   },
 };
 </script>

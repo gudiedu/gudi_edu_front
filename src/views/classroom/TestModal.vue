@@ -35,7 +35,8 @@
         </template>
       </div>
       <div class="button-group">
-        <v-btn class="insert-button" @click="submitTest">등록</v-btn>
+        <v-btn class="goBack-button" @click="goBack">취소</v-btn>
+        <v-btn class="submit-button" @click="submitTest">등록</v-btn>
       </div>
   </form>
   </div>
@@ -155,6 +156,9 @@ export default {
         });
 
     },
+    goBack(){
+      this.$router.go(-1);
+    },
 
   },
 };
@@ -210,7 +214,6 @@ export default {
   gap: 8px;
 }
 
-.insert-button,
 .submit-button {
   padding: 10px 16px;
   color: #ffffff;

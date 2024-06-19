@@ -29,6 +29,7 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
+            <th>과목번호</th>
             <th>과목명</th>
             <th>강의명</th>
             <th>강사명</th>
@@ -42,6 +43,7 @@
         <tbody>
           <template v-for="course in enrollAvailable" :key="course.course_no">
             <tr>
+              <td @click="courseDetail(course.course_no)">{{ course.course_no }}</td>
               <td @click="courseDetail(course.course_no)">{{ course.course_subject }}</td>
               <td @click="courseDetail(course.course_no)">{{ course.course_name }}</td>
               <td @click="courseDetail(course.course_no)">{{ course.name }}</td>
@@ -49,7 +51,7 @@
               <td @click="courseDetail(course.course_no)">{{ course.course_start_date }}</td>
               <td @click="courseDetail(course.course_no)">{{ course.course_end_date }}</td>
               <td @click="courseDetail(course.course_no)">{{ course.course_quota }}</td>
-              <td @click="courseEnroll()">신청하기</td>
+              <td @click="courseEnroll(course.course_no)">신청하기</td>
             </tr>
         </template>
         </tbody>
@@ -125,16 +127,16 @@ export default {
       });
     },
 
-    courseEnroll(){
+    courseEnroll(courseNo){
+
+      this.courseNo = courseNo;
 
       let enrollInfo = document.getElementById("enrollment");
       let data = new FormData(enrollInfo);
-      data.append("openedNo", this.openedNo);
+      data.append("openedNo", this.courseNo);
       data.append("studentSignedID", this.studentSignedID);
 
-
-      console.log("수강신청번호: ", this.openedNo);
-
+      console.log("수강신청번호: ", this.courseNo);
 
       this.axios
         .post("/classroom/sEnrollInsert.do", data)
