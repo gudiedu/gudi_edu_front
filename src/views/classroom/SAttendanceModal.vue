@@ -24,7 +24,7 @@
               <td>{{ totalCourseDays }}일</td>
               <td>{{ attendanceDays }}일</td>
               <td>{{ absenceDays }}일</td>
-              <td>{{ attendanceRate }}%</td>
+              <td>{{ attendanceRate.toFixed(2) }}%</td>
               <td>{{ totalAllowanceAmount }}원</td>
             </tr>
           </tbody>
@@ -66,10 +66,10 @@ export default {
       courseName: "",
       courseStartDate: "",
       courseEndDate: "",
-      totalCourseDays: "",
-      attendanceDays: "",
-      absenceDays: "",
-      attendanceRate: "",
+      totalCourseDays: 0,
+      attendanceDays: 0,
+      absenceDays: 0,
+      attendanceRate: 0,
       totalAllowanceAmount: "",
       attendanceNotes: [],
       dayoffInfo: [],
@@ -78,11 +78,12 @@ export default {
   mounted() {
     this.attendanceList();
   },
+
   methods: {
     attendanceList() {
       let vm = this;
 
-      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
       params.append("pCourseNo", this.pCourseNo);
 
       this.axios
@@ -142,10 +143,8 @@ export default {
 
     calculateAttendanceRate() {
       if (this.totalCourseDays > 0) {
-        this.attendanceRate = (
-          (this.attendanceDays / this.totalCourseDays) *
-          100
-        ).toFixed(2);
+        this.attendanceRate =
+          (this.attendanceDays / this.totalCourseDays) * 100;
       } else {
         this.attendanceRate = 0;
       }
