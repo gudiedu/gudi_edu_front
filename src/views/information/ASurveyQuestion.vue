@@ -6,35 +6,12 @@
         <v-spacer></v-spacer>
       </v-card-title>
 
+      <div>설문코드 : {{ survey_no }}</div>
+      <div>설문조사명 : {{ survey_name }}</div>
+      
+
       <div class="container">
-        <!-- <div class="filter-button-group">
-			<v-btn
-			  :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-			  @click="findAll"
-			  >전체</v-btn
-			>
-			<v-btn
-			  :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-			  @click="findAdmin"
-			  >진행중</v-btn
-			>
-			<v-btn
-			  :class="{
-				'filter-button': true,
-				active: activeFilter === 'teacher',
-			  }"
-			  @click="findTeacher"
-			  >진행완료</v-btn
-			>
-			<v-btn
-			  :class="{
-				'filter-button': true,
-				active: activeFilter === 'teacher',
-			  }"
-			  @click="findTeacher"
-			  >진행예정</v-btn
-			>
-		  </div> -->
+
 
         <div class="search">
           <div class="search-container">
@@ -58,25 +35,23 @@
         <thead>
           <tr>
             <th>번호</th>
-            <th>설문코드</th>
             <th>상세질문번호</th>
-            <th>필수여부</th>
             <th>질문내용</th>
             <th>질문선택지</th>
             <th>질문유형</th>
           </tr>
         </thead>
-        <tbody>
+          <tbody>
+          <tr v-if="questionList.length === 0">
+            <td colspan="5" class="no-data">질문이 존재하지 않습니다. 질문을 등록해주세요.</td>
+          </tr>
           <tr v-for="(item, index) in questionList" :key="item.survey_question_no">
             <td>{{ index + 1 }}</td>
-            <td>{{ item.survey_no }}</td>
             <td>{{ item.survey_question_no }}</td>
-            <td>{{ item.survey_question_essential }}</td>
-            <td>{{ item.survey_question_text }}</td>
+            <td @click="qusetionModify(item)">{{ item.survey_question_text }}</td>
             <td>{{ item.question_choiced }}</td>
-            <td>{{ item.survey_question_type }}</td>
+            <td>{{ getQuestionType(item.survey_question_type) }}</td>
           </tr>
-         
         </tbody>
       </v-table>
     </v-card>
@@ -85,12 +60,19 @@
     <!-- 설문지 세트 만들기 추가 -->
 
     <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+      <button class="insert-button" @click="openAddModal">질문추가</button>
     </div>
-    <v-dialog v-model="addModal" max-width="800px">
+    <v-dialog v-model="addModal" max-width="800px" >
       <v-card>
         <v-card-text>
-          <ASurveyManagementModal :action="action" />
+          <ASurveyManagementModal 
+          :survey_question_text="survey_question_text" 
+          :survey_question_no="survey_question_no"
+          :question_choiced="question_choiced"
+          :survey_question_type = "survey_question_type"
+          :survey_no="survey_no" 
+          :action="action"  
+          @close="closeAddModal"/>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -99,10 +81,13 @@
 
 <script>
 import axios from 'axios';
-import ASurveyManagementModal from "./ASurveyManagementModal.vue";
+import ASurveyManagementModal from "./ASurveyQuestionModal.vue";
 export default {
   components: { ASurveyManagementModal },
-  props: ['survey_no'],
+  props: {
+    survey_no: Number,
+    survey_name: String
+  },
   data() {
     return {
       titleText: "질문관리",
@@ -111,14 +96,18 @@ export default {
       activeFilter: "all",
       stitle: "",
       questionList: [], //설문지 리스트 목록 저장할 배열
+      selectedNotice: null,
+      survey_question_no: "",
+      survey_question_text: "",
     };
   },
   created() {
     console.log("Received survey_no:", this.survey_no);
+    console.log("Received survey_name:", this.survey_name);
     // survey_no을 이용한 추가적인 로직
   },
 
-
+  
 
   mounted(){
     this.getQuestionList();
@@ -126,10 +115,20 @@ export default {
 
 
   methods: {
+    qusetionModify(question){
+    this.selectedNotice = question;
+    this.survey_question_no = question.survey_question_no;
+    this.survey_question_text = question.survey_question_text;
+    this.question_choiced = question.question_choiced;
+    this.survey_question_type = question.survey_question_type;
+    this.action = "U";
+    this.addModal = true;
+  },
     getQuestionList(){
       let surveyParams = new URLSearchParams();
       surveyParams.append("survey_no", this.survey_no);
       console.log(this.survey_no);
+      console.log(this.survey_name);
 
       axios.post('/survey/QuestionList.do', surveyParams)
       .then(response => {
@@ -143,6 +142,12 @@ export default {
     });
 
     },
+   
+    getQuestionType(questionType) {
+      return questionType === "written" ? '서술형' : '선택형';
+    },
+
+    
     findAll() {
       this.activeFilter = "all";
     },
@@ -153,16 +158,21 @@ export default {
       this.activeFilter = "teacher";
     },
     searchMethod() {},
-    surveyModify() {
-      this.action = "U";
-      this.addModal = true;
-    },
+
     openAddModal() {
+      this.selectedNotice = "";
+       // questionList에서 최대 survey_question_no를 찾아 +1
+      const maxQuestionNo = this.questionList.reduce((max, item) => {
+        return item.survey_question_no > max ? item.survey_question_no : max;
+      }, 0);
+      this.survey_question_no = maxQuestionNo + 1;
+      this.survey_question_text = "";
       this.action = "";
       this.addModal = true;
     },
     closeAddModal() {
       this.addModal = false;
+      this.getQuestionList();
     },
   },
 };
@@ -256,7 +266,7 @@ export default {
 .dashboard-table th,
 .dashboard-table td {
   padding: 12px;
-  text-align: left;
+  text-align: center;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
 }
@@ -268,5 +278,11 @@ export default {
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.no-data {
+  text-align: center; /* 가운데 정렬 */
+  font-weight: bold;
+  font-size: 16px;
 }
 </style>

@@ -37,7 +37,6 @@ export default {
   data() {
     return {
       paction: this.action,
-      // detail_code를 data 내부에 초기값으로 설정
       localDetailName: this.detail_name || '', // 수정할 데이터는 localDetailName으로 정의
     };
   },

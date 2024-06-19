@@ -7,34 +7,7 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-			<v-btn
-			  :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-			  @click="findAll"
-			  >전체</v-btn
-			>
-			<v-btn
-			  :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-			  @click="findAdmin"
-			  >진행중</v-btn
-			>
-			<v-btn
-			  :class="{
-				'filter-button': true,
-				active: activeFilter === 'teacher',
-			  }"
-			  @click="findTeacher"
-			  >진행완료</v-btn
-			>
-			<v-btn
-			  :class="{
-				'filter-button': true,
-				active: activeFilter === 'teacher',
-			  }"
-			  @click="findTeacher"
-			  >진행예정</v-btn
-			>
-		  </div> -->
+
 
         <div class="search">
           <div class="search-container">
@@ -63,16 +36,18 @@
             <th>총문항수</th>
             <th>객관식문항수</th>
             <th>주관식문항수</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(item, index) in surveyList" :key="item.survey_no">
             <td>{{ index + 1 }}</td>
             <td>{{ item.survey_no }}</td>
-            <td  @click="surveyRegister(item.survey_no)">{{ item.survey_name }}</td>
+            <td  @click="surveyRegister(item.survey_no, item.survey_name)">{{ item.survey_name }}</td>
             <td>{{ item.total_questions }}</td>
             <td>{{ item.choice_questions }}</td>
             <td>{{ item.written_questions }}</td>
+            <td @click="surveyModify(item)"><img src="https://cdn-icons-png.flaticon.com/512/17/17452.png" alt="setting" width="20" height="20"></td>
           </tr>
          
         </tbody>
@@ -83,12 +58,17 @@
     <!-- 설문지 세트 만들기 추가 -->
 
     <div class="button-group">
-      <button class="insert-button" @click="surveyRegister">등록</button>
+      <button class="insert-button" @click="openAddModal">설문지 등록</button>
     </div>
     <v-dialog v-model="addModal" max-width="800px">
       <v-card>
         <v-card-text>
-          <ASurveyManagementModal :action="action" />
+          <ASurveyManagementModal 
+            :action="action" 
+            :survey_no="survey_no" 
+            :survey_name="survey_name" 
+            @close="closeAddModal" 
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -102,12 +82,15 @@ export default {
   components: { ASurveyManagementModal },
   data() {
     return {
-      titleText: "설문지관리",
+      titleText: "설문조사문항관리",
       addModal: false,
       action: "",
       activeFilter: "all",
+      selectedNotice: null,
       stitle: "",
       surveyList: [], //설문지 리스트 목록 저장할 배열
+      survey_no: "",
+      survey_name: "",
     };
   },
   mounted(){
@@ -126,8 +109,18 @@ export default {
     .catch(error => {
       console.error('Error fetching surveyList:', error);
     });
-
     },
+
+    surveyModify(survey){
+      this.selectedNotice = survey;
+      this.survey_no = survey.survey_no;
+      this.survey_name = survey.survey_name;
+      this.action = "U";
+      this.addModal = true;
+      
+    },
+    
+
     findAll() {
       this.activeFilter = "all";
     },
@@ -138,23 +131,26 @@ export default {
       this.activeFilter = "teacher";
     },
     searchMethod() {},
-    surveyRegister(survey_no) {
+
+    surveyRegister(survey_no,survey_name) {
       this.$router.push({
-        name: "aSurveyManagementAdd",
-        params: { survey_no },
+        name: "aSurveyQuestion",
+        params: { 
+          survey_no,
+          survey_name
+         },
       });
     },
-
-    surveyModify() {
-      this.action = "U";
-      this.addModal = true;
-    },
+    
     openAddModal() {
       this.action = "";
+      this.survey_no = "";
+      this.survey_name = "";
       this.addModal = true;
     },
     closeAddModal() {
       this.addModal = false;
+      this.getSurveyList();
     },
   },
 };
