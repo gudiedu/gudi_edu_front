@@ -94,10 +94,10 @@ export default {
           this.testScore = each.test_score;
           this.testNo[index] = each.test_no;
         });
-        // // testNo에 값을 잘 추가했는지 확인하는 alert
-        //   for (let [key, value] of this.testNo.entries()) {
-        //     alert(`${key}: ${value}`);
-        //   }
+         // testNo에 값을 잘 추가했는지 확인하는 alert
+           for (let [key, value] of this.testNo.entries()) {
+             console.log(`${key}: ${value}`);
+           }
       })
     },
     // 시험 채점
@@ -131,10 +131,10 @@ export default {
       data.append("testQuestion", this.testQuestion);
       data.append("testNo", this.testNo);
 
-      // // FormData에 값을 잘 추가했는지 확인하는 alert
-      // for (let [key, value] of data.entries()) {
-      //   alert(`${key}: ${value}`);
-      // }
+       // FormData에 값을 잘 추가했는지 확인하는 alert
+       for (let [key, value] of data.entries()) {
+         alert(`${key}: ${value}`);
+       }
 
       this.axios
         .post("/classroom/sTestSubmit.do", data)
@@ -142,6 +142,7 @@ export default {
           console.log("너의 정체가 무엇이냐: ",JSON.stringify(response));
 
           if (response.data.result > 0) {
+            alert("result값알려주라: " + response.data.result);
             alert(response.data.resultMsg);
             
             this.calculateTest();

@@ -39,7 +39,7 @@
         </thead>
         <tbody>
           <template v-for="test in sTestList" :key="test.course_no">
-            <tr @click="testDetail(test.course_no, test.test_category)">
+            <tr @click="testDetail(test.course_no, test.test_category, test.result_no)">
               <td>{{ test.course_subject }}</td>
               <td>{{ test.course_name }}</td>
               <td>{{ test.name }}</td>
@@ -83,6 +83,19 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="testResultModal">
+      <v-card>
+        <v-card-text>
+          <testResultModal
+           :action="action"
+           :courseNo="courseNo"
+           :testCategory="testCategory"
+           :testResultNo="testResultNo"
+           @close-modal="closeTestModal"
+          />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 
 
 
@@ -91,11 +104,13 @@
 
 <script>
 import testModal from "./TestModal.vue";
- import Paginate from "vuejs-paginate-next";
+import testResultModal from "./TestResultModal.vue";
+import Paginate from "vuejs-paginate-next";
 
 export default {
   components: {
     testModal,
+    testResultModal,
      Paginate,
   },
   data() {
@@ -107,11 +122,13 @@ export default {
       studentSignedID : "",
       testList: [],
       testModal: false,
+      testResultModal: false,
       currentPage: 1,
       totalCnt: 0,
       pageSize: 10,
       testCategory:"",
       searchedWords: "",
+      testResultNo: "",
     };
   },
   mounted(){
@@ -176,12 +193,22 @@ export default {
 
     },
 
-    testDetail(courseNo, testCategory) {
+    testDetail(courseNo, testCategory, testResultNo) {
+
       this.courseNo = courseNo;
       this.testCategory = testCategory;
-      this.testModal = true;
+      this.testResultNo = testResultNo;
+
       console.log("courseNo: ", this.courseNo);
       console.log("testCategory : ", this.testCategory);
+      console.log("testResultNo", this.testResultNo);
+      console.log("testResultNo == 0: ", this.testResultNo == 0);
+      
+      if(testResultNo == 0){
+        this.testModal = true;
+      } else {
+        this.testResultModal = true;
+      }
     },
 
     closeTestModal(){
