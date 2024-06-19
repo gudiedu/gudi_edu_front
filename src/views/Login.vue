@@ -12,25 +12,11 @@
           <h1>GUDI Login</h1>
           <p class="id">
             <!-- <label for="userId">아이디</label> -->
-            <input
-              v-model="loginId"
-              type="text"
-              placeholder="아이디"
-              style="ime-mode: inactive"
-              id="userId"
-              ref="userId"
-            />
+            <input v-model="loginId" type="text" placeholder="아이디" style="ime-mode: inactive" id="userId" ref="userId" />
           </p>
           <p class="pw">
             <!-- <label for="userPwd">비밀번호</label> -->
-            <input
-              v-model="pwd"
-              type="password"
-              placeholder="비밀번호"
-              onfocus="this.placeholder=''; return true"
-              id="userPwd"
-              ref="userPwd"
-            />
+            <input v-model="pwd" type="password" placeholder="비밀번호" onfocus="this.placeholder=''; return true" id="userPwd" ref="userPwd" />
           </p>
           <p class="member_info">
             <input v-model="saveId" id="cb_saveId" type="checkbox" />
@@ -119,8 +105,7 @@ export default {
     setCookie: function (name, value, day) {
       let today = new Date();
       today.setDate(today.getDate() + day);
-      document.cookie =
-        name + "=" + value + "; path=/; expires=" + today.toUTCString() + ";";
+      document.cookie = name + "=" + value + "; path=/; expires=" + today.toUTCString() + ";";
     },
     getCookie: function (name) {
       //쿠키에서 loginId 값을 가져온다.
