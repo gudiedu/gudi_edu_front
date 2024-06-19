@@ -109,12 +109,25 @@
 
       <v-row>
         <v-col cols="12" class="box1" v-if="fileName">
-          <div class="form-label">첨부파일</div>
+          <div class="preview_wrapper">
+            <div class="form-label">첨부파일</div>
+            <v-btn
+              class="close-button"
+              icon
+              @click="deleteFile"
+              v-if="
+                isMySuggestion &&
+                !suggestionAnswered &&
+                fileName &&
+                removeFile !== 'Y'
+              "
+            >
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
           <div id="preview" v-html="previewHtml" @click="downLoad"></div>
         </v-col>
-      </v-row>
 
-      <v-row>
         <v-col cols="12" class="box1">
           <form id="file-form" enctype="multipart/form-data">
             <input
@@ -128,7 +141,7 @@
                 (!fileName || removeFile === 'Y')
               "
             />
-            <v-btn
+            <!-- <v-btn
               class="delete-button"
               @click="deleteFile"
               v-if="
@@ -139,7 +152,7 @@
               "
             >
               첨부파일 삭제
-            </v-btn>
+            </v-btn> -->
           </form>
         </v-col>
       </v-row>
@@ -533,5 +546,18 @@ export default {
 .delete-button:hover {
   background-color: #e57373;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
+
+.close-button {
+  position: relative;
+  left: 10px;
+  bottom: 5px;
+  width: 30px;
+  height: 30px;
+}
+
+.preview_wrapper {
+  display: flex;
+  flex-direction: row;
 }
 </style>

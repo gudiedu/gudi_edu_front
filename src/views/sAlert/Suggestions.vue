@@ -17,6 +17,17 @@
               v-model="stitle"
             />
           </div>
+          <select class="search-category" v-model="scategory">
+            <option value="" disabled>카테고리를 선택하세요.</option>
+            <option value="">선택 취소</option>
+            <option
+              v-for="category in categories"
+              :key="category"
+              :value="category"
+            >
+              {{ category }}
+            </option>
+          </select>
           <div class="button-group">
             <button class="search-button" @click="searchList">검색</button>
           </div>
@@ -29,6 +40,7 @@
         <thead>
           <tr>
             <th>글번호</th>
+            <th>분류</th>
             <th>제목</th>
             <th>작성자</th>
             <th>등록일</th>
@@ -43,6 +55,7 @@
                 @click="suggestionModify(item.suggestion_no)"
               >
                 <td>{{ item.suggestion_no }}</td>
+                <td>{{ item.suggestion_category }}</td>
                 <td>
                   {{ item.suggestion_title }}
                 </td>
@@ -126,11 +139,13 @@ export default {
       action: "",
       activeFilter: "all",
       stitle: "",
+      scategory: "",
       suggestionList: [],
       totalCnt: 0,
       pageSize: 10,
       currentPage: 1,
       suggestionNo: 0,
+      categories: ["학사", "시설", "장비", "서비스", "기타"],
     };
   },
   mounted() {
@@ -159,6 +174,7 @@ export default {
     searchList() {
       let params = new URLSearchParams();
       params.append("stitle", this.stitle);
+      params.append("scategory", this.scategory);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
 
@@ -242,6 +258,13 @@ export default {
 .search {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
 }
 
 .search-input {
@@ -250,6 +273,14 @@ export default {
   border: none;
   outline: none;
   font-size: 16px;
+}
+
+.search-category {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-left: 16px;
+  font-size: 16px;
+  background-color: #fff;
 }
 
 .button-group {
