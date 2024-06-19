@@ -10,28 +10,28 @@
         <div class="filter-button-group">
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
+            @click="findStatus('all')"
             >전체</v-btn
           >
           <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
+            :class="{ 'filter-button': true, active: activeFilter === 'ing' }"
+            @click="findStatus('ing')"
             >진행중</v-btn
           >
           <v-btn
             :class="{
               'filter-button': true,
-              active: activeFilter === 'teacher',
+              active: activeFilter === 'complete',
             }"
-            @click="findTeacher"
+            @click="findStatus('complete')"
             >진행완료</v-btn
           >
           <v-btn
             :class="{
               'filter-button': true,
-              active: activeFilter === 'teacher',
+              active: activeFilter === 'expect',
             }"
-            @click="findTeacher"
+            @click="findStatus('expect')"
             >진행예정</v-btn
           >
         </div>
@@ -47,7 +47,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="searchList">검색</button>
           </div>
         </div>
       </div>
@@ -55,12 +55,23 @@
       <v-divider></v-divider>
 
       <v-table class="dashboard-table">
+        <colgroup>
+          <col width="8%" />
+          <col width="*" />
+          <col width="11%" />
+          <col width="11%" />
+          <col width="11%" />
+          <col width="13%" />
+          <col width="13%" />
+          <col width="9%" />
+          <col width="11%" />
+      </colgroup>
         <thead>
           <tr>
             <th>글번호</th>
             <th>강의명</th>
-            <th>강사명</th>
-            <th>수강인원</th>
+            <th>강의과목</th>
+            <th>수강정원</th>
             <th>수강기간</th>
             <th>시작일</th>
             <th>종료일</th>
@@ -69,85 +80,200 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td @click="getLectureDetail">Vue</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행중</td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td @click="getLectureDetail">Java</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행예정</td>
-          </tr>
+
+          <template v-if="totalCnt > 0">
+            <template v-for="(item, index) in courseList" :key="item.course_no">
+              <tr>
+                <td>{{ index + 1 + (currentPage - 1) * pageSize }}</td>
+                <td @click="getLectureDetail(item.course_no)">
+                  {{ item.course_name }}
+                </td>
+                <td>{{ item.course_subject}}</td>
+                <td>{{ item.course_quota}}명</td>
+                <td>{{ item.duration}}일</td>
+                <td>{{ item.course_start_date}}</td>
+                <td>{{ item.course_end_date}}</td>
+                <td>{{ item.course_loc}}</td>
+                <td>{{ getCourseStatus(item.course_start_date, item.course_end_date) }}</td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
+            <tr>
+              <td colspan="9">조회된 데이터가 없습니다.</td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
+    
+    <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
+    </div>
 
     <!-- 페이지네이션 추가-->
 
     <div class="button-group">
       <button class="insert-button" @click="openAddModal">강의등록</button>
     </div>
-    <v-dialog v-model="addModal" max-width="700px">
+    <!-- <v-dialog v-model="addModal" max-width="700px">
       <v-card>
         <v-card-text>
           <LectureManagementModal :action="action" />
         </v-card-text>
       </v-card>
-    </v-dialog>
+    </v-dialog> -->
   </v-container>
 </template>
 
 <script>
 import LectureManagementModal from "./TCourseModal.vue";
+import Paginate from 'vuejs-paginate-next';
+import { openModal } from 'jenesius-vue-modal'
+
 export default {
-  components: { LectureManagementModal },
+  components: { Paginate },
   data() {
     return {
       titleText: "강의목록",
       addModal: false,
       action: "",
-      selectedNotice: null,
       activeFilter: "all",
       stitle: "",
+      status: "",
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
+      courseList: [],
+      opoupreturn:"",
+
+
     };
   },
+    mounted() {
+    this.searchList()
+  },
   methods: {
-    findAll() {
-      this.activeFilter = "all";
+
+    searchList: function () {
+
+      let vm = this //this를 axios안에서 사용할 수 없으므로 별도로 할달을 빼놓았음
+
+      let params = new URLSearchParams() //파라미터를 넘길 때 사용
+      params.append('stitle', this.stitle)
+      params.append('status', this.status)
+      params.append('currentPage', this.currentPage)
+      params.append('pageSize', this.pageSize)
+
+      this.axios
+        .post('/tCourse/listCourse', params)
+        .then((response) => {
+          // console.log(JSON.stringify(response))
+
+          vm.courseList = response.data.listdata
+          vm.totalCnt = response.data.totalcnt
+        })
+        .catch(function (error) {
+          alert('에러! API 요청에 오류가 있습니다. ' + error)
+        })
     },
-    findAdmin() {
-      this.activeFilter = "admin";
+    findStatus(param) {
+      if (param === "all") {
+        this.activeFilter = param;
+        this.currentPage = 1;
+        this.status = "";
+      } else if (param === "ing") {
+        this.activeFilter = param;
+        this.currentPage = 1;
+        this.status = param;
+      } else if (param === "complete") {
+        this.activeFilter = param;
+        this.currentPage = 1;
+        this.status = param;
+      } else if (param ==="expect") {
+        this.activeFilter = param;
+        this.currentPage = 1;
+        this.status = param;
+      }
+
+      this.searchList();
+
     },
-    findTeacher() {
-      this.activeFilter = "teacher";
+
+    getCourseStatus(startdate, enddate) {
+      const currentDate = new Date();
+      const start = new Date(startdate);
+      const end = new Date(enddate);
+
+      if (currentDate < start) {
+        return "진행예정";
+      } else if (currentDate >= start && currentDate <= end) {
+        return "진행중";
+      } else if (currentDate > end) {
+        return "진행완료";
+      }
+
     },
-    searchMethod() {},
+    openPopup: async function () {
+      const popUpVar = await openModal(LectureManagementModal, {
+        
+        title: this.pTitle,
+        courseNo: "",
+        action: this.action,
+        retrunval: (value) => {
+          this.opoupreturn = value
+          console.log('return val : ' + value)
+        },
+      })
+
+      popUpVar.onclose = () => {
+        console.log('Close')
+        //팝업창이 닫히면 리스트 다시 새로고침 (등록, 수정 한 데이터가 업로드 된다.)
+        if (this.opoupreturn === 'Y') {
+          this.searchList()
+        }
+        // return false;
+      }
+
+      console.log(popUpVar)
+    },
 
     openAddModal() {
-      this.action = "";
-      this.addModal = true;
+      this.action = "I";
+      this.openPopup();
+
     },
     closeAddModal() {
-      this.addModal = false;
     },
-    getLectureDetail() {
+    getLectureDetail(courseNo) {
       this.$router.push({
         name: "tCourseDetail",
-        params: {},
+        params: {course_no: courseNo},
       });
+    },
+    page: function () {
+      var total = this.totalCnt
+      var page = this.pageSize
+      var xx = total % page
+      var result = parseInt(total / page)
+
+      if (xx == 0) {
+        return result
+      } else {
+        result = result + 1
+        return result
+      }
     },
   },
 };
@@ -243,7 +369,7 @@ export default {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .dashboard-table th {

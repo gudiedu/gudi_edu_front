@@ -4,20 +4,20 @@
 
     <div class="form-group">
       <div class="form-label">날짜</div>
-      <input type="text" name="date" class="form-input" />
+      <input type="date" name="date" class="form-input" v-model="dayoff_date" />
     </div>
     <div class="form-group">
       <div class="form-label">공휴일</div>
-      <input type="text" name="holliday" class="form-input" />
+      <input type="text" name="holliday" class="form-input" v-model="dayoff_detail"/>
     </div>
 
     <div class="button-group">
-      <template v-if="paction === 'U'">
-        <v-btn class="update-button" @click="updateNotice">수정</v-btn>
-        <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
+      <template v-if="action === 'U'">
+        <v-btn class="update-button" @click="updateDay">수정</v-btn>
+        <v-btn class="delete-button" @click="deleteDay">삭제</v-btn>
       </template>
       <template v-else>
-        <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
+        <v-btn class="insert-button" @click="insertDay">등록</v-btn>
       </template>
     </div>
   </div>
@@ -27,16 +27,84 @@
 export default {
   props: {
     action: String,
+    dayoff_no: String,
+
   },
   data() {
     return {
-      paction: this.action,
+      dayoff_date:"",
+      dayoff_detail:"",
+      paction:"",
+      
+
     };
   },
+  mounted() {
+    this.dayoff();
+  },
   methods: {
-    updateNotice() {},
-    deleteNotice() {},
-    insertNotice() {},
+    dayoff() {
+      if (this.action === "U") {
+        let params = new URLSearchParams()
+        params.append('dayoff_no', this.dayoff_no)
+
+
+        this.axios
+          .post('/support/keySchedule', params)
+          .then((response) => {
+            // console.log(JSON.stringify(response))
+            const schedule = response.data.schedule;
+            this.dayoff_date = schedule.dayoff_date;
+            this.dayoff_detail = schedule.dayoff_detail;
+
+  
+          })
+          .catch(function (error) {
+            alert('에러! api요청 ' + error)
+          })
+
+        }
+      
+
+    },
+    saveDay() {
+      
+      let params = new URLSearchParams()
+      params.append('dayoff_date', this.dayoff_date)
+      params.append('dayoff_detail', this.dayoff_detail)
+      params.append('dayoff_no', this.dayoff_no)
+      params.append('paction', this.paction)
+
+
+      this.axios
+        .post('/support/saveSchedule', params)
+        .then((response) => {
+          // console.log(JSON.stringify(response))
+          alert(response.data.resultMsg)
+          this.$emit('close-modal');
+          this.$emit('execute-search-list');
+ 
+        })
+        .catch(function (error) {
+          alert('에러! api요청 ' + error)
+        })
+        
+        
+
+    },
+    updateDay() {
+      this.paction = "U";
+      this.saveDay();
+      
+    },
+    deleteDay() {
+      this.paction = "D";
+      this.saveDay();
+    },
+    insertDay() {
+      this.paction = "I";
+      this.saveDay();
+    },
   },
 };
 </script>

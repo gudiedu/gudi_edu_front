@@ -5,7 +5,7 @@
       <chat-list :chats="chats" @select-chat="selectChat"></chat-list>
     </div>
     <div class="chat-room-container">
-      <chat-room v-if="selectedChat" :chat-room="selectedChat"></chat-room>
+      <chat-room v-if="selectedChat" :loginID="loginID" :chatRoom="selectedChat"></chat-room>
     </div>
   </div>
     
@@ -21,11 +21,9 @@ import ChatRoom from './ChatRoom.vue';
 export default {
   data: function () {
     return {
-      chats: [
-        { id: 1, name: 'Chat Room 1', participants: 3 },
-        { id: 2, name: 'Chat Room 2', participants: 5 }
-      ], // 채팅방 목록 데이터
-      selectedChat: null // 선택된 채팅방
+      chats: [], 
+      selectedChat: null,
+      loginID:"", 
 
     };
   },
@@ -39,14 +37,14 @@ export default {
     searchlist: function () {
       let vm = this;
 
-
-
       this.axios
-        .post("")
+        .post("/support/myChatRoomList")
         .then((response) => {
-          console.log(JSON.stringify(response));
+          console.log(JSON.stringify(response.data.listdata));
 
-          vm.list = response.data.list;
+          vm.chats = response.data.listdata;
+          vm.loginID = response.data.loginID;
+
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
