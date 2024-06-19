@@ -261,8 +261,8 @@ export default {
       this.RegMemberModall = false;
     },
     navigateToStudentAttendance(student){
-      this.$store.dispatch('updateStudentInfo', student);
-      this.$router.push({ name : 'aStudentAttendance' });
+      // this.$store.dispatch('updateStudentInfo', student);
+      this.$router.push({ name : 'aStudentAttendance', params: {studentId: student.loginID} });
     },
   },
 };
