@@ -116,7 +116,7 @@
               @change="handleFileChange"
             />
           </form>
-          <v-btn class="insert-button" @click.prevent="insertSuggestion"
+          <v-btn class="insert-button" @click.prevent="insertReply"
             >등록</v-btn
           >
         </div>
@@ -218,6 +218,11 @@ export default {
       let formTag = document.getElementById("file-form");
       let dataWithFile = new FormData(formTag);
 
+      if (this.replyContent === "" || this.replyContent === undefined) {
+        alert("내용을 입력해주세요");
+        return;
+      }
+
       dataWithFile.append("suggestion_reply_content", this.replyContent);
       console.log(this.replyContent);
       dataWithFile.append(
@@ -280,9 +285,14 @@ export default {
         });
     },
     /** 건의사항 답변 등록 */
-    insertSuggestion() {
+    insertReply() {
       let formTag = document.getElementById("file-form");
       let dataWithFile = new FormData(formTag);
+
+      if (this.replyContent === "" || this.replyContent === undefined) {
+        alert("내용을 입력해주세요");
+        return;
+      }
 
       dataWithFile.append("suggestion_reply_content", this.replyContent);
       dataWithFile.append(

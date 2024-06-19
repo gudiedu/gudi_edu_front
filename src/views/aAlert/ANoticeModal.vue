@@ -150,9 +150,7 @@
           </form>
           <v-btn
             class="insert-button"
-            @click.prevent="
-              updateNotice(noticeNo, noticeTitle, noticeContent)
-            "
+            @click.prevent="updateNotice(noticeNo, noticeTitle, noticeContent)"
             >수정</v-btn
           >
         </template>
@@ -209,6 +207,15 @@ export default {
     updateNotice(noticeNo, noticeTitle, noticeContent) {
       let vm = this;
 
+      if (noticeTitle === "" || noticeTitle === undefined) {
+        alert("제목을 입력해주세요");
+        return;
+      }
+      if (noticeContent === "" || noticeContent === undefined) {
+        alert("본문을 입력해주세요");
+        return;
+      }
+
       let formTag = document.getElementById("file-form");
       let dataWithFile = new FormData(formTag);
       dataWithFile.append("notice_title", noticeTitle);
@@ -234,7 +241,7 @@ export default {
     changeNotice() {
       this.paction = "U";
     },
-    /** 
+    /**
      * 공지사항 삭제 메서드
      * @param {string} noticeNo - 공지사항 번호
      */
@@ -263,6 +270,15 @@ export default {
     insertNotice(noticeTitle, noticeContent) {
       let vm = this;
 
+      if (noticeTitle === "" || noticeTitle === undefined) {
+        alert("제목을 입력해주세요");
+        return;
+      }
+      if (noticeContent === "" || noticeContent === undefined) {
+        alert("본문을 입력해주세요");
+        return;
+      }
+
       let formTag = document.getElementById("file-form");
       let dataWithFile = new FormData(formTag);
       dataWithFile.append("notice_title", noticeTitle);
@@ -280,13 +296,13 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
-    /** 
+    /**
      * 첨부파일 입력 감지 메서드
      */
     handleFileChange(event) {
       this.selectedFile = event.target.files[0];
     },
-    /** 
+    /**
      * 첨부파일 삭제 메서드
      */
     deleteFile() {
@@ -294,7 +310,8 @@ export default {
       this.removeFile = "Y";
       this.fileName = null;
     },
-    /** 
+    checkNotice(noticeTitle, noticeContent) {},
+    /**
      * 첨부파일 다운로드 메서드
      */
     download: function () {
