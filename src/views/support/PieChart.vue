@@ -1,6 +1,6 @@
 <template>
   <div class="chart-container">
-    <canvas ref="barChart"></canvas>
+    <canvas ref="pieChart"></canvas>
   </div>
 </template>
 
@@ -10,7 +10,7 @@ import { Chart, registerables } from "chart.js";
 Chart.register(...registerables);
 
 export default {
-  name: "BarChart",
+  name: "PieChart",
   props: {
     results: {
       type: Array,
@@ -25,8 +25,8 @@ export default {
       const labels = this.results.map((result) => result.choice_result);
       const data = this.results.map((result) => result.choice_count);
 
-      new Chart(this.$refs.barChart, {
-        type: "bar",
+      new Chart(this.$refs.pieChart, {
+        type: "pie", // 도넛 차트 타입으로 변경
         data: {
           labels: labels,
           datasets: [
@@ -42,31 +42,32 @@ export default {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1, // y축의 간격을 1로 설정하여 자연수만 표시
-                callback: function (value) {
-                  if (Number.isInteger(value)) {
-                    return value;
-                  }
-                },
-              },
-            },
-          },
-          layout: {
-            padding: {
-              bottom: 0,
-            },
-          },
+          // scales: {
+          //   y: {
+          //     beginAtZero: true,
+          //     ticks: {
+          //       stepSize: 1, // y축의 간격을 1로 설정하여 자연수만 표시
+          //       callback: function (value) {
+          //         if (Number.isInteger(value)) {
+          //           return value;
+          //         }
+          //       },
+          //     },
+          //   },
+          // },
+          // layout: {
+          //   padding: {
+          //     bottom: 0,
+          //   },
+          // },
+          cutout: "30%", // 도넛 차트의 중앙 부분을 비워서 도넛 형태로 만듭니다
           plugins: {
             legend: {
               display: true,
-              position: "right", // 범례를 오른쪽에 표시
+              position: "right",
               labels: {
-                boxWidth: 10, // 범례 상자의 너비를 10으로 설정
-                boxHeight: 10, // 범례 상자의 높이를 10으로 설정
+                boxWidth: 10,
+                boxHeight: 10,
                 generateLabels: function (chart) {
                   const datasets = chart.data.datasets[0];
                   return chart.data.labels.map((label, i) => ({

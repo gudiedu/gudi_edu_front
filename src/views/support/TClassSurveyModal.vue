@@ -9,7 +9,9 @@
           <p id="qsurveyText" class="survey-text">{{ result.survey_question_text }}</p>
 
           <div v-if="hasChoices(result.survey_question_no)">
-            <BarChart :results="getResultsByQuestionNo(result.survey_question_no)" />
+            <div class="chart-wrapper">
+              <PieChart :results="getResultsByQuestionNo(result.survey_question_no)" />
+            </div>
           </div>
 
           <div v-else>
@@ -27,11 +29,11 @@
 </template>
 
 <script>
-import BarChart from "./BarChart.vue";
+import PieChart from "./PieChart.vue";
 
 export default {
   components: {
-    BarChart,
+    PieChart,
   },
   props: {
     courseNo: {
@@ -78,13 +80,17 @@ export default {
 
 <style scoped>
 .survey-number {
-  font-size: 18px; /* 원하는 크기로 설정 */
+  font-size: 17px; /* 원하는 크기로 설정 */
+  font-weight: 600;
   text-align: center;
+  margin-bottom: 8px; /* 텍스트와 그래프 사이의 간격을 줄이기 위해 수정 */
 }
 
 .survey-text {
-  font-size: 18px; /* 원하는 크기로 설정 */
+  font-size: 17px; /* 원하는 크기로 설정 */
+  font-weight: 600;
   text-align: center;
+  margin-bottom: 0; /* 텍스트와 그래프 사이의 간격을 줄이기 위해 수정 */
 }
 
 #survey-detail {
@@ -102,14 +108,18 @@ export default {
   font-weight: 600;
   margin-bottom: 16px;
   color: #2c3e50;
+  margin-bottom: 50px;
 }
 
 .modal-content {
-  margin-bottom: 16px;
+  margin-bottom: 50px; /* 문항 간의 간격을 넓히기 위해 수정 */
+}
+
+.chart-wrapper {
+  margin-top: 8px; /* 그래프와 문항 텍스트 사이의 간격을 줄이기 위해 추가 */
 }
 
 .chart-container {
-  margin-top: 16px;
   background-color: #f9f9f9;
   padding: 16px;
   border-radius: 8px;

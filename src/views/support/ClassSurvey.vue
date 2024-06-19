@@ -20,7 +20,10 @@
 
       <v-divider></v-divider>
 
-      <v-table class="dashboard-table">
+      <div v-if="isLoading" class="loading-container">
+        <v-progress-circular :size="50" :width="4" color="primary" indeterminate></v-progress-circular>
+      </div>
+      <v-table v-else class="dashboard-table">
         <thead>
           <tr>
             <th>글번호</th>
@@ -35,16 +38,10 @@
           <template v-if="totalCnt > 0">
             <template v-for="(item, index) in ClassSurveyList" :key="item.ClassSurvey_no">
               <tr>
-                <td>
-                  {{ totalCnt - ((currentPage - 1) * pageSize + index) }}
-                </td>
+                <td>{{ totalCnt - ((currentPage - 1) * pageSize + index) }}</td>
                 <td>{{ item.course_name }}</td>
-                <td>
-                  {{ item.course_start_date }}
-                </td>
-                <td>
-                  {{ item.course_end_date }}
-                </td>
+                <td>{{ item.course_start_date }}</td>
+                <td>{{ item.course_end_date }}</td>
                 <td>({{ item.respondent_count || 0 }} / {{ item.course_quota }})</td>
                 <td @click="viewSurveyResult(item.course_no)">결과확인</td>
               </tr>
@@ -109,6 +106,7 @@ export default {
       totalCnt: 0,
       pageSize: 10,
       currentPage: 1,
+      isLoading: false,
     };
   },
 
@@ -122,12 +120,11 @@ export default {
       this.$refs.searchButton.click(); // 엔터 키를 누르면 검색 버튼을 클릭
     },
 
-    // 기존 methods...
-
     searchList: function () {
       let vm = this;
+      vm.isLoading = true; // 로딩 시작
 
-      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
       params.append("stitle", this.stitle);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
@@ -143,6 +140,9 @@ export default {
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
+        })
+        .finally(() => {
+          vm.isLoading = false; // 로딩 종료
         });
     },
 
@@ -275,5 +275,12 @@ export default {
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 </style>
