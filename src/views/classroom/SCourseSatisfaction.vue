@@ -117,6 +117,7 @@ export default {
         .then((response) => {
           if (response.data.result >= 0) {
             alert("설문이 저장되었습니다.");
+            this.$router.push("/dashboard/classroom/course");
           } else {
             alert("설문 저장 실패: " + response.data.resultMsg);
           }
