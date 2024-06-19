@@ -88,19 +88,23 @@
       </div>
       <div class="form-group" v-if="replyFileName">
         <div class="form-label">첨부파일</div>
-        <div
-          id="preview"
-          clsss="preview"
-          v-html="replyPreviewHtml"
-          @click="download(responseReply.file_no, replyFileName)"
-        ></div>
-        <div
-          v-if="action === 'U' || action === 'I'"
-          class="x-box"
-          @click.prevent="deleteFile"
-        >
-          X
-        </div>
+        <v-row>
+          <v-col cols="12" sm="3" class="box1">
+            <div
+              id="preview"
+              clsss="preview"
+              v-html="replyPreviewHtml"
+              @click="download(responseReply.file_no, replyFileName)"
+            ></div>
+          </v-col>
+          <div
+            v-if="action === 'U' || action === 'I'"
+            class="x-box"
+            @click.prevent="deleteFile"
+          >
+            X
+          </div>
+        </v-row>
       </div>
       <template v-if="action === 'I'">
         <div class="button-group">
@@ -172,6 +176,7 @@ export default {
     };
   },
   methods: {
+    /** 선택된 건의사항 불러오기 */
     selectSuggestion() {
       let vm = this;
 
@@ -208,6 +213,7 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    /**  건의사항 답변 수정  */
     updateSuggestion() {
       let formTag = document.getElementById("file-form");
       let dataWithFile = new FormData(formTag);
@@ -235,6 +241,7 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    /** 건의사항 답변 삭제 */
     deleteReply() {
       let params = new URLSearchParams();
       params.append(
@@ -255,6 +262,7 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    /** 건의사항 삭제 */
     deleteSuggestion() {
       let params = new URLSearchParams();
       params.append("suggestion_no", this.responseSuggestion.suggestion_no);
@@ -271,6 +279,7 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    /** 건의사항 답변 등록 */
     insertSuggestion() {
       let formTag = document.getElementById("file-form");
       let dataWithFile = new FormData(formTag);
@@ -297,6 +306,7 @@ export default {
     handleFileChange(event) {
       this.selectedFile = event.target.files[0];
     },
+    /** 첨부파일 삭제 */
     deleteFile() {
       this.replyPreviewHtml = "";
       this.replyFileName = null;
@@ -305,6 +315,10 @@ export default {
     toggleUpdate() {
       this.action = "U";
     },
+    /**
+     * 미리보기 HTML 생성
+     * @param {Object} suggestion - response된 건의사항 객체
+     */
     previewHtml(suggestion) {
       if (suggestion.file_no) {
         let ext = suggestion.file_extension;
@@ -325,6 +339,11 @@ export default {
       }
       return "";
     },
+    /**
+     * 파일 다운로드
+     * @param {Number} fileNo - 파일 번호
+     * @param {String} fileName - 원본 파일명
+     */
     download: function (fileNo, fileName) {
       let params = new URLSearchParams();
       params.append("file_no", fileNo);
@@ -371,6 +390,7 @@ export default {
 
 .form-group {
   display: flex;
+  justify-content: flex-start;
   flex-direction: column;
   margin-bottom: 16px;
 }
@@ -446,12 +466,11 @@ export default {
   display: inline-block;
 }
 
-.preview{
+.preview {
   display: inline-block;
 }
 
 .file-form {
   margin-right: auto;
 }
-
 </style>

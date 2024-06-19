@@ -110,11 +110,11 @@
         <v-card-text>
           <NoticeModal
             :action="action"
-            :notice_content="notice_content"
-            :notice_created_at="notice_created_at"
-            :notice_no="notice_no"
-            :notice_title="notice_title"
-            :loginID="loginID"
+            :noticeContent="noticeContent"
+            :noticeCreatedAt="noticeCreatedAt"
+            :noticeNo="noticeNo"
+            :noticeTitle="noticeTitle"
+            :loginId="loginId"
             :paction="action"
             :previewHtml="previewHtml"
             :fileName="fileName"
@@ -141,31 +141,41 @@ export default {
     return {
       titleText: "공지사항",
       addModal: false,
+      /** @vue-data {String} action - 조회 수정,저장 구분 변수 */
       action: "",
       selectedNotice: null,
+      /** @vue-data {String} activeFilter - 공지사항 작성자 타입 변수 */
       activeFilter: "all",
       stitle: "",
+      /** @vue-data {any[]} noticeList - 전체 공지사항 목록 */
       noticeList: [],
       totalCnt: 0,
       pageSize: 10,
       currentPage: 1,
-      notice_title: "",
-      loginID: "",
-      notice_content: "",
-      notice_created_at: "",
-      notice_no: 0,
-      typeList: [],
+      noticeTitle: "",
+      loginId: "",
+      noticeContent: "",
+      noticeCreatedAt: "",
+      noticeNo: 0,
+      /** @vue-data {any[]} typeList - 관리자, 강사 별 공지사항 목록 */
+      typeList: [], 
+      /** @vue-data {String} previewHtml - 이미지 미리보기 HTML 코드 */
       previewHtml: "",
+      /** @vue-data {String} fileName - 원본 파일명 */
       fileName: "",
+      /** @vue-data {String} etx - 파일 확장자 */
       etx: "",
     };
   },
   mounted() {
-    // this.pagination();
     this.searchList();
     this.page();
   },
   methods: {
+    /** 
+     * 전체 공지사항 목록 조회
+     * @param {String} stitle - 검색어
+     */
     searchList: function (stitle) {
       let vm = this;
 
@@ -198,6 +208,10 @@ export default {
       this.notice_title = "";
       this.notice_content = "";
     },
+    /**
+     * 타입별 페이지네이션을 위해 분배하는 메서드
+     * @param {String} userType - 전체/관리자/강사 등 작성자 타입
+     */
     findType(userType) {
       if (userType === "a") {
         this.findAdmin();
@@ -225,27 +239,35 @@ export default {
       this.typeList = this.noticeList.filter((e) => e.user_type === "t");
       this.totalCnt = this.typeList.length;
     },
+    /**
+     * 공지사항 수정 메서드
+     */
     noticeModify() {
       this.selectedNotice = notice;
       this.action = "U";
       this.addModal = true;
     },
-    selectNotice(notice_no, action) {
+    /**
+     * 공지사항 조회 메서드
+     * @param {Number} noticeNo - 선택한 공지사항 번호
+     * @param {String} action - 조회,수정을 결정하는 변수
+     */
+    selectNotice(noticeNo, action) {
       this.action = action;
       let vm = this;
 
       let params = new URLSearchParams();
-      params.append("notice_no", notice_no);
+      params.append("notice_no", noticeNo);
 
       this.axios
         .post("/aAlert/notice", params)
         .then((response) => {
           console.log(JSON.stringify(response));
-          this.notice_title = response.data.notice_title;
-          this.loginID = response.data.loginID;
-          this.notice_content = response.data.notice_content;
-          this.notice_created_at = response.data.notice_created_at;
-          this.notice_no = response.data.notice_no;
+          this.noticeTitle = response.data.notice_title;
+          this.loginId = response.data.loginID;
+          this.noticeContent = response.data.notice_content;
+          this.noticeCreatedAt = response.data.notice_created_at;
+          this.noticeNo = response.data.notice_no;
           this.ext = response.data.file_extension;
 
           if (!response.data.file_no) {

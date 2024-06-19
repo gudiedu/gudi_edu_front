@@ -15,11 +15,13 @@
       <v-divider></v-divider>
 
       <v-card class="dashboard-card">
-        <div class="titletext">{{ this.studentName }}({{ getStudentId }})님의 강의 목록</div>
+        <div class="titletext">
+          {{ this.studentName }}({{ getStudentId }})님의 강의 목록
+        </div>
         <v-table class="dashboard-table">
           <thead>
             <tr>
-              <th>강의명</th>
+              <th class="lecture-name">강의명</th>
               <th>강사명</th>
               <th>강의실</th>
               <th>시작일</th>
@@ -29,7 +31,12 @@
           </thead>
           <tbody>
             <tr v-for="item in lectureList" :key="item.course_id">
-              <td @click="showAttendance(item.course_name, item.course_no)">{{ item.course_name }}</td>
+              <td
+                class="lecture-name"
+                @click="showAttendance(item.course_name, item.course_no)"
+              >
+                {{ item.course_name }}
+              </td>
               <td>{{ item.name }}</td>
               <td>{{ item.course_loc }}</td>
               <td>{{ item.course_start_date }}</td>
@@ -44,8 +51,8 @@
         <div class="titletext">출석 현황</div>
         <Attendance
           :selectedLecture="selectedLecture"
-          :attendanceList="attendanceList"
-          @showAttendance = "showAttendance"
+          :aList="attendanceList"
+          @showAttendance="showAttendance"
         />
       </v-card>
     </v-card>
@@ -81,7 +88,7 @@ export default {
     this.searchLecture();
   },
   methods: {
-    lectureRegistration() {},
+    /** 학생의 강의 목록 조회 */
     searchLecture() {
       let vm = this;
 
@@ -92,13 +99,18 @@ export default {
         .post("/aInformation/student", params)
         .then((response) => {
           console.log(JSON.stringify(response));
-          this.lectureList = response.data;
-          this.studentName = this.lectureList[this.lectureList.length - 1].name;
+          this.lectureList = response.data.slice(0, response.data.length - 1);
+          this.studentName = response.data[response.data.length -1].name;
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    /**
+     * 출석 목록 조회
+     * @param {String} courseName - 강의 제목
+     * @param {Number} courseNo - 강의 번호
+     */
     showAttendance(courseName, courseNo) {
       console.log(courseName);
       console.log(courseNo);
@@ -143,6 +155,7 @@ export default {
 
 .titletext {
   font-size: 24px;
+  left: 0;
   font-weight: bold;
 }
 
@@ -250,5 +263,11 @@ export default {
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.lecture-name {
+  width: 325px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 </style>

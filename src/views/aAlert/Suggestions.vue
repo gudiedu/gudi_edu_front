@@ -5,29 +5,7 @@
         <div class="titletext">{{ titleText }}</div>
         <v-spacer></v-spacer>
       </v-card-title>
-
       <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >강사</v-btn
-          >
-        </div> -->
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -45,9 +23,7 @@
           </div>
         </div>
       </div>
-
       <v-divider></v-divider>
-
       <v-table class="dashboard-table">
         <thead>
           <tr>
@@ -83,7 +59,6 @@
       </v-table>
     </v-card>
 
-    <!-- 페이지네이션 추가-->
     <div id="noticePagination">
       <paginate
         class="justify-content-center"
@@ -142,6 +117,10 @@ export default {
     this.page();
   },
   methods: {
+    /**
+     * 건의사항 전체 조회 메서드
+     * @param {String} stitle - 검색어
+     */
     searchList: function (stitle) {
       let vm = this;
 
@@ -163,14 +142,22 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
-    selectSuggestion(suggestion_no, suggestion_answered) {
+    /** 
+     * 선택된 건의사항 저장 및 모달 open
+     * @param {Number} suggestionNo - 건의사항 번호
+     * @param {String} suggestionAnswered - 답변 여부
+     */
+    selectSuggestion(suggestionNo, suggestionAnswered) {
       this.selectedSuggestion = {
-        suggestion_no: suggestion_no,
-        suggestion_answered: suggestion_answered,
+        suggestion_no: suggestionNo,
+        suggestion_answered: suggestionAnswered,
       };
       this.openPopup();
     },
-    searchMethod() {},
+    /** 
+     * 건의사항 수정 메서드
+     * @param {Property} suggestion - 건의 사항 번호, 답변 여부가 포함된 객체
+     */
     suggestionModify(suggestion) {
       this.selectedSuggestion = suggestion;
       this.addModal = true;

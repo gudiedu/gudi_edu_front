@@ -2,26 +2,32 @@
   <v-table class="dashboard-table">
     <thead>
       <tr>
-        <th>강의명</th>
-        <th>출석일자</th>
-        <th>출결상태</th>
-        <th>비고</th>
+        <th class="lecture-name">강의명</th>
+        <th class="attendance-date">출석일자</th>
+        <th class="attendance-status">출결상태</th>
+        <th class="attendance-file">첨부파일</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="item in attendance" :key="item.attendance_no">
+      <tr
+        v-for="item in pageList"
+        :key="item.attendance_no"
+        class="attendance-table"
+      >
         <td>{{ this.selectedLecture }}</td>
         <td>{{ item.attendance_date }}</td>
         <td>
           <v-select
             v-model="item.attendance_status"
             :items="attendanceOptions"
+            class="select-box"
+            density="comfortable"
             @update:modelValue="changeAttendanceStatus(item)"
           >
             class="fixed-width-select" ></v-select
           >
         </td>
-        <td>
+        <td class="attendance-file">
           <form
             id="file-form"
             enctype="multipart/form-data"
@@ -44,34 +50,62 @@
             <span id="preview" @click="download(item)">
               {{ item.file_origin }}
             </span>
-            <span @click="deleteAttendanceFile(item)">
-              X
-            </span>
+            <span class="x-box" @click="deleteAttendanceFile(item)"> X </span>
           </form>
+          <div v-else>-</div>
         </td>
       </tr>
     </tbody>
   </v-table>
+  <div id="attendancePagination">
+    <paginate
+      class="justify-content-center"
+      v-model="currentPage"
+      :page-count="page()"
+      :page-range="5"
+      :margin-pages="0"
+      :click-handler="pagination()"
+      :prev-text="'이전'"
+      :next-text="'다음'"
+      :container-class="'pagination'"
+      :page-class="'page-item'"
+    ></paginate>
+  </div>
 </template>
 
 <script>
+import Paginate from "vuejs-paginate-next";
 export default {
-  components: {},
+  components: {
+    Paginate,
+  },
   props: {
     selectedLecture: String,
-    attendanceList: Array,
+    aList: Array,
+    totalCount: Number,
+  },
+  mounted() {
+    this.page();
   },
   data() {
     return {
       attendanceStatus: null,
       attendanceOptions: ["출석", "지각", "조퇴", "병결"],
-      attendance: this.attendanceList,
+      attendanceList: this.aList,
       selectLecture: this.selectedLecture,
       selectedFile: "",
       previewHtml: "",
+      totalCnt: this.totalCnt,
+      pageSize: 7,
+      currentPage: 1,
+      pageList: [],
     };
   },
   methods: {
+    /**
+     * 출석 상태 변경
+     * @param {Object} attendance - 출석 정보 객체
+     */
     changeAttendanceStatus(attendance) {
       let params = new URLSearchParams();
       params.append("attendance_no", attendance.attendance_no);
@@ -84,6 +118,10 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    /**
+     * 병결 서류 업로드
+     * @param {Object} attendance - 출석 정보 객체
+     */
     uploadAttendanceFile(attendance) {
       let formTag = document.getElementById("file-form");
       let dataWithFile = new FormData(formTag);
@@ -104,6 +142,10 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    /**
+     * 병결 서류 삭제
+     * @param {Object} attendance - 출석 정보 객체
+     */
     deleteAttendanceFile(attendance) {
       let params = new URLSearchParams();
       params.append("attendance_no", attendance.attendance_no);
@@ -149,15 +191,38 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    page: function () {
+      this.totalCnt = this.attendanceList.length;
+      let total = this.totalCnt;
+      let page = this.pageSize;
+      let xx = total % page;
+      let result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+    },
+    pagination() {
+      let endElement = this.currentPage * this.pageSize;
+      let startElement = endElement - this.pageSize;
+      this.pageList = this.attendanceList.slice(startElement, endElement);
+    },
   },
   watch: {
-    attendanceList() {
+    aList() {
       let vm = this;
-      vm.attendance = vm.attendanceList;
+      vm.attendanceList = vm.aList;
     },
     selectedLecture() {
       let vm = this;
       vm.selectLecture = vm.selectedLecture;
+    },
+    totalCount() {
+      let vm = this;
+      vm.totalCnt = vm.totalCount;
     },
   },
 };
@@ -176,7 +241,6 @@ export default {
   text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
-  width: 200px;
 }
 
 .dashboard-table th {
@@ -187,6 +251,11 @@ export default {
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
 }
+
+.attendance-table {
+  height: 48px;
+}
+
 .fixed-width-select {
   width: 100%;
   min-width: 100px;
@@ -216,5 +285,31 @@ export default {
 .delete-button:hover {
   background-color: #e57373;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
+
+.attendance-status {
+  width: 150px;
+}
+
+.lecture-name {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: auto;
+}
+
+.attendance-date {
+  width: 100px;
+}
+.file-insert,
+.attendance-file {
+  width: 334px;
+}
+
+.x-box {
+  cursor: pointer;
+}
+
+.select-box {
+  vertical-align: 10px;
 }
 </style>
