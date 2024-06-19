@@ -27,10 +27,10 @@
 
     
     <div class="chat-list">
-      <div class="chat-item" v-for="chat in chats" :key="chat.id">
-        <div class="chat-item-info"  @click="chatJoin">
-          <div class="chat-item-name">{{ chat.name }}</div>
-          <div class="chat-item-participants">{{ chat.participants }}명</div>
+      <div class="chat-item" v-for="chat in chats" :key="chat.chat_no">
+        <div class="chat-item-info"  @click="chatJoin(chat.chat_no)">
+          <div class="chat-item-name">{{ chat.chat_name }}</div>
+          <div class="chat-item-participants">{{ chat.count_people }}명</div>
           <div>채팅방 입장</div>
         </div>
       </div>
@@ -53,13 +53,7 @@ export default {
   data: function () {
     return {
       list: [],
-      chats: [
-        { id: 1, name: '친구들', participants: 3 },
-        { id: 2, name: '가족', participants: 5 },
-        { id: 3, name: '회사', participants: 10 },
-        { id: 4, name: '동호회', participants: 8 },
-        { id: 5, name: '스터디 그룹', participants: 4 }
-      ],
+      chats: [],
 
     
   
@@ -73,25 +67,40 @@ export default {
       let vm = this;
 
 
+      // let params = new URLSearchParams()
+      // params.append('courseNo', this.courseNo)
 
       this.axios
-        .post("")
+        .post("/support/chatRoomList")
         .then((response) => {
-          console.log(JSON.stringify(response));
+          //console.log(JSON.stringify(response));
 
-          vm.list = response.data.list;
+          vm.chats = response.data.listdata;
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
-    chatJoin: function () {
+    chatJoin(chatNo) {
+
+      let params = new URLSearchParams()
+      params.append('chatNo', chatNo)
+
+      this.axios
+        .post("/support/chatRoomJoin", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
 
 
-      
-      window.open('#/test', '_blank', 'width=650,height=600');
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+
+      window.open('#/myChatRoomList', '_blank', 'width=650,height=600');
 
     },
+
     chatMake: function ()  {
 
 

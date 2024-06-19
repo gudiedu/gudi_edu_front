@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-card class="dashboard-card">
       <v-card-title class="d-flex align-center pe-2">
-        <div class="titletext">{{ titleText }}</div>
+        <div class="titletext">{{ titleText }} </div>
         <v-spacer></v-spacer>
       </v-card-title>
 
@@ -16,27 +16,52 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>2024-05-05</td>
-            <td @click="holidayModify">어린이날</td>
-          </tr>
-          <tr>
-            <td>2024-05-07</td>
-            <td @click="holidayModify">휴강</td>
-          </tr>
+          <template v-if="totalCnt > 0">
+            <template v-for="item in schedulelist" :key="item.dayoff_no">
+              <tr>
+                <td @click="holidayModify(item.dayoff_no)">{{ item.dayoff_date }}</td>
+                <td @click="holidayModify(item.dayoff_no)">{{ item.dayoff_detail}}</td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
+            <tr>
+              <td colspan="2">조회된 데이터가 없습니다.</td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
 
+    <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
+    </div>
+
     <!-- 페이지네이션 추가-->
 
     <div class="button-group">
+      <!-- <button class="insert-button" @click="publicApi" style="margin-right:20px; float:left;">공공데이터 가져오기</button> -->
       <button class="insert-button" @click="openAddModal">등록</button>
     </div>
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <TClassScheduleManagementModal :action="action" />
+          <TClassScheduleManagementModal 
+          :action="this.action" 
+          :dayoff_no="this.dayoff_no" 
+          @execute-search-list="searchList()" 
+          @close-modal="closeModal()" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -45,39 +70,90 @@
 
 <script>
 import TClassScheduleManagementModal from "./TClassScheduleModal.vue";
+import Paginate from 'vuejs-paginate-next';
+
 export default {
-  components: { TClassScheduleManagementModal },
+  components: { TClassScheduleManagementModal, Paginate },
   data() {
     return {
       titleText: "공휴일관리",
       addModal: false,
       action: "",
-      selectedNotice: null,
-      activeFilter: "all",
-      stitle: "",
+      totalCnt: 0,
+      pageSize: 5,
+      currentPage: 1,
+      schedulelist:[],
+      dayoff_no:"",
+
+
     };
   },
+  mounted() {
+    this.searchList()
+  },
   methods: {
-    findAll() {
-      this.activeFilter = "all";
+    searchList: function () {
+
+      let vm = this 
+
+      let params = new URLSearchParams() 
+      params.append('currentPage', this.currentPage)
+      params.append('pageSize', this.pageSize)
+
+      this.axios
+        .post('/support/listClassSchedule', params)
+        .then((response) => {
+          // console.log(JSON.stringify(response))
+
+          vm.schedulelist = response.data.listdata
+          vm.totalCnt = response.data.totalcnt
+        })
+        .catch(function (error) {
+          alert('에러! API 요청에 오류가 있습니다. ' + error)
+        })
     },
-    findAdmin() {
-      this.activeFilter = "admin";
+    publicApi() {
+      if (confirm("기존 데이터를 모두 삭제합니다 진행 하시겠습니까?")) { 
+        
+        this.axios
+        .post('/support/apiHoliday')
+        .then((response) => {
+           console.log(JSON.stringify(response))
+           alert(response.data.resultMsg);
+
+           this.searchList();
+
+        })
+        .catch(function (error) {
+          alert('에러! API 요청에 오류가 있습니다. ' + error)
+        })
+      }
+
     },
-    findTeacher() {
-      this.activeFilter = "teacher";
-    },
-    searchMethod() {},
-    holidayModify() {
+    holidayModify(dayoff_no) {
       this.action = "U";
+      this.dayoff_no = dayoff_no;
       this.addModal = true;
     },
     openAddModal() {
       this.action = "";
       this.addModal = true;
     },
-    closeAddModal() {
+    closeModal() {
       this.addModal = false;
+    },
+    page: function () {
+      var total = this.totalCnt
+      var page = this.pageSize
+      var xx = total % page
+      var result = parseInt(total / page)
+
+      if (xx == 0) {
+        return result
+      } else {
+        result = result + 1
+        return result
+      }
     },
   },
 };

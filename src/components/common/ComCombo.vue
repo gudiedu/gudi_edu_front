@@ -54,7 +54,11 @@ export default {
         console.log(response)
 
         vm.items = response.data.list
-        vm.defaultvalue = vm.selvalue
+        // vm.defaultvalue = vm.selvalue
+
+        vm.$nextTick(() => {
+          vm.defaultvalue = vm.selvalue;
+        });
 
         console.log(
           'vm.defaultvalue : ' +
@@ -72,6 +76,11 @@ export default {
       //alert('event : ' + this.eventid + ' : ' + params);
       this.defaultvalue = params
     })
+  },
+  watch: {
+    selvalue(newVal) {
+      this.defaultvalue = newVal;
+    },
   },
   methods: {},
   created() {

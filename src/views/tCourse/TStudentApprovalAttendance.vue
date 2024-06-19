@@ -5,62 +5,156 @@
         <th>이름</th>
         <th>연락처</th>
         <th>이메일</th>
-        <th>생년월일</th>
         <th>설문</th>
         <th>점수</th>
         <th>승인여부</th>
+        <template v-if="this.stateMsg === '진행예정'">
         <th>승인/취소</th>
+        </template>
       </tr>
     </thead>
     <tbody>
+      <template v-if="totalCnt > 0">
       <tr v-for="(user, index) in users" :key="index">
         <td>{{ user.name }}</td>
-        <td>{{ user.phone }}</td>
+        <td>{{ user.hp }}</td>
         <td>{{ user.email }}</td>
-        <td>{{ user.birthdate }}</td>
-        <td>{{ user.survey }}</td>
-        <td>{{ user.score }}</td>
-        <td>{{ user.approval }}</td>
+        <td>{{ user.survey_exists }}</td>
+        <td>{{ user.grade }}</td>
+        <td>{{ user.enrollment_confirmed }}</td>
+        <template v-if="this.stateMsg === '진행예정'">
         <td>
           <button @click="toggleApproval(index)">
-            {{ user.approval === "Y" ? "취소" : "승인" }}
+            {{ user.enrollment_confirmed === "Y" ? "취소" : "승인" }}
           </button>
         </td>
+        </template>
       </tr>
+      </template>
+      <template v-else>
+        <tr>
+          <td colspan="7">조회된 데이터가 없습니다.</td>
+        </tr>
+      </template>
     </tbody>
   </v-table>
+
+      <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
+    </div>
 </template>
 
 <script>
+import Paginate from 'vuejs-paginate-next';
+
 export default {
+  components: { Paginate },
+    props: {
+    courseNo: Number,
+    stateMsg: String,
+  },
   data() {
     return {
-      users: [
-        {
-          name: "홍길동",
-          phone: "010-1234-5678",
-          email: "gudiedu@naver.com",
-          birthdate: "1990-01-01",
-          survey: "N",
-          score: 0,
-          approval: "N",
-        },
-        {
-          name: "김길동",
-          phone: "010-1234-5678",
-          email: "gudiedu@naver.com",
-          birthdate: "1990-01-01",
-          survey: "Y",
-          score: 0,
-          approval: "Y",
-        },
-      ],
+      users: [],
+      status:"",
+      enno:"",
+      totalCnt: 0,
+      pageSize: 5,
+      currentPage: 1,
     };
+  },    
+  mounted() {
+    this.searchList()
   },
   methods: {
+    searchList: function () {
+
+      let vm = this 
+
+      let params = new URLSearchParams() 
+      params.append('courseNo', this.courseNo)
+      params.append('currentPage', this.currentPage)
+      params.append('pageSize', this.pageSize)
+
+      this.axios
+        .post('/tCourse/listEnrollment', params)
+        .then((response) => {
+          // console.log(JSON.stringify(response))
+
+          vm.users = response.data.listdata
+          vm.totalCnt = response.data.totalcnt
+          
+        })
+        .catch(function (error) {
+          alert('에러! API 요청에 오류가 있습니다. ' + error)
+        })
+    },
+    enyn() {
+      //alert(this.enno);
+      let params = new URLSearchParams()
+      params.append('courseNo', this.courseNo)
+      params.append('status', this.status)
+      params.append('enNo', this.enno)
+
+      this.axios
+        .post('/tCourse/updateEnroll', params)
+        .then((response) => {
+          // console.log(JSON.stringify(response))
+          alert(response.data.resultMsg)
+        })
+        .catch(function (error) {
+          alert('에러! API 요청에 오류가 있습니다. ' + error)
+        })
+    },
+
     toggleApproval(index) {
-      this.users[index].approval =
-        this.users[index].approval === "Y" ? "N" : "Y";
+      //enrollment_confirmed
+      if (this.users[index].enrollment_confirmed === "Y") {
+        this.enno = this.users[index].enrollment_no;
+        this.status = "cancel";
+        this.enyn();
+
+
+
+        this.users[index].enrollment_confirmed = "N"
+        this.$emit('execute-search-list');
+
+      } else {
+        this.enno = this.users[index].enrollment_no;
+        this.status = "approval";
+        this.enyn();
+
+
+
+
+        this.users[index].enrollment_confirmed = "Y"
+        this.$emit('execute-search-list');
+      }
+
+    },
+    page: function () {
+      var total = this.totalCnt
+      var page = this.pageSize
+      var xx = total % page
+      var result = parseInt(total / page)
+
+      if (xx == 0) {
+        return result
+      } else {
+        result = result + 1
+        return result
+      }
     },
   },
 };
@@ -78,7 +172,7 @@ export default {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
-  font-size: 16px;
+  font-size: 14px;
   width: 200px;
 }
 

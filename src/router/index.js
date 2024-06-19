@@ -31,7 +31,7 @@ const routes = [
         
       }, 
       {
-        path: "/tCourse/course",
+        path: "/tCourse/course/:course_no",
         name: "tCourseDetail",
         component: () => import("@/views/tCourse/TCourseDetail.vue"),
       },
@@ -62,8 +62,8 @@ const routes = [
   },
   
   {
-    path: "/test",
-    name: "test",
+    path: "/myChatRoomList",
+    name: "myChatRoomList",
     component: () =>
       import(/* webpackChunkName: "about" */ "@/components/ChatApp.vue"),
   },
