@@ -35,37 +35,53 @@
       <v-divider></v-divider>
 
       <form id="enrollment">
-      <v-table class="dashboard-table">
-        <thead>
-          <tr>
-            <!-- <td>과목번호</td> -->
-            <th>과목명</th>
-            <th>강의명</th>
-            <th>강사명</th>
-            <th>강의실</th>
-            <th>시작일</th>
-            <th>종료일</th>
-            <th>수강정원</th>
-            <th>수강신청</th>
-          </tr>
-        </thead>
-        <tbody>
-          <template v-for="course in enrollAvailable" :key="course.course_no">
+        <v-table class="dashboard-table">
+          <thead>
             <tr>
-              <!-- <td @click="courseDetail(course.course_no)">{{ course.course_no }}</td> -->
-              <td @click="courseDetail(course.course_no)">{{ course.course_subject }}</td>
-              <td @click="courseDetail(course.course_no)">{{ course.course_name }}</td>
-              <td @click="courseDetail(course.course_no)">{{ course.name }}</td>
-              <td @click="courseDetail(course.course_no)">{{ course.course_loc }}</td>
-              <td @click="courseDetail(course.course_no)">{{ course.course_start_date }}</td>
-              <td @click="courseDetail(course.course_no)">{{ course.course_end_date }}</td>
-              <td @click="courseDetail(course.course_no)">{{ course.course_quota }}</td>
-              <td @click="courseEnroll(course.course_no)">신청하기</td>
+              <!-- <td>과목번호</td> -->
+              <th>수강신청</th>
+              <th>과목명</th>
+              <th>강의명</th>
+              <th>강사명</th>
+              <th>강의실</th>
+              <th>시작일</th>
+              <th>종료일</th>
+              <th>수강정원</th>
             </tr>
-        </template>
-        </tbody>
-      </v-table>
-    </form>
+          </thead>
+          <tbody>
+            <template v-for="course in enrollAvailable" :key="course.course_no">
+              <tr>
+                <td @click="courseEnroll(course.course_no)">
+                  <div class="enroll-button">신청</div>
+                </td>
+                <!-- <td @click="courseDetail(course.course_no)">{{ course.course_no }}</td> -->
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_subject }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_name }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.name }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_loc }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_start_date }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_end_date }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_quota }}
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </v-table>
+      </form>
     </v-card>
   </v-container>
 </template>
@@ -79,22 +95,20 @@ export default {
       action: "",
       sEnrollList: [],
       enrollAvailable: [],
-      courseNo:"",
-      studentSignedID : "",
-      searchKeyword: '',
-      selectedOption: '과목명',
-      options: ['과목명', '강의명', '강사명'],
+      courseNo: "",
+      studentSignedID: "",
+      searchKeyword: "",
+      selectedOption: "과목명",
+      options: ["과목명", "강의명", "강사명"],
       searchResults: [],
       searched: false,
     };
   },
-  mounted(){
+  mounted() {
     this.enrollList();
-
   },
   methods: {
-    enrollList(){
-
+    enrollList() {
       let enrollListParams = new URLSearchParams();
 
       this.axios
@@ -104,7 +118,7 @@ export default {
 
           this.enrollAvailable = response.data.enrollList;
 
-          response.data.enrollList.forEach(each => {
+          response.data.enrollList.forEach((each) => {
             this.openedNo = each.course_no;
             this.openedSubject = each.course_subject;
             this.openedName = each.course_name;
@@ -112,41 +126,49 @@ export default {
             this.openedBegins = each.course_start_date;
             this.openedEnds = each.course_end_date;
             this.teacherName = each.name;
-
           });
-
-        })
+        });
     },
 
     searchMethod() {
-
-      switch (this.selectedOption){
-        case '과목명' :
-          console.log('검색조건: subject, keyWord:', this.searchKeyword);
-          this.searchResults = this.items.filter(item => item.subject.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+      switch (this.selectedOption) {
+        case "과목명":
+          console.log("검색조건: subject, keyWord:", this.searchKeyword);
+          this.searchResults = this.items.filter((item) =>
+            item.subject
+              .toLowerCase()
+              .includes(this.searchKeyword.toLowerCase())
+          );
           break;
-        case '강사명' :
-          console.log('검색조건: teacher, keyWord:', this.searchKeyword);
-          this.searchResults = this.items.filter(item => item.instructor.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+        case "강사명":
+          console.log("검색조건: teacher, keyWord:", this.searchKeyword);
+          this.searchResults = this.items.filter((item) =>
+            item.instructor
+              .toLowerCase()
+              .includes(this.searchKeyword.toLowerCase())
+          );
           break;
-        case '강의명':
-          console.log('검색조건: course, keyWord: ', this.searchKeyword);
-          this.searchResults = this.items.filter(item => item.lecture.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+        case "강의명":
+          console.log("검색조건: course, keyWord: ", this.searchKeyword);
+          this.searchResults = this.items.filter((item) =>
+            item.lecture
+              .toLowerCase()
+              .includes(this.searchKeyword.toLowerCase())
+          );
           break;
         default:
-          console.warn('검색 조건을 다시 확인해주세요.');
+          console.warn("검색 조건을 다시 확인해주세요.");
       }
       this.searched = true; // 검색을 수행했음을 표시
     },
     courseDetail(courseNo) {
       this.$router.push({
-        name: 'sCourseDetail',
+        name: "sCourseDetail",
         params: { courseNo: courseNo },
       });
     },
 
-    courseEnroll(courseNo){
-
+    courseEnroll(courseNo) {
       this.courseNo = courseNo;
 
       let enrollInfo = document.getElementById("enrollment");
@@ -156,27 +178,22 @@ export default {
 
       console.log("수강신청번호: ", this.courseNo);
 
-      this.axios
-        .post("/classroom/sEnrollInsert.do", data)
-        .then((response) => {
-          console.log("수강신청JSON: ", JSON.stringify(response));
+      this.axios.post("/classroom/sEnrollInsert.do", data).then((response) => {
+        console.log("수강신청JSON: ", JSON.stringify(response));
 
-          if(response.data.result > 0){
-            alert(response.data.resultMsg);
-            console.log("너왜안나오냐: ", response.data.resultMsg);
-          }
-        });
-
-
+        if (response.data.result > 0) {
+          alert(response.data.resultMsg);
+          console.log("너왜안나오냐: ", response.data.resultMsg);
+        }
+      });
     },
-
   },
 };
 </script>
 
 <style scoped>
 .dashboard-card {
-  margin: 20px;
+  margin-bottom: 20px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -257,19 +274,22 @@ export default {
   width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
+  cursor: pointer;
 }
 
 .dashboard-table th,
 .dashboard-table td {
-  padding: 12px;
-  text-align: left;
+  padding: 12px 8px;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dashboard-table th {
   background-color: #f4f4f4;
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 .dashboard-table tr:hover {
@@ -281,4 +301,31 @@ export default {
   min-width: 100px; /* 선택적으로 너비를 조정할 수 있습니다 
 } */
 
+.enroll-button {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 50px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.enroll-button:hover {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
 </style>

@@ -26,40 +26,51 @@
       <v-divider></v-divider>
 
       <form id="test">
-      <v-table class="dashboard-table">
-        <thead>
-          <tr>
-            <th>과목명</th>
-            <th>강의명</th>
-            <th>강사명</th>
-            <th>강의실</th>
-            <th>시험명</th>
-            <th>시험현황</th>
-          </tr>
-        </thead>
-        <tbody>
-          <template v-for="test in sTestList" :key="test.course_no">
-            <tr @click="testDetail(test.course_no, test.test_category, test.result_no)">
-              <td>{{ test.course_subject }}</td>
-              <td>{{ test.course_name }}</td>
-              <td>{{ test.name }}</td>
-              <td>{{ test.course_loc }}</td>
-              <td>{{ test.test_category }}</td>
-              <td>
-                {{ test.result_no != 0  && (test.test_category === '1차' || test.test_category === '2차' || test.test_category === '테스트') ? `응시 / ${test.result_score}` : '미응시' }}
-              </td>
+        <v-table class="dashboard-table">
+          <thead>
+            <tr>
+              <th>과목명</th>
+              <th>강의명</th>
+              <th>강사명</th>
+              <th>강의실</th>
+              <th>시험명</th>
+              <th>시험현황</th>
             </tr>
-        </template>
-        </tbody>
-      </v-table>
-    </form>
+          </thead>
+          <tbody>
+            <template v-for="test in sTestList" :key="test.course_no">
+              <tr
+                @click="
+                  testDetail(test.course_no, test.test_category, test.result_no)
+                "
+              >
+                <td>{{ test.course_subject }}</td>
+                <td>{{ test.course_name }}</td>
+                <td>{{ test.name }}</td>
+                <td>{{ test.course_loc }}</td>
+                <td>{{ test.test_category }}</td>
+                <td>
+                  {{
+                    test.result_no != 0 &&
+                    (test.test_category === "1차" ||
+                      test.test_category === "2차" ||
+                      test.test_category === "테스트")
+                      ? `응시 / ${test.result_score}`
+                      : "미응시"
+                  }}
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </v-table>
+      </form>
     </v-card>
 
     <!-- 페이지네이션 추가-->
     <div id="testPagination">
       <paginate
         class="justify-content-center"
-        v-model="currentPage" 
+        v-model="currentPage"
         :page-count="page()"
         :page-range="5"
         :margin-pages="0"
@@ -67,38 +78,36 @@
         :prev-text="'이전'"
         :next-text="'다음'"
         :container-class="'pagination'"
-        :page-class="'page-item'">
+        :page-class="'page-item'"
+      >
       </paginate>
-     </div>
+    </div>
 
-    <v-dialog v-model="testModal">
+    <v-dialog v-model="testModal" max-width="1000px">
       <v-card>
         <v-card-text>
           <testModal
-           :action="action"
-           :courseNo="courseNo"
-           :testCategory="testCategory"
-           @close-modal="closeModal"
+            :action="action"
+            :courseNo="courseNo"
+            :testCategory="testCategory"
+            @close-modal="closeModal"
           />
         </v-card-text>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="testResultModal">
+    <v-dialog v-model="testResultModal" max-width="1000px">
       <v-card>
         <v-card-text>
           <testResultModal
-           :action="action"
-           :courseNo="courseNo"
-           :testCategory="testCategory"
-           :testResultNo="testResultNo"
-           @close-modal="closeModal"
+            :action="action"
+            :courseNo="courseNo"
+            :testCategory="testCategory"
+            :testResultNo="testResultNo"
+            @close-modal="closeModal"
           />
         </v-card-text>
       </v-card>
     </v-dialog>
-
-
-
   </v-container>
 </template>
 
@@ -111,7 +120,7 @@ export default {
   components: {
     testModal,
     testResultModal,
-     Paginate,
+    Paginate,
   },
   data() {
     return {
@@ -119,55 +128,51 @@ export default {
       action: "",
       sTestList: [],
       courseNo: 0,
-      studentSignedID : "",
+      studentSignedID: "",
       testList: [],
       testModal: false,
       testResultModal: false,
       currentPage: 1,
       totalCnt: 0,
       pageSize: 10,
-      testCategory:"",
+      testCategory: "",
       searchedWords: "",
       testResultNo: "",
     };
   },
-  mounted(){
+  mounted() {
     this.courseTestList();
   },
   methods: {
     // 수강 강의 리스트 불러오기
-    courseTestList(){
-
+    courseTestList() {
       let testListParams = new URLSearchParams();
       testListParams.append("searchedWords", this.searchedWords);
 
       this.axios
         .post("/classroom/sTestList.do", testListParams)
         .then((response) => {
-          console.log("강의리스트불러오는JSON이닷: ",JSON.stringify(response));
+          console.log("강의리스트불러오는JSON이닷: ", JSON.stringify(response));
 
           this.sTestList = response.data.testList;
 
-          response.data.testList.forEach(each => {
-             this.testCourseNo = each.course_no;
-             this.testSubject = each.course_subject;
-             this.testCourseName = each.course_name;
-             this.testCourseBegins = each.course_start_date;
-             this.teacherName = each.name;
-             this.testCourseLoc = each.course_loc;
-             this.testResultNo = each.result_no;
-             this.testResultScore = each.result_score;
-             this.testCategory = each.test_category;
+          response.data.testList.forEach((each) => {
+            this.testCourseNo = each.course_no;
+            this.testSubject = each.course_subject;
+            this.testCourseName = each.course_name;
+            this.testCourseBegins = each.course_start_date;
+            this.teacherName = each.name;
+            this.testCourseLoc = each.course_loc;
+            this.testResultNo = each.result_no;
+            this.testResultScore = each.result_score;
+            this.testCategory = each.test_category;
 
-             console.log("this.testResultScore : ", this.testResultScore);
-
-           });
-
-        })
+            console.log("this.testResultScore : ", this.testResultScore);
+          });
+        });
     },
 
-    testResult(courseNo, testCategory){
-
+    testResult(courseNo, testCategory) {
       this.courseNo = courseNo;
       this.testCategory = testCategory;
       console.log("courseNo: ", this.courseNo);
@@ -178,23 +183,19 @@ export default {
       this.axios
         .post("/classroom/sTestCalculate.do", testResultParam)
         .then((response) => {
-          console.log("여기를찾아쥬세유: ",JSON.stringify(response));
+          console.log("여기를찾아쥬세유: ", JSON.stringify(response));
 
-          response.data.sTestResultList.forEach(each => {
-             this.testCourseNo = each.course_no;
-             this.testSubject = each.course_subject;
-             this.testResultNo = each.result_no;
-             this.testResultScore = each.result_score;
-             this.testCategory = each.test_category;
-
-           });
-
-        })
-
+          response.data.sTestResultList.forEach((each) => {
+            this.testCourseNo = each.course_no;
+            this.testSubject = each.course_subject;
+            this.testResultNo = each.result_no;
+            this.testResultScore = each.result_score;
+            this.testCategory = each.test_category;
+          });
+        });
     },
 
     testDetail(courseNo, testCategory, testResultNo) {
-
       this.courseNo = courseNo;
       this.testCategory = testCategory;
       this.testResultNo = testResultNo;
@@ -203,21 +204,21 @@ export default {
       console.log("testCategory : ", this.testCategory);
       console.log("testResultNo", this.testResultNo);
       console.log("testResultNo == 0: ", this.testResultNo == 0);
-      
-      if(testResultNo == 0){
+
+      if (testResultNo == 0) {
         this.testModal = true;
       } else {
         this.testResultModal = true;
       }
     },
 
-    closeModal(){
+    closeModal() {
       this.testModal = false;
       this.testResultModal = false;
       this.courseTestList();
     },
     searching() {
-      console.log('검색어:', this.searchKeyword);
+      console.log("검색어:", this.searchKeyword);
     },
 
     page: function () {
@@ -239,7 +240,7 @@ export default {
 
 <style scoped>
 .dashboard-card {
-  margin: 20px;
+  margin-bottom: 20px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -320,6 +321,7 @@ export default {
   width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
+  cursor: pointer;
 }
 
 .dashboard-table th,

@@ -60,7 +60,7 @@ export default {
       suggestionContent: "",
       suggestionCategory: "",
       selectedFile: null,
-      categories: ["학사", "시설", "장비", "서비스", "기타"],
+      categories: ["시설", "학사", "기타"],
     };
   },
   methods: {

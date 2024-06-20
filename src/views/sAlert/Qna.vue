@@ -28,34 +28,34 @@
             <th>작성자</th>
             <th>등록일</th>
             <th>답변여부</th>
-            </tr>
-            </thead>
-            <tbody>
-              <template v-if="totalCnt > 0">
-                <!--해당 게시글에 대한 세부정보는 SQnaSelectModal로 열기-->
-                <template v-for="item in listQna" :key="item.question_no">
-                  <tr class="table_row" @click="sQnaSelected(item.question_no)">
-                    <td>{{ item.course_name }}</td>
-                    <td>{{ item.question_title }}</td>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.question_created_at }}</td>
-                    <td>{{ item.reply_no > 0 ? 'Y' : 'N' }}</td>
-                  </tr>
-                </template>
-              </template>
-            <template v-else>
-              <tr style="text-align: center">
-                <td>조회된 데이터가 없습니다.</td>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-if="totalCnt > 0">
+            <!--해당 게시글에 대한 세부정보는 SQnaSelectModal로 열기-->
+            <template v-for="item in listQna" :key="item.question_no">
+              <tr class="table_row" @click="sQnaSelected(item.question_no)">
+                <td>{{ item.course_name }}</td>
+                <td>{{ item.question_title }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.question_created_at }}</td>
+                <td>{{ item.reply_no > 0 ? "Y" : "N" }}</td>
               </tr>
             </template>
-          </tbody>
+          </template>
+          <template v-else>
+            <tr style="text-align: center">
+              <td>조회된 데이터가 없습니다.</td>
+            </tr>
+          </template>
+        </tbody>
       </v-table>
     </v-card>
     <!-- 페이지네이션 추가-->
-     <div id="qnaPagination">
+    <div id="qnaPagination">
       <paginate
         class="justify-content-center"
-        v-model="currentPage" 
+        v-model="currentPage"
         :page-count="page()"
         :page-range="5"
         :margin-pages="0"
@@ -63,9 +63,10 @@
         :prev-text="'이전'"
         :next-text="'다음'"
         :container-class="'pagination'"
-        :page-class="'page-item'">
+        :page-class="'page-item'"
+      >
       </paginate>
-     </div>
+    </div>
 
     <div class="button-group">
       <button class="insert-button" @click="sQnaSubmit()">등록</button>
@@ -74,21 +75,18 @@
     <v-dialog v-model="sQnaSubmitModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <sQnaSubmitModal 
-            @close-modal="closeSubmitModal"
-            :action="action"
-          />
+          <sQnaSubmitModal @close-modal="closeSubmitModal" :action="action" />
         </v-card-text>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="sQnaSelectedModal" width="1800px" height="3000px">
+    <v-dialog v-model="sQnaSelectedModal" max-width="1000px" height="3000px">
       <v-card>
         <v-card-text>
           <sQnaSelectedModal
-           :action="action"
-           :sQuestionNo="sQuestionNo"
-           @close-modal="closeSelectedModal"
+            :action="action"
+            :sQuestionNo="sQuestionNo"
+            @close-modal="closeSelectedModal"
           />
         </v-card-text>
       </v-card>
@@ -101,7 +99,6 @@ import sQnaSubmitModal from "./SQnaSubmitModal.vue";
 import sQnaSelectedModal from "./SQnaSelectModal.vue";
 import Paginate from "vuejs-paginate-next";
 
-
 export default {
   components: {
     sQnaSubmitModal,
@@ -109,7 +106,7 @@ export default {
     Paginate,
   },
   // modal setup
-  
+
   data() {
     return {
       titleText: "질의응답",
@@ -125,11 +122,10 @@ export default {
       searchedWords: "",
     };
   },
-  mounted(){
+  mounted() {
     this.qna_list();
   },
   methods: {
-
     // Qna 등록 모달 열기
     sQnaSubmit() {
       this.action = "I";
@@ -142,26 +138,25 @@ export default {
     },
 
     // 질의응답 세부조회 모달 열기
-    sQnaSelected(sQuestionNo){
+    sQnaSelected(sQuestionNo) {
       this.sQnaSelectedModal = true;
       this.sQuestionNo = sQuestionNo;
       this.action = "S";
     },
 
     // 질의응답 세부조회 모달 닫기
-    sQnaSelectedClosed(){
+    sQnaSelectedClosed() {
       this.sQnaSelectedModal = false;
       this.qna_list();
     },
 
-    closeSelectedModal(){
+    closeSelectedModal() {
       this.sQnaSelectedModal = false;
       this.qna_list();
     },
-    
+
     // Qna 리스트 조회 which will be mounted.
-    qna_list : function(){
-
+    qna_list: function () {
       // qna로 넘겨줄 parameter 정리
       let vm = this; // axios에서 this를 사용하기 위해 vm에 담아봄
 
@@ -182,7 +177,7 @@ export default {
           vm.listQna = response.data.listQna;
           console.log(response.data.listQna);
         })
-        .catch(function (error){
+        .catch(function (error) {
           alert("ERROR" + error);
         });
     },
@@ -206,7 +201,7 @@ export default {
 
 <style scoped>
 .dashboard-card {
-  margin: 20px;
+  margin-bottom: 20px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -287,14 +282,17 @@ export default {
   width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
+  cursor: pointer;
 }
 
 .dashboard-table th,
 .dashboard-table td {
-  padding: 12px;
-  text-align: left;
+  padding: 12px 8px;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dashboard-table th {

@@ -7,6 +7,38 @@
       </v-card-title>
 
       <div class="container">
+        <div class="filter-button-group">
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
+            @click="findStatus('all')"
+            >전체</v-btn
+          >
+          <v-btn
+            :class="{
+              'filter-button': true,
+              active: activeFilter === 'facilities',
+            }"
+            @click="findStatus('facilities')"
+            >시설</v-btn
+          >
+          <v-btn
+            :class="{
+              'filter-button': true,
+              active: activeFilter === 'academicAffairs',
+            }"
+            @click="findStatus('academicAffairs')"
+            >학사</v-btn
+          >
+          <v-btn
+            :class="{
+              'filter-button': true,
+              active: activeFilter === 'others',
+            }"
+            @click="findStatus('others')"
+            >기타</v-btn
+          >
+        </div>
+
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -17,7 +49,7 @@
               v-model="stitle"
             />
           </div>
-          <select class="search-category" v-model="scategory">
+          <!-- <select class="search-category" v-model="scategory">
             <option value="" disabled>카테고리를 선택하세요.</option>
             <option value="">선택 취소</option>
             <option
@@ -27,7 +59,7 @@
             >
               {{ category }}
             </option>
-          </select>
+          </select> -->
           <div class="button-group">
             <button class="search-button" @click="searchList">검색</button>
           </div>
@@ -140,12 +172,13 @@ export default {
       activeFilter: "all",
       stitle: "",
       scategory: "",
+      status: "",
       suggestionList: [],
       totalCnt: 0,
       pageSize: 10,
       currentPage: 1,
       suggestionNo: 0,
-      categories: ["학사", "시설", "장비", "서비스", "기타"],
+      // categories: ["시설", "학사", "기타"],
     };
   },
   mounted() {
@@ -174,6 +207,7 @@ export default {
     searchList() {
       let params = new URLSearchParams();
       params.append("stitle", this.stitle);
+      params.append("status", this.status);
       params.append("scategory", this.scategory);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
@@ -187,6 +221,24 @@ export default {
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
+    },
+
+    findStatus(param) {
+      if (param === "all") {
+        this.activeFilter = param;
+        this.status = "";
+      } else if (param === "facilities") {
+        this.activeFilter = param;
+        this.status = param;
+      } else if (param === "academicAffairs") {
+        this.activeFilter = param;
+        this.status = param;
+      } else if (param === "others") {
+        this.activeFilter = param;
+        this.status = param;
+      }
+
+      this.searchList();
     },
 
     page: function () {
@@ -228,7 +280,7 @@ export default {
   display: flex;
   height: 50px;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .filter-button-group {
@@ -325,5 +377,29 @@ export default {
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.filter-button-group {
+  display: flex;
+  margin: 16px 0;
+}
+
+.filter-button {
+  background-color: #f4f6f8;
+  color: #2c3e50;
+  border-radius: 20px;
+  padding: 8px 16px;
+  margin: 0 4px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.filter-button.active {
+  background-color: #407bff;
+  color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.filter-button:hover {
+  background-color: #5a9bff;
 }
 </style>
