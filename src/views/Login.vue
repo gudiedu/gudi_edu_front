@@ -43,7 +43,7 @@
             <a href=""><strong>[아이디/비밀번호 찾기]</strong></a>
           </div> -->
           <!-- Login Btn -->
-          <a class="btn_login" id="btn_login" @click="fLoginProc">
+          <a class="btn_login" id="btn_login" @click="fLoginProc($event)">
             <strong>로그인</strong>
           </a>
         </fieldset>
@@ -74,7 +74,11 @@ export default {
     //this.$refs.userPwd.focus()
   },
   methods: {
-    fLoginProc: function() {
+    fLoginProc: function(event) {
+      console.log("event객체")
+      console.log(event)
+      event.preventDefault();
+      
       console.log('saveId::' + this.saveId)
       // cookie 1일 설정
       this.setCookie("LOGIN_ID", this.loginId, 1)  //false his.setCookie("LOGIN_ID", this.loginId, this.saveId == true ? 7 : -1) 
@@ -94,6 +98,7 @@ export default {
       params.append('password', this.pwd);
       this.axios.post('/api/loginProc.do', params)
       .then(res => {
+        console.log("res:")
         console.log(res)
         let data = res.data;
         if(data.result == "SUCCESS") {
@@ -107,6 +112,7 @@ export default {
           sessionStorage.setItem('loginInfo', JSON.stringify(data))
           sessionStorage.setItem('loginID', JSON.stringify(data.loginId))
           sessionStorage.setItem('name', JSON.stringify(data.name));
+          
           this.$router.push('/dashboard')
           //sessionStroage 값 확인
           //sessionStorage.getItem("세션값:" + JSON.stringify(data.loginId))
@@ -123,17 +129,17 @@ export default {
       today.setDate(today.getDate() + day)
       document.cookie = name + "=" + value +"; path=/; expires=" 
       + today.toUTCString() + ";"
-      console.log("document.cookie:"  + document.cookie)
+      console.log("document.cookie:"  + document.cookie) //LOGIN_ID=admin
     },
     getCookie: function(name) {
       //쿠키에서 loginId 값을 가져온다.
       let cookie = document.cookie + ";"
-      console.log('cookie:'+ cookie);    //LOGIN_ID=admin;`
-      let idx = cookie.indexOf(name, 0)
+      console.log('cookie:'+ cookie);    //LOGIN_ID=admin;
+      let idx = cookie.indexOf(name, 0) // 0은 찾기 시작하는 위치
       let val = "";
       console.log('idx::' + idx)
       if(idx > -1){
-        cookie = cookie.substring(idx, cookie.length)
+        cookie = cookie.substring(idx, cookie.length)  //LOGIN_ID=admin;
         let begin = cookie.indexOf("=", 0) + 1
         let end = cookie.indexOf(";", begin)
         val = cookie.substring(begin, end)
