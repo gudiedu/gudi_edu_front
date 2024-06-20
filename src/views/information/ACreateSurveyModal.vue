@@ -73,6 +73,10 @@ props: {
     },
 
     insertNotice() {
+        if (!this.selectedSurvey) {
+      alert('설문을 선택해 주세요.');
+      return;
+    }
       const params = new URLSearchParams();
       params.append('survey_no', this.selectedSurvey);
       params.append('course_no', this.localCourse_no);
@@ -80,7 +84,7 @@ props: {
       axios.post('/survey/surveyIntoCourse.do', params)
         .then(response => {
           console.log("surveyIntoCourse:", response)
-          alert(this.localCourse_name + " 강의에 설문이등록되었습니다.");
+          alert(this.localCourse_name + " 강의에 설문이 등록되었습니다.");
           this.$emit('close'); // 부모 컴포넌트에서 모달을 닫도록 이벤트 발생
         })
         .catch(error => {
