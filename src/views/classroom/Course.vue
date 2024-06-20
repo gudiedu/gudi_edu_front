@@ -11,50 +11,26 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
+            
             <th>강의명</th>
             <th>강사명</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th>만족도</th>
+            <th>수업만족도</th>
             <th>출결</th>
           </tr>
         </thead>
         <tbody>
-          <template v-if="totalCnt > 0">
-            <template v-for="item in sCourseList" :key="item.course_no">
-              <tr>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_subject }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_name }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.teacher_name }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_start_date }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_end_date }}
-                </td>
-                <td>
-                  <span v-if="isAfterEndDate(item.course_end_date)">
-                    <span v-if="item.survey_completed === 'Y'">완료</span>
-                    <span v-else @click="classSatisfaction(item.course_no)"
-                      >미완료</span
-                    >
-                  </span>
-                </td>
-                <td @click="attendance(item.course_no)">출결</td>
-              </tr>
-            </template>
-          </template>
-          <template v-else>
+          <template v-for="item in sCourseList" :key="item.course_no">
             <tr>
-              <td colspan="10" style="text-align: center">
-                조회된 데이터가 없습니다.
+              <td @click="courseDetailed(item.course_no)">
+                {{ item.course_name }}
               </td>
+              <td @click="courseDetailed(item.course_no)">{{ item.teacher_name }}</td>
+              <td @click="courseDetailed(item.course_no)">{{ item.course_start_date }}</td>
+              <td @click="courseDetailed(item.course_no)">{{ item.course_end_date }}</td>
+              <td @click="classSatisfaction(item.course_no)">수업만족도</td>
+              <td @click="attendance(item.course_no)">출결</td>
             </tr>
           </template>
         </tbody>
@@ -62,20 +38,14 @@
     </v-card>
 
     <!-- 페이지네이션 추가-->
-    <!-- <div id="noticePagination">
-      <paginate
-        class="justify-content-center"
-        v-model="currentPage"
-        :page-count="page()"
-        :page-range="5"
-        :margin-pages="0"
-        :click-handler="searchList"
-        :prev-text="'이전'"
-        :next-text="'다음'"
-        :container-class="'pagination'"
-        :page-class="'page-item'"
-      ></paginate>
-    </div> -->
+
+    <!-- <v-dialog v-model="satisfactionModal" max-width="600px">
+      <v-card>
+        <v-card-text>
+          <SatisfactionModal :action="action" />
+        </v-card-text>
+      </v-card>
+    </v-dialog> -->
 
     <v-dialog v-model="attendanceModal" max-width="800px">
       <v-card>
@@ -89,7 +59,6 @@
 
 <script>
 import AttendanceModal from "./SAttendanceModal.vue";
-// import Paginate from "vuejs-paginate-next";
 export default {
   components: { AttendanceModal },
   data() {
