@@ -9,105 +9,40 @@
       <v-card-text>
         <v-form>
           <div class="form-group">
-            <v-select
-              :items="memberTypes"
-              label="회원유형"
-              v-model="formData.memberType"
-              outlined
-              dense
-            ></v-select>
+            <v-select :items="memberTypes" label="회원유형" v-model="formData.memberType" outlined dense></v-select>
           </div>
           <div class="form-group">
-            <v-text-field
-              label="이름"
-              v-model="formData.name"
-              outlined
-              dense
-            ></v-text-field>
+            <v-text-field label="이름" v-model="formData.name" outlined dense></v-text-field>
           </div>
           <div class="form-group">
-            <v-text-field
-              label="아이디"
-              v-model="formData.username"
-              outlined
-              dense
-            ></v-text-field>
+            <v-text-field label="아이디" v-model="formData.username" outlined dense></v-text-field>
           </div>
           <div class="form-group">
-            <v-text-field
-              label="비밀번호"
-              type="password"
-              v-model="formData.password"
-              outlined
-              dense
-            ></v-text-field>
+            <v-text-field label="비밀번호" type="password" v-model="formData.password" outlined dense></v-text-field>
           </div>
           <div class="form-group">
-            <v-text-field
-              label="비밀번호 확인"
-              type="password"
-              v-model="formData.confirmPassword"
-              outlined
-              dense
-            ></v-text-field>
+            <v-text-field label="비밀번호 확인" type="password" v-model="formData.confirmPassword" outlined
+              dense></v-text-field>
           </div>
           <div class="form-group postal-code-group">
-            <v-text-field
-              label="우편번호"
-              v-model="formData.postalCode"
-              outlined
-              dense
-            ></v-text-field>
-            <v-btn class="search-button" @click="searchPostalCode"
-              >우편번호 찾기</v-btn
-            >
+            <v-text-field label="우편번호" v-model="formData.postalCode" outlined dense></v-text-field>
+            <v-btn class="search-button" @click="searchPostalCode">우편번호 찾기</v-btn>
           </div>
           <div class="form-group">
-            <v-text-field
-              label="주소"
-              v-model="formData.address"
-              outlined
-              dense
-            ></v-text-field>
+            <v-text-field label="주소" v-model="formData.address" outlined dense></v-text-field>
           </div>
           <div class="form-group">
-            <v-text-field
-              label="상세주소"
-              v-model="formData.detailAddress"
-              outlined
-              dense
-            ></v-text-field>
+            <v-text-field label="상세주소" v-model="formData.detailAddress" outlined dense></v-text-field>
           </div>
           <div class="form-group">
-            <v-select
-              :items="genders"
-              label="성별"
-              v-model="formData.gender"
-              outlined
-              dense
-            ></v-select>
+            <v-select :items="genders" label="성별" v-model="formData.gender" outlined dense></v-select>
           </div>
           <div class="form-group">
             <div class="form-label">생년월일</div>
             <div class="birthdate-select">
-              <v-select
-                v-model="formData.selectedYear"
-                :items="years"
-                label="년"
-                dense
-              ></v-select>
-              <v-select
-                v-model="formData.selectedMonth"
-                :items="months"
-                label="월"
-                dense
-              ></v-select>
-              <v-select
-                v-model="formData.selectedDay"
-                :items="days"
-                label="일"
-                dense
-              ></v-select>
+              <v-select v-model="formData.selectedYear" :items="years" label="년" dense></v-select>
+              <v-select v-model="formData.selectedMonth" :items="months" label="월" dense></v-select>
+              <v-select v-model="formData.selectedDay" :items="days" label="일" dense></v-select>
             </div>
           </div>
           <div class="form-group">
@@ -122,9 +57,7 @@
 
             <template v-else>
               <div class="form-group">
-                <v-btn class="register-button" @click="registerMember"
-                  >등록</v-btn
-                >
+                <v-btn class="register-button" @click="registerMember">등록</v-btn>
               </div>
             </template>
           </div>
@@ -167,7 +100,7 @@ export default {
     this.initializeDates();
   },
   methods: {
-    searchPostalCode() {},
+    searchPostalCode() { },
     initializeDates() {
       // 년도 선택을 위한 배열 생성 (예: 1950부터 현재 년도까지)
       const currentYear = new Date().getFullYear();
@@ -185,8 +118,8 @@ export default {
         this.days.push(day);
       }
     },
-    registerMember() {},
-    delMember() {},
+    registerMember() { },
+    delMember() { },
   },
 };
 </script>

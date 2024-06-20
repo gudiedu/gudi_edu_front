@@ -7,36 +7,10 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >강사</v-btn
-          >
-        </div> -->
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input
-              type="text"
-              class="search-input"
-              placeholder="검색어를 입력해주세요."
-              v-model="stitle"
-            />
+            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" />
           </div>
           <div class="button-group">
             <button class="search-button" @click="searchMethod">검색</button>
@@ -49,41 +23,41 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>글번호</th>
-            <th>강의명</th>
-            <th>작성자</th>
-            <th>제목</th>
-            <th>등록일</th>
+            <th class="centered">번호</th>
+            <th class="centered">제목</th>
+            <th class="centered">강의명</th>
+            <th class="centered">작성자</th>
+            <th class="centered">등록일</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Java 기초</td>
-            <td>강사</td>
-            <td @click="learningMaterialsModify">학습자료입니다.</td>
-            <td>2024.01.01</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Vue</td>
-            <td>강사</td>
-            <td @click="learningMaterialsModify">학습자료2입니다.</td>
-            <td>2024.01.01</td>
+          <tr v-for="(item, index) in lectureItems" :key="item.resource_no">
+            <td class="centered">{{ index + 1 }}</td>
+            <td @click="learningMaterialsModify(item)" class="centered clickable">{{ item.resource_title }}</td>
+            <td @click="learningMaterialsModify(item)" class="centered clickable">{{ item.course_name }}</td>
+            <td class="centered">{{ item.name }}</td> <!-- name 필드로 수정 -->
+            <td class="centered">{{ item.resource_created_at }}</td>
           </tr>
         </tbody>
       </v-table>
     </v-card>
 
-    <!-- 페이지네이션 추가-->
-
     <div class="button-group">
       <button class="insert-button" @click="openAddModal">등록</button>
     </div>
+
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <TLearningMaterialsModal :action="action" />
+          <TResourcesModal :action="'C'" @close="closeAddModal" />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="modifyModal" max-width="600px">
+      <v-card>
+        <v-card-text>
+          <TResourcesModal :action="'U'" :materials="selectedNotice" @close="closeModifyModal" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -91,43 +65,59 @@
 </template>
 
 <script>
-import TLearningMaterialsModal from "./TResourcesModal.vue";
+import TResourcesModal from "./TResourcesModal.vue";
+import axios from 'axios';
+
 export default {
   components: {
-    TLearningMaterialsModal,
+    TResourcesModal,
   },
   data() {
     return {
       titleText: "학습자료",
       addModal: false,
-      action: "",
+      modifyModal: false,
       selectedNotice: null,
-      activeFilter: "all",
       stitle: "",
+      lectureItems: [],
     };
   },
+  created() {
+    this.fetchResourceList();
+  },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
-    searchMethod() {},
-    learningMaterialsModify(materials) {
-      this.selectedNotice = materials;
-      this.action = "U";
-      this.addModal = true;
+    searchMethod() {
+      // 검색 로직 추가
+    },
+    fetchResourceList() {
+      axios.get('/tCourse/resourceList', {
+        params: {
+          currentPage: 1,
+          pageSize: 5
+        }
+      })
+        .then(response => {
+          this.lectureItems = response.data.resourceList;
+          console.log(this.lectureItems);
+        })
+        .catch(error => {
+          console.error("There was an error fetching the resource list!", error);
+        });
     },
     openAddModal() {
-      this.action = "";
       this.addModal = true;
     },
     closeAddModal() {
       this.addModal = false;
+      this.fetchResourceList(); // 모달을 닫을 때 목록을 갱신
+    },
+    learningMaterialsModify(materials) {
+      this.selectedNotice = materials;
+      this.modifyModal = true;
+    },
+    closeModifyModal() {
+      this.modifyModal = false;
+      this.fetchResourceList(); // 모달을 닫을 때 목록을 갱신
     },
   },
 };
@@ -152,30 +142,6 @@ export default {
   height: 50px;
   align-items: center;
   justify-content: flex-end;
-}
-
-.filter-button-group {
-  display: flex;
-  margin: 16px 0;
-}
-
-.filter-button {
-  background-color: #f4f6f8;
-  color: #2c3e50;
-  border-radius: 20px;
-  padding: 8px 16px;
-  margin: 0 4px;
-  transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.filter-button.active {
-  background-color: #407bff;
-  color: #ffffff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.filter-button:hover {
-  background-color: #5a9bff;
 }
 
 .search {
@@ -221,9 +187,14 @@ export default {
 .dashboard-table th,
 .dashboard-table td {
   padding: 12px;
-  text-align: left;
+  text-align: center;
+  /* 가운데 정렬 */
+  vertical-align: middle;
+  /* 세로 가운데 정렬 */
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  color: #000;
+  /* 검은색 텍스트 설정 */
 }
 
 .dashboard-table th {
@@ -233,5 +204,28 @@ export default {
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.clickable {
+  cursor: pointer;
+  color: #000;
+  /* 검은색 텍스트 설정 */
+}
+
+.clickable:hover {
+  text-decoration: underline;
+}
+
+.dashboard-table td:nth-child(4) {
+  /* 제목 컬럼 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.centered {
+  text-align: center !important;
+  /* 강제 가운데 정렬 */
 }
 </style>

@@ -1,163 +1,317 @@
 <template>
-  <div class="modal-content">
-    <h2>시험 출제</h2>
-    <div class="form-group">
-      <label for="examName">시험명</label>
-      <input type="text" v-model="form.examName" required />
-    </div>
-
-    <div id="questionsContainer">
-      <!-- <h3>문제</h3> -->
-      <div
-        v-for="(question, index) in form.questions"
-        :key="index"
-        class="question-entry"
-      >
-        <h4>문제 {{ index + 1 }}</h4>
+  <div>
+    <div v-if="action === 'C'">
+      <!-- 시험 등록 모달 -->
+      <div class="modal-header">
+        <div class="course-subject">{{ courseSubject }}</div>
+        <div class="course-name">{{ courseName }}</div>
+      </div>
+      <div class="form-group">
+        <label for="testCategory">시험명</label>
+        <select v-model="testCategory" id="testCategory" required>
+          <option disabled value="">시험명을 선택해주세요</option>
+          <option value="1차">1차</option>
+          <option value="2차">2차</option>
+          <option value="테스트">테스트</option>
+        </select>
+      </div>
+      <div>
+        <label><input type="checkbox" v-model="selectAll" @change="toggleSelectAll" /> 전체 선택</label>
+      </div>
+      <div v-for="(question, index) in tempQuestions" :key="index">
+        <label><input type="checkbox" v-model="selectedQuestions" :value="index" /> 문제 {{ index + 1 }}</label>
         <div class="form-group">
-          <!-- <label :for="'question-' + index">문제</label> -->
-          <input
-            type="text"
-            v-model="question.question"
-            :id="'question-' + index"
-            required
-          />
+          <label for="testQuestion">문제명</label>
+          <input type="text" v-model="question.test_question" id="testQuestion" required />
         </div>
         <div class="form-group">
-          <label :for="'option1-' + index">보기1</label>
-          <input
-            type="text"
-            v-model="question.option1"
-            :id="'option1-' + index"
-            required
-          />
+          <label for="testChoice1">보기1</label>
+          <input type="text" v-model="question.test_choice1" id="testChoice1" required />
         </div>
         <div class="form-group">
-          <label :for="'option2-' + index">보기2</label>
-          <input
-            type="text"
-            v-model="question.option2"
-            :id="'option2-' + index"
-            required
-          />
+          <label for="testChoice2">보기2</label>
+          <input type="text" v-model="question.test_choice2" id="testChoice2" required />
         </div>
         <div class="form-group">
-          <label :for="'option3-' + index">보기3</label>
-          <input
-            type="text"
-            v-model="question.option3"
-            :id="'option3-' + index"
-            required
-          />
+          <label for="testChoice3">보기3</label>
+          <input type="text" v-model="question.test_choice3" id="testChoice3" required />
         </div>
         <div class="form-group">
-          <label :for="'option4-' + index">보기4</label>
-          <input
-            type="text"
-            v-model="question.option4"
-            :id="'option4-' + index"
-            required
-          />
+          <label for="testChoice4">보기4</label>
+          <input type="text" v-model="question.test_choice4" id="testChoice4" required />
         </div>
         <div class="form-group">
-          <label :for="'answer-' + index">정답</label>
-          <input
-            type="text"
-            v-model="question.answer"
-            :id="'answer-' + index"
-            required
-          />
+          <label for="testAnswer">정답</label>
+          <div class="dropdown-container">
+            <select v-model="question.test_answer" id="testAnswer" required>
+              <option disabled value="">정답을 선택해주세요</option>
+              <option value="보기1">보기1</option>
+              <option value="보기2">보기2</option>
+              <option value="보기3">보기3</option>
+              <option value="보기4">보기4</option>
+            </select>
+            <i class="dropdown-icon">▼</i>
+          </div>
         </div>
         <div class="form-group">
-          <label :for="'score-' + index">배점</label>
-          <input
-            type="number"
-            v-model="question.score"
-            :id="'score-' + index"
-            required
-          />
+          <label for="testScore">배점</label>
+          <input type="number" v-model.number="question.test_score" id="testScore" @input="validateScore(index)"
+            required />
         </div>
       </div>
-    </div>
-    <div class="form-buttons">
-      <button @click="addQuestion" class="addQuestion-button">문제추가</button>
-      <button @click="removeQuestion(index)" class="removeQuestion-button">
-        문제삭제
-      </button>
+      <div class="score-display">총 점수: {{ totalScore }}</div> <!-- 총 점수 표시 영역 -->
+      <div class="main-button-group">
+        <button @click="addQuestion" class="addQuestion-button">추가</button>
+        <button @click="deleteSelectedQuestions" class="removeQuestion-button spaced">삭제</button> <!-- 삭제 버튼 수정 -->
+        <button @click="registerExam" class="insert-button">등록</button>
+      </div>
     </div>
 
-    <div class="form-buttons">
-      <template v-if="paction === 'U'">
-        <button type="button" class="update-button">시험수정</button>
-        <button type="button" class="delete-button">시험삭제</button>
-      </template>
-      <template v-else
-        ><button type="button" class="insert-button">시험등록</button></template
-      >
+    <div v-if="action === 'U'">
+      <!-- 시험 수정 모달 -->
+      <div class="modal-header">
+        <div class="course-subject">{{ courseSubject }}</div>
+        <div class="course-name">{{ courseName }} - {{ testCategory }}</div>
+      </div>
+      <div>
+        <label><input type="checkbox" v-model="selectAll" @change="toggleSelectAll" /> 전체 선택</label>
+      </div>
+      <div v-for="(question, index) in tempQuestions" :key="index">
+        <label><input type="checkbox" v-model="selectedQuestions" :value="index" /> 문제 {{ index + 1 }}</label>
+        <div class="form-group">
+          <label for="testQuestion">문제명</label>
+          <input type="text" v-model="question.test_question" id="testQuestion" required />
+        </div>
+        <div class="form-group">
+          <label for="testChoice1">보기1</label>
+          <input type="text" v-model="question.test_choice1" id="testChoice1" required />
+        </div>
+        <div class="form-group">
+          <label for="testChoice2">보기2</label>
+          <input type="text" v-model="question.test_choice2" id="testChoice2" required />
+        </div>
+        <div class="form-group">
+          <label for="testChoice3">보기3</label>
+          <input type="text" v-model="question.test_choice3" id="testChoice3" required />
+        </div>
+        <div class="form-group">
+          <label for="testChoice4">보기4</label>
+          <input type="text" v-model="question.test_choice4" id="testChoice4" required />
+        </div>
+        <div class="form-group">
+          <label for="testAnswer">정답</label>
+          <div class="dropdown-container">
+            <select v-model="question.test_answer" id="testAnswer" required>
+              <option disabled value="">정답을 선택해주세요</option>
+              <option value="보기1">보기1</option>
+              <option value="보기2">보기2</option>
+              <option value="보기3">보기3</option>
+              <option value="보기4">보기4</option>
+            </select>
+            <i class="dropdown-icon">▼</i>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="testScore">배점</label>
+          <input type="number" v-model.number="question.test_score" id="testScore" @input="validateScore(index)"
+            required />
+        </div>
+      </div>
+      <div class="score-display">총 점수: {{ totalScore }}</div> <!-- 총 점수 표시 영역 -->
+      <div class="main-button-group">
+        <button @click="addQuestion" class="addQuestion-button">추가</button>
+        <button @click="deleteSelectedQuestions" class="removeQuestion-button spaced">삭제</button> <!-- 삭제 버튼 수정 -->
+        <button @click="saveQuestion" class="insert-button">저장</button>
+      </div>
     </div>
   </div>
 </template>
 
+
+
+
 <script>
 export default {
-  props: {
-    action: String,
-  },
+  props: ['action', 'courseNo', 'courseName', 'courseSubject', 'question'],
   data() {
     return {
-      form: {
-        examName: "",
-        examDescription: "",
-        questions: [],
-      },
-      paction: this.action,
+      testCategory: '',
+      questions: [
+        {
+          test_question: '',
+          test_choice1: '',
+          test_choice2: '',
+          test_choice3: '',
+          test_choice4: '',
+          test_answer: '',
+          test_score: 0,
+        },
+      ],
+      tempQuestions: [],
+      totalScore: 0,
+      selectedQuestions: [], // 선택된 문제 인덱스를 저장하는 배열
+      deletedQuestions: [], // 삭제된 질문을 저장하는 배열
+      selectAll: false, // 전체 선택 체크박스 상태
     };
   },
+  mounted() {
+    if (this.action === 'U' && this.question) {
+      this.questions = this.question;
+      this.testCategory = this.question[0].test_category;
+    }
+    this.tempQuestions = JSON.parse(JSON.stringify(this.questions));
+    this.updateTotalScore();
+  },
   methods: {
-    addQuestion() {
-      this.form.questions.push({
-        question: "",
-        option1: "",
-        option2: "",
-        option3: "",
-        option4: "",
-        answer: "",
-        score: 0,
-      });
-    },
-    removeQuestion(index) {
-      if (this.form.questions.length > 0) {
-        this.form.questions.splice(index, 1);
-      } else {
-        alert("더 이상 삭제할 문제가 없습니다.");
+    validateScore(index) {
+      if (this.tempQuestions[index].test_score > 100) {
+        alert("배점은 100점을 초과할 수 없습니다.");
+        this.tempQuestions[index].test_score = 100;
+      }
+      this.updateTotalScore();
+      if (this.totalScore > 100) {
+        const remainingScore = 100 - (this.totalScore - this.tempQuestions[index].test_score);
+        alert(`남은 점수는 ${remainingScore}점입니다. 배점을 ${remainingScore}점으로 조정합니다.`);
+        this.tempQuestions[index].test_score = remainingScore;
+        this.updateTotalScore();
       }
     },
-    save() {},
+    updateTotalScore() {
+      this.totalScore = this.tempQuestions.reduce((sum, question) => sum + (parseInt(question.test_score) || 0), 0);
+    },
+    addQuestion() {
+      const remainingScore = 100 - this.totalScore;
+      if (remainingScore <= 0) {
+        alert("총 점수가 100점을 초과할 수 없습니다. 추가할 수 없습니다.");
+        return;
+      }
+      this.tempQuestions.push({
+        test_question: '',
+        test_choice1: '',
+        test_choice2: '',
+        test_choice3: '',
+        test_choice4: '',
+        test_answer: '',
+        test_score: 0,
+      });
+    },
+    deleteSelectedQuestions() {
+      if (this.selectedQuestions.length === 0) {
+        alert("체크박스를 선택하세요.");
+        return;
+      }
+      if (confirm('정말로 선택된 문제를 삭제하시겠습니까?')) {
+        this.selectedQuestions.sort((a, b) => b - a).forEach(index => {
+          const questionToDelete = this.tempQuestions[index];
+          this.deletedQuestions.push(questionToDelete); // 삭제된 질문을 deletedQuestions에 추가
+          this.tempQuestions.splice(index, 1);
+        });
+        this.selectedQuestions = [];
+        this.selectAll = false;
+        this.updateTotalScore();
+      }
+    },
+    registerExam() {
+      this.updateTotalScore();
+      if (!this.testCategory) {
+        alert("시험 카테고리를 선택해주세요.");
+        return;
+      }
+      if (this.totalScore > 100) {
+        alert("총 점수가 100점을 초과할 수 없습니다.");
+        return;
+      }
+      this.$emit('saveExam', {
+        action: 'C',
+        testCategory: this.testCategory,
+        questions: this.tempQuestions,
+      });
+    },
+    saveQuestion() {
+      this.updateTotalScore();
+      // 문제가 없는 상태에서 저장하면 시험이 삭제됩니다.
+      if (this.tempQuestions.length === 0) {
+        if (confirm("문제가 없는 상태에서 저장하면 시험이 삭제됩니다. 삭제하시겠습니까?")) {
+          this.$emit('deleteExam', { courseNo: this.courseNo, testCategory: this.testCategory });
+          return;
+        }
+      } else if (this.totalScore !== 100) { // 남아있는 문제의 총점이 100점인지 확인합니다.
+        alert("총 점수가 100점이 되질 않습니다.");
+        return;
+      }
+
+      // 업데이트할 문제와 삭제할 문제를 별도로 처리합니다.
+      const updatedQuestions = JSON.parse(JSON.stringify(this.tempQuestions));
+      const deletedQuestionsCopy = JSON.parse(JSON.stringify(this.deletedQuestions.length ? this.deletedQuestions : []));
+
+      console.log("Updated Questions:", updatedQuestions);
+      console.log("Deleted Questions:", deletedQuestionsCopy);
+
+      this.$emit('updateExam', {
+        action: 'U',
+        courseNo: this.courseNo,
+        testCategory: this.testCategory,
+        questions: updatedQuestions,
+        deletedQuestions: deletedQuestionsCopy
+      });
+    },
+    toggleSelectAll() {
+      this.selectedQuestions = this.selectAll ? this.tempQuestions.map((_, index) => index) : [];
+    }
   },
 };
 </script>
 
+
+
+
+
+
+
+
+
+
 <style scoped>
-.modal-content {
-  background-color: #fefefe;
-  padding: 20px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  animation: animatetop 0.4s;
+.modal-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  position: relative;
 }
 
-@keyframes animatetop {
-  from {
-    top: -300px;
-    opacity: 0;
-  }
-  to {
-    top: 0;
-    opacity: 1;
-  }
+.course-subject {
+  background-color: #e0f7fa;
+  padding: 10px 40px;
+  border-radius: 5px;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.course-name {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  flex-grow: 0;
+}
+
+.form-group label {
+  margin-top: 20px;
+}
+
+.v-dialog__content {
+  max-height: 100vh;
+  height: auto;
 }
 
 .form-group {
   margin-bottom: 15px;
+}
+
+.form-group:last-of-type {
+  margin-bottom: 40px;
 }
 
 .form-group label {
@@ -166,74 +320,82 @@ export default {
 }
 
 .form-group input,
-.form-group textarea {
+.form-group select {
   width: 100%;
   padding: 8px;
-  box-sizing: border-box;
   border: 1px solid #dfdfdf;
+  box-sizing: border-box;
 }
 
-.form-buttons {
-  margin-top: 10px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.form-buttons button {
-  margin-right: 10px;
-}
-
-.form-button2 {
-  display: flex;
-  justify-content: flex-end;
+.dropdown-container {
   position: relative;
-  top: 10px;
+}
+
+.dropdown-icon {
+  position: absolute;
   right: 10px;
-}
-
-#questionsContainer {
-  margin-top: 20px;
-}
-
-.question-entry {
-  margin-bottom: 20px;
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .insert-button,
-.update-button,
-.addQuestion-button {
+.addQuestion-button,
+.removeQuestion-button {
   padding: 10px 17px;
-  background-color: #007bff;
-  color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
+  margin-top: 50px;
 }
 
-.insert-button:hover,
-.update-button:hover,
+.main-button-group {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 60px;
+}
+
+.insert-button {
+  background-color: #28a745;
+  color: white;
+  margin-left: auto;
+}
+
+.insert-button:hover {
+  background-color: #218838;
+}
+
+.addQuestion-button {
+  background-color: #007bff;
+  color: white;
+}
+
 .addQuestion-button:hover {
   background-color: #0056b3;
 }
 
-.removeQuestion-button,
-.delete-button {
-  padding: 10px 17px;
+.removeQuestion-button {
   background-color: #d32f2f;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+  margin-left: 10px;
 }
 
-.removeQuestion-button:hover,
-.delete-button:hover {
+.removeQuestion-button:hover {
   background-color: #e57373;
-  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
+
+.modal-input {
+  max-width: 100%;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
+}
+
+.score-display {
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 10px;
 }
 </style>
