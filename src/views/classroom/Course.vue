@@ -15,7 +15,7 @@
             <th>강사명</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th>설문조사</th>
+            <th>만족도</th>
             <th>출결</th>
           </tr>
         </thead>
@@ -23,20 +23,26 @@
           <template v-if="totalCnt > 0">
             <template v-for="item in sCourseList" :key="item.course_no">
               <tr>
-                <td>{{ item.course_subject }}</td>
-                <td @click="lectureModify(item.course_no)">
+                <td @click="courseDetailed(item.course_no)">
+                  {{ item.course_subject }}
+                </td>
+                <td @click="courseDetailed(item.course_no)">
                   {{ item.course_name }}
                 </td>
-                <td>{{ item.teacher_name }}</td>
-                <td>{{ item.course_start_date }}</td>
-                <td>{{ item.course_end_date }}</td>
+                <td @click="courseDetailed(item.course_no)">
+                  {{ item.teacher_name }}
+                </td>
+                <td @click="courseDetailed(item.course_no)">
+                  {{ item.course_start_date }}
+                </td>
+                <td @click="courseDetailed(item.course_no)">
+                  {{ item.course_end_date }}
+                </td>
                 <td>
                   <span v-if="isAfterEndDate(item.course_end_date)">
-                    <span v-if="item.survey_completed === 'Y'"
-                      >설문조사완료</span
-                    >
+                    <span v-if="item.survey_completed === 'Y'">완료</span>
                     <span v-else @click="classSatisfaction(item.course_no)"
-                      >설문조사미완료</span
+                      >미완료</span
                     >
                   </span>
                 </td>
@@ -56,7 +62,7 @@
     </v-card>
 
     <!-- 페이지네이션 추가-->
-    <div id="noticePagination">
+    <!-- <div id="noticePagination">
       <paginate
         class="justify-content-center"
         v-model="currentPage"
@@ -69,7 +75,7 @@
         :container-class="'pagination'"
         :page-class="'page-item'"
       ></paginate>
-    </div>
+    </div> -->
 
     <v-dialog v-model="attendanceModal" max-width="800px">
       <v-card>
@@ -82,9 +88,9 @@
 </template>
 <script>
 import AttendanceModal from "./SAttendanceModal.vue";
-import Paginate from "vuejs-paginate-next";
+// import Paginate from "vuejs-paginate-next";
 export default {
-  components: { AttendanceModal, Paginate },
+  components: { AttendanceModal },
   data() {
     return {
       titleText: "강의관리",
@@ -100,10 +106,10 @@ export default {
     this.courseList();
   },
   methods: {
-    lectureModify(courseNo) {
+    courseDetailed(courseNo) {
       this.$router.push({
-        name: "sLectureDetail",
-        params: { name: courseNo },
+        name: "sCourseDetail",
+        params: { courseNo },
       });
     },
 
