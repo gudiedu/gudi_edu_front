@@ -290,7 +290,7 @@ export default {
                 response.data.file_local_path +
                 "' id 'imgFile' style='width:100px; height 100px;' />";
             } else {
-              this.previewHtml = response.data.result.file_origin;
+              this.previewHtml = "<div>" + response.data.file_origin + "</div>";
             }
           }
           this.openPopup();

@@ -316,7 +316,7 @@ export default {
      */
     download: function () {
       let params = new URLSearchParams();
-      params.append("notice_no", this.notice_no);
+      params.append("notice_no", this.noticeNo);
 
       this.axios({
         url: "/aAlert/notice/fileDownload",
