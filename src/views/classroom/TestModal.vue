@@ -1,6 +1,6 @@
 <template>
   <div class="lecture-detail">
-    <v-btn class="close-button" icon @click="$emit('close-modal')">
+    <v-btn class="close-button" icon @click="closeModal">
         <v-icon>mdi-close</v-icon>
       </v-btn>
     <h2 class="title">시험</h2>
@@ -160,6 +160,10 @@ export default {
     goBack(){
       this.$router.go(-1);
     },
+
+    closeModal(){
+      this.$emit('close-modal');
+    }
 
   },
 };

@@ -6,22 +6,31 @@
         <v-spacer></v-spacer>
       </v-card-title>
 
-      <div class="container">
+      <!-- <div class="container">
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
+             <v-select
+              v-model="selectedOption"
+              :items="options"
+              label="검색조건"
+              outlined
+              class="search-select"
+              item-height="10"
+              dense
+              max-height="100"></v-select> 
             <input
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
-              v-model="stitle"
+              v-model="searchKeyword"
             />
           </div>
           <div class="button-group">
             <button class="search-button" @click="searchMethod">검색</button>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <v-divider></v-divider>
 
@@ -29,7 +38,7 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>과목번호</th>
+            <!-- <td>과목번호</td> -->
             <th>과목명</th>
             <th>강의명</th>
             <th>강사명</th>
@@ -43,7 +52,7 @@
         <tbody>
           <template v-for="course in enrollAvailable" :key="course.course_no">
             <tr>
-              <td @click="courseDetail(course.course_no)">{{ course.course_no }}</td>
+              <!-- <td @click="courseDetail(course.course_no)">{{ course.course_no }}</td> -->
               <td @click="courseDetail(course.course_no)">{{ course.course_subject }}</td>
               <td @click="courseDetail(course.course_no)">{{ course.course_name }}</td>
               <td @click="courseDetail(course.course_no)">{{ course.name }}</td>
@@ -58,19 +67,6 @@
       </v-table>
     </form>
     </v-card>
-
-    <!-- 페이지네이션 추가-->
-
-    <!-- <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
-    </div>
-    <v-dialog v-model="addModal" max-width="600px">
-      <v-card>
-        <v-card-text>
-          <SLearningMaterialsModal :action="action" />
-        </v-card-text>
-      </v-card>
-    </v-dialog> -->
   </v-container>
 </template>
 
@@ -85,6 +81,11 @@ export default {
       enrollAvailable: [],
       courseNo:"",
       studentSignedID : "",
+      searchKeyword: '',
+      selectedOption: '과목명',
+      options: ['과목명', '강의명', '강사명'],
+      searchResults: [],
+      searched: false,
     };
   },
   mounted(){
@@ -119,6 +120,23 @@ export default {
 
     searchMethod() {
 
+      switch (this.selectedOption){
+        case '과목명' :
+          console.log('검색조건: subject, keyWord:', this.searchKeyword);
+          this.searchResults = this.items.filter(item => item.subject.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+          break;
+        case '강사명' :
+          console.log('검색조건: teacher, keyWord:', this.searchKeyword);
+          this.searchResults = this.items.filter(item => item.instructor.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+          break;
+        case '강의명':
+          console.log('검색조건: course, keyWord: ', this.searchKeyword);
+          this.searchResults = this.items.filter(item => item.lecture.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+          break;
+        default:
+          console.warn('검색 조건을 다시 확인해주세요.');
+      }
+      this.searched = true; // 검색을 수행했음을 표시
     },
     courseDetail(courseNo) {
       this.$router.push({
@@ -257,4 +275,10 @@ export default {
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
 }
+/*
+.search-select {
+  margin-left: 10px;
+  min-width: 100px; /* 선택적으로 너비를 조정할 수 있습니다 
+} */
+
 </style>

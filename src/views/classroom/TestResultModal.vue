@@ -8,7 +8,7 @@
 
     <form id="showing">
       <div class="question-container">
-        <template v-for="(result, index) in showingResult" :key="result.test_no">
+        <div v-for="(result, index) in showingResult" :key="result.test_no">
           <div class="form-label">{{ index + 1 }}. {{ result.test_question }}</div>
           <v-radio-group v-model="studentChoiced[index]" :key="index">
             <v-radio :color="isCorrect(studentChoiced[index], result.test_answer)" :label="result.test_choice1.toString()" value="1"></v-radio>
@@ -16,7 +16,7 @@
             <v-radio :color="isCorrect(studentChoiced[index], result.test_answer)" :label="result.test_choice3.toString()" value="3"></v-radio>
             <v-radio :color="isCorrect(studentChoiced[index], result.test_answer)" :label="result.test_choice4.toString()" value="4"></v-radio>
           </v-radio-group>
-        </template>
+        </div>
       </div>
 
       <div class="button-group">
@@ -57,7 +57,6 @@ export default {
       this.axios
         .post("/classroom/sShowingTestResult.do", resultParams)
         .then(response => {
-          
           this.showingResult = response.data.showingResult.filter(result =>
             result.course_no === this.SelectedCourseNo &&
             result.test_category === this.SelectedTestCategory
@@ -76,8 +75,17 @@ export default {
         window.location.reload();
       });
     },
-    isCorrect(answerSelected, testAnswer) {
-      return answerSelected === testAnswer ? "indigo-darken-4" : "red-darken-4";
+    isCorrect(answerSelected, testAnswer, resultIndex) {
+      if (answerSelected === testAnswer) {
+        return "indigo-darken-4";
+      } else if (this.studentChoiced[resultIndex] === testAnswer) {
+        return "indigo-darken-4";
+      } else {
+        return "red-darken-4";
+      }
+},
+    closeModal(){
+      this.$emit('close-modal');
     }
   }
 };

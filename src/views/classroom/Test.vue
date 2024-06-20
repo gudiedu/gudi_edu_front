@@ -6,7 +6,7 @@
         <v-spacer></v-spacer>
       </v-card-title>
 
-      <div class="container">
+      <!-- <div class="container">
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -14,14 +14,14 @@
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
-              v-model="searchedWords"
+              v-model="searchKeyword"
             />
           </div>
           <div class="button-group">
             <button class="search-button" @click="searchMethod">검색</button>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <v-divider></v-divider>
 
@@ -78,7 +78,7 @@
            :action="action"
            :courseNo="courseNo"
            :testCategory="testCategory"
-           @close-modal="closeTestModal"
+           @close-modal="closeModal"
           />
         </v-card-text>
       </v-card>
@@ -91,7 +91,7 @@
            :courseNo="courseNo"
            :testCategory="testCategory"
            :testResultNo="testResultNo"
-           @close-modal="closeTestModal"
+           @close-modal="closeModal"
           />
         </v-card-text>
       </v-card>
@@ -211,8 +211,13 @@ export default {
       }
     },
 
-    closeTestModal(){
+    closeModal(){
       this.testModal = false;
+      this.testResultModal = false;
+      this.courseTestList();
+    },
+    searching() {
+      console.log('검색어:', this.searchKeyword);
     },
 
     page: function () {
