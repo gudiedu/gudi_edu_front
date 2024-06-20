@@ -141,6 +141,10 @@ export default {
       if(idx > -1){
         cookie = cookie.substring(idx, cookie.length)  //LOGIN_ID=admin;
         let begin = cookie.indexOf("=", 0) + 1
+
+
+
+        
         let end = cookie.indexOf(";", begin)
         val = cookie.substring(begin, end)
       }
