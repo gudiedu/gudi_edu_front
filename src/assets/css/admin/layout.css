@@ -12,6 +12,7 @@ body.bgNone {
 
 #wrap_area {
   width: 1280px;
+  /* width: 1440px; */
   margin: 0 auto;
   font-size: 13px;
 }

@@ -10,6 +10,7 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
+            <th>과목명</th>
             <th>강의명</th>
             <th>강사명</th>
             <th>시작일</th>
@@ -22,6 +23,7 @@
           <template v-if="totalCnt > 0">
             <template v-for="item in sCourseList" :key="item.course_no">
               <tr>
+                <td>{{ item.course_subject }}</td>
                 <td @click="lectureModify(item.course_no)">
                   {{ item.course_name }}
                 </td>
@@ -159,6 +161,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .dashboard-card {
   margin-bottom: 20px;
@@ -239,11 +242,11 @@ export default {
 }
 
 .dashboard-table {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
   cursor: pointer;
+  /* Ensure table expands to fit card */
 }
 
 .dashboard-table th,
