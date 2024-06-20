@@ -81,6 +81,7 @@ export default {
   },
   props: {
     selectedLecture: String,
+    /** @vue-props {any[]} aList - attendanceList */
     aList: Array,
     totalCount: Number,
   },
