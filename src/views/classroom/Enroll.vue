@@ -6,90 +6,67 @@
         <v-spacer></v-spacer>
       </v-card-title>
 
-      <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >강사</v-btn
-          >
-        </div> -->
-
+      <!-- <div class="container">
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
+             <v-select
+              v-model="selectedOption"
+              :items="options"
+              label="검색조건"
+              outlined
+              class="search-select"
+              item-height="10"
+              dense
+              max-height="100"></v-select> 
             <input
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
-              v-model="stitle"
+              v-model="searchKeyword"
             />
           </div>
           <div class="button-group">
             <button class="search-button" @click="searchMethod">검색</button>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <v-divider></v-divider>
 
+      <form id="enrollment">
       <v-table class="dashboard-table">
         <thead>
           <tr>
+            <!-- <td>과목번호</td> -->
+            <th>과목명</th>
             <th>강의명</th>
             <th>강사명</th>
             <th>강의실</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th>수강인원</th>
+            <th>수강정원</th>
+            <th>수강신청</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td @click="lectureModify('Java 기초')">Java 기초</td>
-            <td>강사</td>
-            <td>101호</td>
-            <td>2024.01.02</td>
-            <td>2024.05.01</td>
-            <td>20</td>
-          </tr>
-          <tr>
-            <td @click="lectureModify('Vue')">Vue</td>
-            <td>강사</td>
-            <td>101호</td>
-            <td>2024.01.02</td>
-            <td>2024.05.01</td>
-            <td>20</td>
-          </tr>
+          <template v-for="course in enrollAvailable" :key="course.course_no">
+            <tr>
+              <!-- <td @click="courseDetail(course.course_no)">{{ course.course_no }}</td> -->
+              <td @click="courseDetail(course.course_no)">{{ course.course_subject }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.course_name }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.name }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.course_loc }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.course_start_date }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.course_end_date }}</td>
+              <td @click="courseDetail(course.course_no)">{{ course.course_quota }}</td>
+              <td @click="courseEnroll(course.course_no)">신청하기</td>
+            </tr>
+        </template>
         </tbody>
       </v-table>
+    </form>
     </v-card>
-
-    <!-- 페이지네이션 추가-->
-
-    <!-- <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
-    </div>
-    <v-dialog v-model="addModal" max-width="600px">
-      <v-card>
-        <v-card-text>
-          <SLearningMaterialsModal :action="action" />
-        </v-card-text>
-      </v-card>
-    </v-dialog> -->
   </v-container>
 </template>
 
@@ -100,48 +77,99 @@ export default {
     return {
       titleText: "수강신청",
       action: "",
-      selectedNotice: null,
-      activeFilter: "all",
-      stitle: "",
-      satisfactionModal: false,
-      attendanceModal: false,
+      sEnrollList: [],
+      enrollAvailable: [],
+      courseNo:"",
+      studentSignedID : "",
+      searchKeyword: '',
+      selectedOption: '과목명',
+      options: ['과목명', '강의명', '강사명'],
+      searchResults: [],
+      searched: false,
     };
   },
+  mounted(){
+    this.enrollList();
+
+  },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
-    searchMethod() {},
-    // lectureModify(lecture) {
-    //   this.selectedNotice = lecture;
-    //   this.action = "U";
-    //   this.addModal = true;
-    // },
-    // openAddModal() {
-    //   this.action = "";
-    //   this.addModal = true;
-    // },
-    // closeAddModal() {
-    //   this.addModal = false;
-    // },
-    lectureModify(lectureName) {
+    enrollList(){
+
+      let enrollListParams = new URLSearchParams();
+
+      this.axios
+        .post("/classroom/sEnrollList.do", enrollListParams)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+
+          this.enrollAvailable = response.data.enrollList;
+
+          response.data.enrollList.forEach(each => {
+            this.openedNo = each.course_no;
+            this.openedSubject = each.course_subject;
+            this.openedName = each.course_name;
+            this.openedQuota = each.course_quota;
+            this.openedBegins = each.course_start_date;
+            this.openedEnds = each.course_end_date;
+            this.teacherName = each.name;
+
+          });
+
+        })
+    },
+
+    searchMethod() {
+
+      switch (this.selectedOption){
+        case '과목명' :
+          console.log('검색조건: subject, keyWord:', this.searchKeyword);
+          this.searchResults = this.items.filter(item => item.subject.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+          break;
+        case '강사명' :
+          console.log('검색조건: teacher, keyWord:', this.searchKeyword);
+          this.searchResults = this.items.filter(item => item.instructor.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+          break;
+        case '강의명':
+          console.log('검색조건: course, keyWord: ', this.searchKeyword);
+          this.searchResults = this.items.filter(item => item.lecture.toLowerCase().includes(this.searchKeyword.toLowerCase()));
+          break;
+        default:
+          console.warn('검색 조건을 다시 확인해주세요.');
+      }
+      this.searched = true; // 검색을 수행했음을 표시
+    },
+    courseDetail(courseNo) {
       this.$router.push({
-        name: "sLectureDetailRegister",
-        params: { name: lectureName },
+        name: 'sCourseDetail',
+        params: { courseNo: courseNo },
       });
     },
-    classSatisfaction() {
-      this.satisfactionModal = true;
+
+    courseEnroll(courseNo){
+
+      this.courseNo = courseNo;
+
+      let enrollInfo = document.getElementById("enrollment");
+      let data = new FormData(enrollInfo);
+      data.append("openedNo", this.courseNo);
+      data.append("studentSignedID", this.studentSignedID);
+
+      console.log("수강신청번호: ", this.courseNo);
+
+      this.axios
+        .post("/classroom/sEnrollInsert.do", data)
+        .then((response) => {
+          console.log("수강신청JSON: ", JSON.stringify(response));
+
+          if(response.data.result > 0){
+            alert(response.data.resultMsg);
+            console.log("너왜안나오냐: ", response.data.resultMsg);
+          }
+        });
+
+
     },
-    attendance() {
-      this.attendanceModal = true;
-    },
+
   },
 };
 </script>
@@ -247,4 +275,10 @@ export default {
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
 }
+/*
+.search-select {
+  margin-left: 10px;
+  min-width: 100px; /* 선택적으로 너비를 조정할 수 있습니다 
+} */
+
 </style>

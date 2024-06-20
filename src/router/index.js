@@ -34,9 +34,9 @@ const routes = [
         component: () => import("@/views/tCourse/TCourseDetail.vue"),
       },
       {
-        path: "/classroom/course",
-        name: "sLectureDetail",
-        component: () => import("@/views/classroom/SLectureDetail.vue"),
+        path: "/classroom/course/:courseNo",
+        name: "sCourseDetail",
+        component: () => import("@/views/classroom/SCourseDetail.vue"),
       },
       {
         path: "/classroom/course/:courseNo",

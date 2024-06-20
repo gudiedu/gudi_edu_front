@@ -15,7 +15,7 @@
             <th>강사명</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th>설문조사</th>
+            <th>수업만족도</th>
             <th>출결</th>
           </tr>
         </thead>
@@ -46,9 +46,14 @@
           </template>
           <template v-else>
             <tr>
-              <td colspan="10" style="text-align: center">
-                조회된 데이터가 없습니다.
+              <td @click="courseDetailed(item.course_no)">
+                {{ item.course_name }}
               </td>
+              <td @click="courseDetailed(item.course_no)">{{ item.teacher_name }}</td>
+              <td @click="courseDetailed(item.course_no)">{{ item.course_start_date }}</td>
+              <td @click="courseDetailed(item.course_no)">{{ item.course_end_date }}</td>
+              <td @click="classSatisfaction(item.course_no)">수업만족도</td>
+              <td @click="attendance(item.course_no)">출결</td>
             </tr>
           </template>
         </tbody>
@@ -100,10 +105,10 @@ export default {
     this.courseList();
   },
   methods: {
-    lectureModify(courseNo) {
+    courseDetailed(courseNo) {
       this.$router.push({
-        name: "sLectureDetail",
-        params: { name: courseNo },
+        name: "sCourseDetail",
+        params: { courseNo },
       });
     },
 

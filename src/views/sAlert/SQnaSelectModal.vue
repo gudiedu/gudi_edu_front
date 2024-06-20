@@ -141,7 +141,6 @@ export default {
       params.append("SelectedQuestionNo", this.SelectedQuestionNo);
       //params.append("replyNo", this.reply_no);
 
-
       this.axios
       .post("/sAlert/sQnaSelected.do", params)
       .then((response) => {
@@ -158,6 +157,7 @@ export default {
         
         this.QnaContentReply = response.data.sQnaSelectedReply; // 배열을 직접 할당
         // console.log("this.questionTitle: ", this.questionTitle);
+        console.log("Type of showResult:", typeof this.QnaContentReply);
 
         response.data.sQnaSelectedReply.forEach(reply => {
           this.replyNo = reply.reply_no;
