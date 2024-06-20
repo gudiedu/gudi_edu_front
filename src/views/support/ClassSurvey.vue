@@ -7,105 +7,75 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >진행중</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >진행완료</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >진행예정</v-btn
-          >
-        </div> -->
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input
-              type="text"
-              class="search-input"
-              placeholder="검색어를 입력해주세요."
-              v-model="stitle"
-            />
+            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="searchList">검색</button>
           </div>
         </div>
       </div>
 
       <v-divider></v-divider>
 
-      <v-table class="dashboard-table">
+      <div v-if="isLoading" class="loading-container">
+        <v-progress-circular :size="50" :width="4" color="primary" indeterminate></v-progress-circular>
+      </div>
+      <v-table v-else class="dashboard-table">
         <thead>
           <tr>
             <th>글번호</th>
             <th>강의명</th>
-            <th>강사명</th>
-            <th>수강인원</th>
-            <th>수강기간</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th>강의실</th>
             <th>현황</th>
-            <th></th>
+            <th>결과</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Vue</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행중</td>
-
-            <td @click="viewSurveyResult">결과확인</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Java</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행완료</td>
-
-            <td @click="viewSurveyResult">결과확인</td>
-          </tr>
+          <template v-if="totalCnt > 0">
+            <template v-for="(item, index) in ClassSurveyList" :key="item.ClassSurvey_no">
+              <tr>
+                <td>{{ totalCnt - ((currentPage - 1) * pageSize + index) }}</td>
+                <td>{{ item.course_name }}</td>
+                <td>{{ item.course_start_date }}</td>
+                <td>{{ item.course_end_date }}</td>
+                <td>({{ item.respondent_count || 0 }} / {{ item.confirmed_count }})</td>
+                <td @click="viewSurveyResult(item.course_no)">결과확인</td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
+            <tr>
+              <td colspan="6">진행중인 만족도 조사가 없습니다.</td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
-
     <!-- 페이지네이션 추가-->
 
-    <v-dialog v-model="viewServeyResultModal" max-width="600px">
+    <div id="ClassSurveyPagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
+    </div>
+
+    <v-dialog v-model="viewSurveyResultModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ViewSurveyResult :action="action" />
+          <ViewSurveyResultModal :courseNo="selectedCourseNo" @close="viewSurveyResultModal = false" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -113,47 +83,91 @@
 </template>
 
 <script>
-import ViewSurveyResult from "./TClassSurveyModal.vue";
+import ViewSurveyResultModal from "../information/TClassSurveyModal.vue";
+import Paginate from "vuejs-paginate-next";
 
 export default {
-  components: { ViewSurveyResult },
+  components: {
+    ViewSurveyResultModal,
+    Paginate,
+  },
+
   data() {
     return {
       titleText: "수업만족도관리",
       createSurveyModal: false,
-      viewServeyResultModal: false,
+      viewSurveyResultModal: false,
       action: "",
-      selectedNotice: null,
+      selectedClassSurvey: null,
+      selectedCourseNo: null, // 추가된 부분
       activeFilter: "all",
       stitle: "",
+      ClassSurveyList: [],
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
+      isLoading: false,
     };
   },
+
+  mounted() {
+    this.searchList();
+    this.page();
+  },
+
   methods: {
-    findAll() {
-      this.activeFilter = "all";
+    onEnterKey() {
+      this.$refs.searchButton.click(); // 엔터 키를 누르면 검색 버튼을 클릭
     },
-    findAdmin() {
-      this.activeFilter = "admin";
+
+    searchList: function () {
+      let vm = this;
+      vm.isLoading = true; // 로딩 시작
+
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+      params.append("loginID", sessionStorage.getItem("loginId"));
+
+      this.axios
+        .post("/support/searchClassSurvey.do", params)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+
+          vm.ClassSurveyList = response.data.listdata || [];
+          vm.totalCnt = response.data.totalcnt || 0;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        })
+        .finally(() => {
+          vm.isLoading = false; // 로딩 종료
+        });
     },
-    findTeacher() {
-      this.activeFilter = "teacher";
-    },
-    searchMethod() {},
-    noticeModify(notice) {
-      this.selectedNotice = notice;
-      this.action = "U";
-      this.addModal = true;
-    },
+
     openAddModal() {
-      this.action = "";
       this.addModal = true;
     },
     closeAddModal() {
       this.addModal = false;
     },
 
-    viewSurveyResult() {
-      this.viewServeyResultModal = true;
+    viewSurveyResult(courseNo) {
+      console.log("Selected course_no: ", courseNo); // 디버깅 로그 추가
+      if (courseNo !== null && courseNo !== undefined && courseNo !== "null") {
+        this.selectedCourseNo = String(courseNo); // 문자열로 변환
+        this.viewSurveyResultModal = true;
+      } else {
+        console.error("Invalid course_no:", courseNo); // course_no가 잘못된 경우 로그 출력
+      }
+    },
+
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var result = Math.ceil(total / page);
+      return result;
     },
   },
 };
@@ -261,5 +275,12 @@ export default {
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 </style>

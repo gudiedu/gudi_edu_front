@@ -12,6 +12,7 @@
     "axios": "^1.6.8",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "chart.js": "^4.4.3",
     "core-js": "^3.8.3",
     "jenesius-vue-modal": "^1.11.1",
     "mitt": "^3.0.1",

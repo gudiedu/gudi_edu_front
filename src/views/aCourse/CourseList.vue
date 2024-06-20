@@ -78,18 +78,8 @@
       </v-table>
     </v-card>
     
-    <!-- 페이지네이션 추가-->
 
-    <!-- <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
-    </div>
-    <v-dialog v-model="addModal" max-width="600px">
-      <v-card>
-        <v-card-text>
-          <NoticeModal :action="action" />
-        </v-card-text>
-      </v-card>
-    </v-dialog> -->
+
   </v-container>
 </template>
 
@@ -107,6 +97,7 @@ export default {
       stitle: "",
       courseList: [], // 강의 코드 목록을 저장할 배열
       filteredCourseList: [], // 필터링된 강의 목록을 저장할 배열
+
     };
   },
   mounted() {
@@ -115,10 +106,14 @@ export default {
   },
   methods: {
     getCourseList() {
-  axios.get('/course/CourseList.do')
+      let vm = this;
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
+
+
+  axios.post('/course/CourseList.do',params)
     .then(response => {
       console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
-      this.courseList = response.data.listdate; // 데이터 바인딩
+      vm.courseList = response.data.listdate; // 데이터 바인딩
       this.filteredCourseList = this.courseList;
       console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
     })
