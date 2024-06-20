@@ -105,7 +105,15 @@ export default {
           })
           sessionStorage.setItem('loginInfo', JSON.stringify(data))
           sessionStorage.setItem('loginID', JSON.stringify(data.loginId))
-          this.$router.push('/dashboard')
+          if(data.user_type === 'a'){
+            this.$router.push('/dashboard/aAlert/notice');
+          } else if(data.user_type === 't'){
+            this.$router.push('/dashboard/tAlert/notice');
+          } else if(data.user_type === 's'){
+            this.$router.push('/dashboard/sAlert/notice');
+          } else{
+            this.$router.push('/dashboard');
+          }
           //sessionStroage 값 확인
           //sessionStorage.getItem("세션값:" + JSON.stringify(data.loginId))
         } else {
