@@ -19,13 +19,13 @@
         <tr>
           <td class="label">파일</td>
           <td class="content">
-            <input type="file" id="file-insert" name="file-insert" @change="handleFileChange" />
+            <input type="file" id="file-insert" name="file-insert" @change="handleFileChange" multiple />
           </td>
         </tr>
       </table>
       <div class="button-group">
-        <v-btn class="insert-button" @click="insertNotice">등록</v-btn>
-        <v-btn class="cancel-button" @click="cancel">닫기</v-btn>
+        <v-btn type="submit" class="insert-button">등록</v-btn>
+        <v-btn type="button" class="cancel-button" @click="cancel">닫기</v-btn>
       </div>
     </form>
   </div>
@@ -33,39 +33,28 @@
 
 <script>
 export default {
-  props: {
-    action: String,
-    //loginID: String,
-  },
   data() {
     return {
-      paction: this.action,
       noticeTitle: "",
       noticeContent: "",
-      selectedFile: null,
+      selectedFiles: [],
     };
   },
-
   methods: {
     insertNotice() {
-      console.log("Notice Title: ", this.noticeTitle);
-      console.log("Notice Content: ", this.noticeContent);
+      console.log("Inserting notice");
 
-      let formTag = document.getElementById("file-form");
-      let dataWithFile = new FormData(formTag);
-      dataWithFile.append("noticeTitle", this.noticeTitle);
-      dataWithFile.append("noticeContent", this.noticeContent);
-      // dataWithFile.append("loginID", this.loginID);
-
-      if (this.selectedFile) {
-        dataWithFile.append("file", this.selectedFile);
-      }
+      const formData = new FormData();
+      formData.append("noticeTitle", this.noticeTitle);
+      formData.append("noticeContent", this.noticeContent);
+      this.selectedFiles.forEach((file) => {
+        formData.append("files", file);
+      });
 
       this.axios
-        .post("/tAlert/insertNotice.do", dataWithFile)
+        .post("/tAlert/insertNotice.do", formData)
         .then((response) => {
           console.log(JSON.stringify(response));
-
           if (response.data.result > 0) {
             alert(response.data.resultMsg);
             this.$emit("close-modal"); // 모달 닫기 이벤트 발생
@@ -75,14 +64,11 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
-
     cancel() {
-      // 취소 로직을 여기에 추가
       this.$emit("close-modal");
     },
-
     handleFileChange(event) {
-      this.selectedFile = event.target.files[0];
+      this.selectedFiles = Array.from(event.target.files);
     },
   },
 };
@@ -178,7 +164,6 @@ export default {
 
 .insert-button,
 .cancel-button {
-  /* padding: 10px 16px; */
   color: #ffffff;
   border: none;
   border-radius: 4px;
