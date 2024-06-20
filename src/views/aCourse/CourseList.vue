@@ -37,7 +37,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -47,7 +47,7 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>번호</th>
+            <th>강의번호</th>
             <th>강의명</th>
             <th>강사명</th>
             <th>수강인원</th>
@@ -59,8 +59,12 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="filteredCourseList.length === 0">
+            <td colspan="9" class="no-results">검색 결과가 없습니다.</td>
+          </tr>
+
           <tr v-for="(item, index) in filteredCourseList" :key="item.course_no">
-            <td>{{ index + 1 }}</td>
+            <td>{{ item.course_no }}</td>
             <td>{{ item.course_name }}</td>
             <td>{{ item.user_name }}</td>
             <td>{{ item.course_quota }}명</td>
@@ -77,7 +81,22 @@
         </tbody>
       </v-table>
     </v-card>
-    
+
+    <!-- 페이지네이션 추가-->
+    <div id="Pagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage" 
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="getCourseList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'">
+      </paginate>
+     </div>
 
 
   </v-container>
@@ -85,8 +104,11 @@
 
 <script>
 import axios from 'axios';
+import Paginate from "vuejs-paginate-next";
 export default {
-  components: {},
+  components: {
+    Paginate,
+  },
   data() {
     return {
       titleText: "강의목록",
@@ -97,24 +119,39 @@ export default {
       stitle: "",
       courseList: [], // 강의 코드 목록을 저장할 배열
       filteredCourseList: [], // 필터링된 강의 목록을 저장할 배열
+      currentPage: 1,
+      totalCnt: 0,
+      pageSize: 30,
 
     };
   },
   mounted() {
     // 페이지 로드될 때 강의 코드 목록을 가져오는 메서드 호출
     this.getCourseList();
+    this.page();
   },
   methods: {
+    handlePageClick(pageNumber) {
+      this.currentPage = pageNumber;
+      this.getCourseList();
+  },
     getCourseList() {
+      
       let vm = this;
       let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
 
 
   axios.post('/course/CourseList.do',params)
     .then(response => {
-      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
       vm.courseList = response.data.listdate; // 데이터 바인딩
+      vm.totalCnt = response.data.totalCnt;
+      
       this.filteredCourseList = this.courseList;
+
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
       console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
     })
     .catch(error => {
@@ -149,27 +186,29 @@ export default {
     this.activeFilter = "scheduled";
     this.filterCourses();
   },
-
-    searchMethod() {
-      console.log(this.stitle);
-      axios.get('/course/courseSearch.do', {
-          params: {
-            word: this.stitle
-          }
-        })
-    .then(response => {
-      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
-      this.courseList = response.data.listdate; // 데이터 바인딩
-      this.filterCourses();
-      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
-    })
-    .catch(error => {
-      console.error('Error fetching course list:', error);
-    });
-
-
-
+  handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.getCourseList(); // 검색 실행
     },
+
+    // searchMethod() {
+    //   console.log(this.stitle);
+    //   axios.get('/course/courseSearch.do', {
+    //       params: {
+    //         word: this.stitle
+    //       }
+    //     })
+    // .then(response => {
+    //   console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+    //   this.courseList = response.data.listdate; // 데이터 바인딩
+    //   this.filterCourses();
+    //   console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    // })
+    // .catch(error => {
+    //   console.error('Error fetching course list:', error);
+    // });
+    // },
+
     noticeModify(notice) {
       this.selectedNotice = notice;
       this.action = "U";
@@ -181,6 +220,19 @@ export default {
     },
     closeAddModal() {
       this.addModal = false;
+    },
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var remaining = total % page;
+      var result = parseInt(total / page);
+
+      if (remaining == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
     },
     
   },
