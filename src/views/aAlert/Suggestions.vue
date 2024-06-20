@@ -27,7 +27,8 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>글번호</th>
+            <th class="suggestion-no">글번호</th>
+            <th>분류</th>
             <th>제목</th>
             <th>작성자</th>
             <th>등록일</th>
@@ -48,7 +49,14 @@
                 selectSuggestion(item.suggestion_no, item.suggestion_answered)
               "
             >
-              [{{ item.suggestion_category }}] {{ item.suggestion_title }}
+              {{ item.suggestion_category }}
+            </td>
+            <td
+              @click="
+                selectSuggestion(item.suggestion_no, item.suggestion_answered)
+              "
+            >
+              {{ item.suggestion_title }}
             </td>
             <td>{{ item.loginID }}</td>
             <td>{{ item.suggestion_created_at }}</td>
@@ -142,7 +150,7 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
-    /** 
+    /**
      * 선택된 건의사항 저장 및 모달 open
      * @param {Number} suggestionNo - 건의사항 번호
      * @param {String} suggestionAnswered - 답변 여부
@@ -154,7 +162,7 @@ export default {
       };
       this.openPopup();
     },
-    /** 
+    /**
      * 건의사항 수정 메서드
      * @param {Property} suggestion - 건의 사항 번호, 답변 여부가 포함된 객체
      */
@@ -305,5 +313,9 @@ export default {
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.suggestion-no{
+  width: 80px;
 }
 </style>
