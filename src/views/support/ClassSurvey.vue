@@ -42,7 +42,7 @@
                 <td>{{ item.course_name }}</td>
                 <td>{{ item.course_start_date }}</td>
                 <td>{{ item.course_end_date }}</td>
-                <td>({{ item.respondent_count || 0 }} / {{ item.course_quota }})</td>
+                <td>({{ item.respondent_count || 0 }} / {{ item.confirmed_count }})</td>
                 <td @click="viewSurveyResult(item.course_no)">결과확인</td>
               </tr>
             </template>
