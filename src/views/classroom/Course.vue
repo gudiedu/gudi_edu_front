@@ -62,7 +62,7 @@
     </v-card>
 
     <!-- 페이지네이션 추가-->
-    <!-- <div id="noticePagination">
+    <div id="noticePagination">
       <paginate
         class="justify-content-center"
         v-model="currentPage"
@@ -75,7 +75,7 @@
         :container-class="'pagination'"
         :page-class="'page-item'"
       ></paginate>
-    </div> -->
+    </div>
 
     <v-dialog v-model="attendanceModal" max-width="800px">
       <v-card>
@@ -88,9 +88,9 @@
 </template>
 <script>
 import AttendanceModal from "./SAttendanceModal.vue";
-// import Paginate from "vuejs-paginate-next";
+import Paginate from "vuejs-paginate-next";
 export default {
-  components: { AttendanceModal },
+  components: { AttendanceModal, Paginate },
   data() {
     return {
       titleText: "강의관리",
