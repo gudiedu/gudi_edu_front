@@ -184,6 +184,8 @@ export default {
         if (response.data.result > 0) {
           alert(response.data.resultMsg);
           console.log("너왜안나오냐: ", response.data.resultMsg);
+        } else {
+          alert(response.data.resultMsg);
         }
       });
     },

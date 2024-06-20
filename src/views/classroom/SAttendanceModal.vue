@@ -1,5 +1,8 @@
 <template>
   <div class="lecture-detail">
+    <v-btn class="close-button" icon @click="$emit('close-modal')">
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
     <h2 class="title">{{ courseName }} 출결사항</h2>
 
     <div class="attendanceModal">
@@ -164,6 +167,12 @@ export default {
 </script>
 
 <style scoped>
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
 .dashboard-card {
   margin: 16px 0;
 }

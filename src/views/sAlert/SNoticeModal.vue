@@ -1,37 +1,51 @@
 <template>
   <div class="lecture-detail">
+    <v-btn class="close-button" icon @click="$emit('close-modal')">
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
     <h2 class="title">공지사항</h2>
 
-    <div class="form-group">
-      <div class="form-label">글번호</div>
-      <input
-        readonly
-        type="text"
-        name="noticeNo"
-        v-model="pNoticeNo"
-        class="form-input"
-      />
-    </div>
-    <div class="form-group">
-      <div class="form-label">작성자</div>
-      <input
-        readonly
-        type="text"
-        name="name"
-        v-model="name"
-        class="form-input"
-      />
-    </div>
-    <div class="form-group">
-      <div class="form-label">등록일</div>
-      <input
-        readonly
-        type="text"
-        name="noticeCreateAt"
-        v-model="noticeCreatedAt"
-        class="form-input"
-      />
-    </div>
+    <v-row>
+      <v-col cols="12" sm="2" class="box1">
+        <div class="form-group">
+          <div class="form-label">글번호</div>
+          <input
+            readonly
+            type="text"
+            name="noticeNo"
+            v-model="pNoticeNo"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+
+      <v-col cols="12" sm="5" class="box1">
+        <div class="form-group">
+          <div class="form-label">작성자</div>
+          <input
+            readonly
+            type="text"
+            name="name"
+            v-model="name"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+
+      <v-col cols="12" sm="5" class="box1">
+        <div class="form-group">
+          <div class="form-label">등록일</div>
+          <input
+            readonly
+            type="text"
+            name="noticeCreateAt"
+            v-model="noticeCreatedAt"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+    </v-row>
+
     <div class="form-group">
       <div class="form-label">제목</div>
       <input
@@ -42,6 +56,7 @@
         class="form-input"
       />
     </div>
+
     <div class="form-group">
       <div class="form-label">내용</div>
       <textarea
@@ -162,6 +177,12 @@ export default {
   margin-top: 16px;
   max-width: 800px;
   margin: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
 }
 
 .title {

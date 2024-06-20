@@ -80,7 +80,10 @@
     <v-dialog v-model="attendanceModal" max-width="800px">
       <v-card>
         <v-card-text>
-          <AttendanceModal :courseNo="courseNo" />
+          <AttendanceModal
+            :courseNo="courseNo"
+            @close-modal="closeAttendanceModal"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -123,6 +126,11 @@ export default {
     attendance(courseNo) {
       this.courseNo = courseNo;
       this.attendanceModal = true;
+    },
+
+    closeAttendanceModal() {
+      this.attendanceModal = false;
+      this.courseList();
     },
 
     courseList() {

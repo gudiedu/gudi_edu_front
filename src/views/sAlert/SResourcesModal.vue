@@ -1,57 +1,94 @@
 <template>
   <div class="lecture-detail">
+    <v-btn class="close-button" icon @click="$emit('close-modal')">
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
     <h2 class="title">학습자료</h2>
 
-    <div class="form-group">
-      <div class="form-label">글번호</div>
-      <input
-        readonly
-        type="text"
-        name="pResourceNo"
-        v-model="pResourceNo"
-        class="form-input"
-      />
-    </div>
-    <div class="form-group">
-      <div class="form-label">강의명</div>
-      <input
-        readonly
-        type="text"
-        name="courseName"
-        v-model="courseName"
-        class="form-input"
-      />
-    </div>
-    <div class="form-group">
-      <div class="form-label">작성자</div>
-      <input
-        readonly
-        type="text"
-        name="name"
-        v-model="name"
-        class="form-input"
-      />
-    </div>
-    <div class="form-group">
-      <div class="form-label">등록일</div>
-      <input
-        readonly
-        type="text"
-        name="resourceCreatedAt"
-        v-model="resourceCreatedAt"
-        class="form-input"
-      />
-    </div>
-    <div class="form-group">
-      <div class="form-label">제목</div>
-      <input
-        readonly
-        type="text"
-        name="resourceTitle"
-        v-model="resourceTitle"
-        class="form-input"
-      />
-    </div>
+    <v-row>
+      <v-col cols="12" sm="2" class="box1">
+        <div class="form-group">
+          <div class="form-label">글번호</div>
+          <input
+            readonly
+            type="text"
+            name="pResourceNo"
+            v-model="pResourceNo"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+
+      <v-col cols="12" sm="5" class="box1">
+        <div class="form-group">
+          <div class="form-label">작성자</div>
+          <input
+            readonly
+            type="text"
+            name="name"
+            v-model="name"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+
+      <v-col cols="12" sm="5" class="box1">
+        <div class="form-group">
+          <div class="form-label">등록일</div>
+          <input
+            readonly
+            type="text"
+            name="resourceCreatedAt"
+            v-model="resourceCreatedAt"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12" sm="6" class="box1">
+        <div class="form-group">
+          <div class="form-label">과목명</div>
+          <input
+            readonly
+            type="text"
+            name="courseSubject"
+            v-model="courseSubject"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+
+      <v-col cols="12" sm="6" class="box1">
+        <div class="form-group">
+          <div class="form-label">강의명</div>
+          <input
+            readonly
+            type="text"
+            name="courseName"
+            v-model="courseName"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12" class="box1">
+        <div class="form-group">
+          <div class="form-label">제목</div>
+          <input
+            readonly
+            type="text"
+            name="resourceTitle"
+            v-model="resourceTitle"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+    </v-row>
+
     <div class="form-group">
       <div class="form-label">내용</div>
       <textarea
@@ -61,6 +98,7 @@
         class="form-textarea"
       ></textarea>
     </div>
+
     <div class="form-group" v-if="fileName">
       <div class="form-label">첨부파일</div>
       <div id="preview" v-html="previewHtml" @click="downLoad"></div>
@@ -77,6 +115,7 @@ export default {
   data() {
     return {
       pResourceNo: this.resourceNo,
+      courseSubject: "",
       courseName: "",
       name: "",
       resourceCreatedAt: "",
@@ -95,6 +134,7 @@ export default {
       this.axios
         .post("/sAlert/sSelectResource.do", params)
         .then((response) => {
+          this.courseSubject = response.data.result.course_subject;
           this.courseName = response.data.result.course_name;
           this.name = response.data.result.name;
           this.resourceCreatedAt = response.data.result.resource_created_at;
@@ -165,6 +205,10 @@ export default {
 </script>
 
 <style scoped>
+.box1 {
+  padding: 10px;
+}
+
 .lecture-detail {
   padding: 16px;
   background-color: #ffffff;
@@ -173,6 +217,12 @@ export default {
   margin-top: 16px;
   max-width: 800px;
   margin: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
 }
 
 .title {

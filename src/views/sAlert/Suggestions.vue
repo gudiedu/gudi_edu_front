@@ -61,7 +61,7 @@
             </option>
           </select> -->
           <div class="button-group">
-            <button class="search-button" @click="searchList">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -202,6 +202,11 @@ export default {
     closeModifyModal() {
       this.suggestionModifyModal = false;
       this.searchList();
+    },
+
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.searchList(); // 검색 실행
     },
 
     searchList() {

@@ -1,5 +1,8 @@
 <template>
   <div class="lecture-detail">
+    <v-btn class="close-button" icon @click="$emit('close-modal')">
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
     <h2 class="title">건의사항</h2>
 
     <form id="file-form" enctype="multipart/form-data">
@@ -103,6 +106,12 @@ export default {
   margin-top: 16px;
   max-width: 800px;
   margin: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
 }
 
 .title {

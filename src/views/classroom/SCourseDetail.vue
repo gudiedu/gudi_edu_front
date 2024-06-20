@@ -32,17 +32,22 @@
               <tr>
                 <td>{{ info.course_name }}</td>
                 <td>{{ info.name }}</td>
-                <td>{{ info.course_loc}}</td>
+                <td>{{ info.course_loc }}</td>
                 <td>{{ info.course_start_date }}</td>
                 <td>{{ info.course_end_date }}</td>
                 <td>{{ info.course_quota }}</td>
               </tr>
-              <tr colspan="6">
-                {{ info.course_description }}
-              </tr>
+              <!-- <tr colspan="6" class="course_description">
+                {{
+                  info.course_description
+                }}
+              </tr> -->
             </template>
           </tbody>
         </v-table>
+        <div class="course_description">
+          {{ courseDescription }}
+        </div>
       </v-card>
 
       <v-card class="dashboard-card">
@@ -56,13 +61,16 @@
             </tr>
           </thead>
           <tbody>
-            <template v-for="detail in courseDetailResult" :key="detail.course_detail_week_no">
-            <tr>
-              <td>{{ detail.course_detail_week_no }}주차</td>
-              <td>{{ detail.course_detail_goal }}</td>
-              <td>{{ detail.course_detail_content }}</td>
-            </tr>
-          </template>
+            <template
+              v-for="detail in courseDetailResult"
+              :key="detail.course_detail_week_no"
+            >
+              <tr>
+                <td>{{ detail.course_detail_week_no }}주차</td>
+                <td>{{ detail.course_detail_goal }}</td>
+                <td>{{ detail.course_detail_content }}</td>
+              </tr>
+            </template>
           </tbody>
         </v-table>
       </v-card>
@@ -77,9 +85,10 @@ export default {
       titleText: "강의상세",
       sCourseInfo: [],
       sCourseDetail: [],
-      currentLoginID:"",
-      infoResult:[],
-      courseDetailResult:[],
+      currentLoginID: "",
+      infoResult: [],
+      courseDetailResult: [],
+      courseDescription: "",
     };
   },
   mounted() {
@@ -96,11 +105,10 @@ export default {
   methods: {
     // 강의번호에 대한 강의 정보 조회 - mounted 되야함
     sCourseInfoList() {
-
       let courseParams = new URLSearchParams();
       courseParams.append("courseNo", this.courseNo);
 
-      console.log("courseNo나오니안나오니 : "+ this.courseNo);
+      console.log("courseNo나오니안나오니 : " + this.courseNo);
 
       // axios 요청 설정
       this.axios
@@ -111,7 +119,7 @@ export default {
 
           this.sCourseInfo = response.data.infoResult;
 
-          response.data.infoResult.forEach(each => {
+          response.data.infoResult.forEach((each) => {
             this.courseName = each.course_name;
             this.teacherName = each.name;
             this.courseBegins = each.course_start_date;
@@ -138,8 +146,7 @@ export default {
         });
     },
 
-    sCourseDetailList(){
-
+    sCourseDetailList() {
       let detailParams = new URLSearchParams();
       detailParams.append("courseNo", this.courseNo);
 
@@ -148,35 +155,36 @@ export default {
       this.axios
         .post("/classroom/sCourseDetail.do", detailParams)
         .then((response) => {
-          console.log("DETAIL_JSON :  "+ JSON.stringify(response));
+          console.log("DETAIL_JSON :  " + JSON.stringify(response));
 
           this.courseDetailResult = response.data.detailResult;
 
-          response.data.detailResult.forEach(each => {
+          response.data.detailResult.forEach((each) => {
             this.courseWeekNo = each.course_detail_week_no;
             this.courseDetailContent = each.course_detail_content;
             this.courseDetailGoal = each.course_detail_goal;
           });
 
           console.log("courseWeekNo: ", this.courseWeekNo);
-
-          
         })
-        .catch(function (error){
+        .catch(function (error) {
           alert("ERROR" + error);
         });
     },
 
-    goBack(){
+    goBack() {
       this.$router.go(-1);
     },
-
   },
 };
 </script>
 
-
 <style scoped>
+.course_description {
+  padding: 10px;
+  font-size: 14px;
+}
+
 .textarea {
   margin-top: 20px;
 }
@@ -188,7 +196,7 @@ export default {
 }
 
 .dashboard-card {
-  margin: 20px;
+  margin-bottom: 20px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -279,6 +287,12 @@ export default {
   text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word; /* 긴 단어 줄바꿈 */
+  word-break: break-all; /* 단어를 쪼개서 줄바꿈 */
+  flex-basis: 100%; /* 셀이 flex 컨테이너로서 기본 크기 지정 */
 }
 
 .dashboard-table th {
@@ -289,5 +303,4 @@ export default {
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
 }
-
 </style>

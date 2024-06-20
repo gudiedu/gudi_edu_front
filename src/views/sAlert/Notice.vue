@@ -39,7 +39,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchList">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -98,7 +98,11 @@
     <v-dialog v-model="noticeModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <NoticeModal :action="action" :noticeNo="noticeNo" />
+          <NoticeModal
+            :action="action"
+            :noticeNo="noticeNo"
+            @close-modal="closeNoticeModal"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -135,6 +139,16 @@ export default {
     noticeModify(noticeNo) {
       this.noticeModal = true;
       this.noticeNo = noticeNo;
+    },
+
+    closeNoticeModal() {
+      this.noticeModal = false;
+      this.searchList();
+    },
+
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.searchList(); // 검색 실행
     },
 
     searchList: function () {

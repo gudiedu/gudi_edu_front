@@ -18,7 +18,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchList">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -29,6 +29,7 @@
         <thead>
           <tr>
             <th>글번호</th>
+            <th>과목명</th>
             <th>강의명</th>
             <th>제목</th>
             <th>작성자</th>
@@ -40,6 +41,7 @@
             <template v-for="item in resourceList" :key="item.resource_no">
               <tr class="table_row" @click="resourceModify(item.resource_no)">
                 <td>{{ item.resource_no }}</td>
+                <td>{{ item.course_subject }}</td>
                 <td>{{ item.course_name }}</td>
                 <td>
                   {{ item.resource_title }}
@@ -79,7 +81,11 @@
     <v-dialog v-model="resourceModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ResourceModal :action="action" :resourceNo="resourceNo" />
+          <ResourceModal
+            :action="action"
+            :resourceNo="resourceNo"
+            @close-modal="closeResourceModal"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -118,7 +124,17 @@ export default {
       this.resourceNo = resourceNo;
     },
 
-    searchList() {
+    closeResourceModal() {
+      this.resourceModal = false;
+      this.searchList();
+    },
+
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.searchList(); // 검색 실행
+    },
+
+    searchList: function () {
       let vm = this;
 
       let params = new URLSearchParams(); //파라미터를 넘길 때 사용
@@ -130,6 +146,7 @@ export default {
         .post("/sAlert/sListResources.do", params)
         .then((response) => {
           vm.resourceList = response.data.listData;
+          console.log(vm.resourceList);
           vm.totalCnt = response.data.totalCnt;
         })
         .catch(function (error) {

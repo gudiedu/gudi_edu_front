@@ -29,7 +29,13 @@
     </div>
 
     <div class="button-group">
-      <v-btn class="submit-button" @click="submitSurvey">제출</v-btn>
+      <v-btn class="goBack-button" @click="goBack">뒤로가기</v-btn>
+      <v-btn
+        class="submit-button"
+        @click="submitSurvey"
+        :disabled="!allQuestionsAnswered"
+        >제출</v-btn
+      >
     </div>
   </div>
 </template>
@@ -49,11 +55,26 @@ export default {
     courseNo() {
       return this.$route.params.courseNo;
     },
+
+    allQuestionsAnswered() {
+      return this.surveyQuestions.every((question) => {
+        if (question.survey_question_type === "written") {
+          return question.selectedAnswer.trim() !== "";
+        } else {
+          return question.selectedAnswer !== null;
+        }
+      });
+    },
   },
   mounted() {
     this.surveyList();
   },
   methods: {
+    goBack() {
+      // 뒤로가기 로직 구현
+      this.$router.go(-1);
+    },
+
     surveyList() {
       let vm = this;
 
@@ -190,6 +211,7 @@ export default {
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
+  margin-left: 16px;
 }
 
 .submit-button:hover {

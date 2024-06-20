@@ -1,6 +1,9 @@
 <template>
   <v-container>
     <v-card class="lecture-detail">
+      <v-btn class="close-button" icon @click="$emit('close-modal')">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
       <h2 class="title">건의사항</h2>
 
       <v-row>
@@ -112,7 +115,7 @@
           <div class="preview_wrapper">
             <div class="form-label">첨부파일</div>
             <v-btn
-              class="close-button"
+              class="file-delete-button"
               icon
               @click="deleteFile"
               v-if="
@@ -195,7 +198,7 @@
         v-if="isMySuggestion && !suggestionAnswered"
         >수정</v-btn
       >
-      <v-btn class="goBack-button" @click="goBack">뒤로가기</v-btn>
+      <!-- <v-btn class="goBack-button" @click="goBack">뒤로가기</v-btn> -->
     </div>
   </v-container>
 </template>
@@ -467,6 +470,12 @@ export default {
   margin: auto;
 }
 
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
 .title {
   font-size: 22px;
   font-weight: 600;
@@ -548,7 +557,7 @@ export default {
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 
-.close-button {
+.file-delete-button {
   position: relative;
   left: 10px;
   bottom: 5px;

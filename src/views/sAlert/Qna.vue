@@ -5,6 +5,22 @@
         <div class="titletext">{{ titleText }}</div>
       </v-card-title>
       <div class="container">
+        <div class="filter-button-group">
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
+            @click="findStatus('all')"
+            >전체</v-btn
+          >
+          <v-btn
+            :class="{
+              'filter-button': true,
+              active: activeFilter === 'reply',
+            }"
+            @click="findStatus('reply')"
+            >답변</v-btn
+          >
+        </div>
+
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -80,13 +96,13 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="sQnaSelectedModal" max-width="1000px" height="3000px">
+    <v-dialog v-model="sQnaSelectedModal" max-width="1000px">
       <v-card>
         <v-card-text>
           <sQnaSelectedModal
             :action="action"
             :sQuestionNo="sQuestionNo"
-            @close-modal="closeSelectedModal"
+            @close-modal="sQnaSelectedClosed"
           />
         </v-card-text>
       </v-card>
@@ -150,11 +166,6 @@ export default {
       this.qna_list();
     },
 
-    closeSelectedModal() {
-      this.sQnaSelectedModal = false;
-      this.qna_list();
-    },
-
     // Qna 리스트 조회 which will be mounted.
     qna_list: function () {
       // qna로 넘겨줄 parameter 정리
@@ -180,6 +191,18 @@ export default {
         .catch(function (error) {
           alert("ERROR" + error);
         });
+    },
+
+    findStatus(param) {
+      if (param === "all") {
+        this.activeFilter = param;
+        this.status = "";
+      } else if (param === "reply") {
+        this.activeFilter = param;
+        this.status = param;
+      }
+
+      this.qna_list();
     },
 
     page: function () {
@@ -217,7 +240,7 @@ export default {
   display: flex;
   height: 50px;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .filter-button-group {
