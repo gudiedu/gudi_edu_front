@@ -141,6 +141,7 @@ export default {
     return {
       titleText: "시험관리",
       action: "",
+      activeFilter: "all",
       sTestList: [],
       courseNo: 0,
       studentSignedID: "",
