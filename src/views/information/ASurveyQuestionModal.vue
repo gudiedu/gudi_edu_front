@@ -153,7 +153,7 @@ export default {
         return;
       }
 
-      const params = new URLSearchParams()
+      const params = new URLSearchParams();
       if(this.selectedQuestionType == "written"){
         params.append('question_choiced', 0);
       

@@ -47,7 +47,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch()">검색</button>
           </div>
         </div>
       </div>
@@ -63,6 +63,10 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="courseList.length === 0">
+            <td colspan="3" class="no-results">검색 결과가 없습니다.</td>
+          </tr>
+
           <tr v-for="(item, index) in courseList" :key="item.detail_code">
             <td>{{ index + 1 }}</td>
             <td @click="lectureCodeModify(item)">{{ item.detail_code }}</td>
@@ -80,7 +84,7 @@
         :page-count="page()"
         :page-range="5"
         :margin-pages="0"
-        :click-handler="handlePageClick"
+        :click-handler="getCourseList"
         :prev-text="'이전'"
         :next-text="'다음'"
         :container-class="'pagination'"
@@ -133,15 +137,17 @@ export default {
   mounted() {
     // 페이지 로드될 때 강의 코드 목록을 가져오는 메서드 호출
     this.getCourseList();
+    this.page();
   },
   methods: {
     handlePageClick(pageNumber) {
-    this.currentPage = pageNumber;
-    this.getCourseList();
+      this.getCourseList();
+      this.currentPage = pageNumber;
   },
     getCourseList() {
       let vm = this;
       let courseParams = new URLSearchParams();
+      courseParams.append("stitle", this.stitle);
       courseParams.append("currentPage", this.currentPage);
       courseParams.append("pageSize", this.pageSize);
       courseParams.append("detail_name", this.detail_name);
@@ -159,6 +165,7 @@ export default {
       console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
       vm.courseList = response.data.listdate; // 데이터 바인딩
       vm.totalCnt = response.data.totalCnt;
+
       console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
       console.log("JSON.stringify(response) : " + JSON.stringify(response));
     })
@@ -177,24 +184,29 @@ export default {
     findTeacher() {
       this.activeFilter = "teacher";
     },
-    searchMethod() {
-      console.log(this.stitle);
-      axios.get('/acourse/codeSearch.do', {
-          params: {
-            word: this.stitle
-          }
-        })
-    .then(response => {
-      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
-      this.courseList = response.data.listdate; // 데이터 바인딩
-      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
-    })
-    .catch(error => {
-      console.error('Error fetching course list:', error);
-    });
 
-
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.getCourseList(); // 검색 실행
     },
+    // searchMethod() {
+    //   console.log(this.stitle);
+    //   axios.get('/acourse/codeSearch.do', {
+    //       params: {
+    //         word: this.stitle
+    //       }
+    //     })
+    // .then(response => {
+    //   console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+    //   this.courseList = response.data.listdate; // 데이터 바인딩
+    //   console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    // })
+    // .catch(error => {
+    //   console.error('Error fetching course list:', error);
+    // });
+
+
+    // },
     
     lectureCodeModify(lecture) {
       this.selectedNotice = lecture;
@@ -222,7 +234,7 @@ export default {
       if(this.stitle == ''){
         this.getCourseList(); // 모달이 닫힐 때 강의 목록을 갱신합니다.
       }else{
-        this.searchMethod();
+        this.getCourseList();
       }
 
     },

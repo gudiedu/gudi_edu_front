@@ -20,7 +20,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -40,6 +40,10 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="surveyList.length === 0">
+            <td colspan="7" class="no-results">검색 결과가 없습니다.</td>
+          </tr>
+          
           <tr v-for="(item, index) in surveyList" :key="item.survey_no">
             <td>{{ index + 1 }}</td>
             <td>{{ item.survey_no }}</td>
@@ -54,7 +58,21 @@
       </v-table>
     </v-card>
 
-    <!-- 페이지네이션 추가-->
+      <!-- 페이지네이션 추가-->
+      <div id="Pagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage" 
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="getSurveyList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'">
+      </paginate>
+     </div>
     <!-- 설문지 세트 만들기 추가 -->
 
     <div class="button-group">
@@ -78,8 +96,11 @@
 <script>
 import axios from 'axios';
 import ASurveyManagementModal from "./ASurveyManagementModal.vue";
+import Paginate from "vuejs-paginate-next";
 export default {
-  components: { ASurveyManagementModal },
+  components: { 
+    ASurveyManagementModal,
+    Paginate, },
   data() {
     return {
       titleText: "설문조사문항관리",
@@ -91,19 +112,36 @@ export default {
       surveyList: [], //설문지 리스트 목록 저장할 배열
       survey_no: "",
       survey_name: "",
+      currentPage: 1,
+      totalCnt: 0,
+      pageSize: 10,
     };
   },
   mounted(){
     this.getSurveyList();
+    this.page();
   },
 
 
   methods: {
+    handlePageClick(pageNumber) {
+      this.currentPage = pageNumber;
+      this.getSurveyList();
+  },
+
     getSurveyList(){
-      axios.get('/survey/SurveyList.do')
+      let vm = this;
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+
+    axios.post('/survey/SurveyList.do',params)
       .then(response => {
+      vm.surveyList = response.data.listdate; // 데이터 바인딩
+      vm.totalCnt = response.data.totalCnt;
+
       console.log('SurveyList response:', response.data); // 전체 응답 데이터 콘솔 출력
-      this.surveyList = response.data.listdate; // 데이터 바인딩
       console.log('SurveyList:', this.surveyList); // 바인딩된 데이터 콘솔 출력
     })
     .catch(error => {
@@ -119,6 +157,10 @@ export default {
       this.addModal = true;
       
     },
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.getSurveyList(); // 검색 실행
+    },
     
 
     findAll() {
@@ -130,7 +172,19 @@ export default {
     findTeacher() {
       this.activeFilter = "teacher";
     },
-    searchMethod() {},
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var remaining = total % page;
+      var result = parseInt(total / page);
+
+      if (remaining == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+    },
 
     surveyRegister(survey_no,survey_name) {
       this.$router.push({

@@ -24,7 +24,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -42,8 +42,9 @@
           </tr>
         </thead>
           <tbody>
+            
           <tr v-if="questionList.length === 0">
-            <td colspan="5" class="no-data">질문이 존재하지 않습니다. 질문을 등록해주세요.</td>
+            <td colspan="5" class="no-data">결과가 없습니다.</td>
           </tr>
           <tr v-for="(item, index) in questionList" :key="item.survey_question_no">
             <td>{{ index + 1 }}</td>
@@ -56,8 +57,6 @@
       </v-table>
     </v-card>
 
-    <!-- 페이지네이션 추가-->
-    <!-- 설문지 세트 만들기 추가 -->
 
     <div class="button-group">
       <button class="insert-button" @click="openAddModal">질문추가</button>
@@ -127,6 +126,7 @@ export default {
     getQuestionList(){
       let surveyParams = new URLSearchParams();
       surveyParams.append("survey_no", this.survey_no);
+      surveyParams.append("stitle", this.stitle);
       console.log(this.survey_no);
       console.log(this.survey_name);
 
@@ -141,6 +141,10 @@ export default {
       console.error('Error fetching QuestionList:', error);
     });
 
+    },
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.getQuestionList(); // 검색 실행
     },
    
     getQuestionType(questionType) {
