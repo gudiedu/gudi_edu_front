@@ -19,7 +19,7 @@
         <tr>
           <td class="label">파일</td>
           <td class="content">
-            <input type="file" id="file-insert" name="file-insert" @change="handleFileChange" multiple />
+            <input type="file" id="file-insert" name="file-insert" @change="handleFileChange" />
           </td>
         </tr>
       </table>
@@ -42,6 +42,11 @@ export default {
   },
   methods: {
     insertNotice() {
+      // 유효성 검사
+      if (!this.noticeTitle.trim() || !this.noticeContent.trim()) {
+        alert("제목과 내용을 입력해주세요.");
+        return;
+      }
       console.log("Inserting notice");
 
       const formData = new FormData();
