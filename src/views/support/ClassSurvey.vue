@@ -102,7 +102,7 @@
 </template>
 
 <script>
-import ViewSurveyResultModal from "../information/TClassSurveyModal.vue";
+import ViewSurveyResultModal from "./TClassSurveyModal.vue";
 import Paginate from "vuejs-paginate-next";
 
 export default {
