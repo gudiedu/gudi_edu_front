@@ -4,12 +4,12 @@
       <v-icon>mdi-close</v-icon>
     </v-btn>
 
-    <h2 class="title">시험결과</h2>
+    <h2 class="title">{{ SelectedTestCategory }}</h2>
 
     <form id="showing">
       <div class="question-container">
         <div v-for="(result, index) in showingResult" :key="result.test_no">
-          <div class="form-label">{{ index + 1 }}. {{ result.test_question }}</div>
+          <div class="form-label">{{ index + 1 }}. {{ result.test_question }} (점수: {{ result.question_score }})</div>
           <v-radio-group v-model="studentChoiced[index]" :key="index">
             <v-radio :color="isCorrect(studentChoiced[index], result.test_answer)" :label="result.test_choice1.toString()" value="1"></v-radio>
             <v-radio :color="isCorrect(studentChoiced[index], result.test_answer)" :label="result.test_choice2.toString()" value="2"></v-radio>
@@ -57,10 +57,13 @@ export default {
       this.axios
         .post("/classroom/sShowingTestResult.do", resultParams)
         .then(response => {
+          console.log(JSON.stringify(response));
           this.showingResult = response.data.showingResult.filter(result =>
             result.course_no === this.SelectedCourseNo &&
             result.test_category === this.SelectedTestCategory
           );
+
+
 
           this.studentChoiced = this.showingResult.map(result => result.answer_selected);
         })

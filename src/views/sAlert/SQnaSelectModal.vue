@@ -127,6 +127,7 @@ export default {
       replyNo: 0,
       replyContent: "",
       replyCreatedAt: "",
+      studentSignedID:""
     };
   },
   mounted() {
@@ -137,6 +138,7 @@ export default {
     sQnaSelected() {
       let params = new URLSearchParams();
       params.append("SelectedQuestionNo", this.SelectedQuestionNo);
+      params.append("studentSignedID",this.studentSignedID);
       //params.append("replyNo", this.reply_no);
 
       this.axios

@@ -5,8 +5,21 @@
         <div class="titletext">{{ titleText }}</div>
         <v-spacer></v-spacer>
       </v-card-title>
-
-      <!-- <div class="container">
+     <div class="container">
+      <div class="filter-button-group">
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
+            @click="filtered('all')"
+            >전체</v-btn
+          >
+          <v-btn
+            :class="{
+              'filter-button': true,
+              active: activeFilter === 'notTaken',
+            }"
+            @click="filtered('notTaken')"
+            >미응시</v-btn>
+        </div>
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -15,13 +28,14 @@
               class="search-input"
               placeholder="검색어를 입력해주세요."
               v-model="searchKeyword"
+              @keydown.enter = "handleSearch"
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
-      </div> -->
+      </div>
 
       <v-divider></v-divider>
 
@@ -136,7 +150,8 @@ export default {
       totalCnt: 0,
       pageSize: 10,
       testCategory: "",
-      searchedWords: "",
+      searchKeyword: "",
+      status:"",
       testResultNo: "",
     };
   },
@@ -147,7 +162,8 @@ export default {
     // 수강 강의 리스트 불러오기
     courseTestList() {
       let testListParams = new URLSearchParams();
-      testListParams.append("searchedWords", this.searchedWords);
+      testListParams.append("searchKeyword", this.searchKeyword);
+      testListParams.append("status", this.status);
 
       this.axios
         .post("/classroom/sTestList.do", testListParams)
@@ -217,8 +233,24 @@ export default {
       this.testResultModal = false;
       this.courseTestList();
     },
-    searching() {
+    handleSearch() {
       console.log("검색어:", this.searchKeyword);
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.courseTestList();
+    },
+    filtered(param) {
+      if (param === "all") {
+        this.activeFilter = param;
+        this.status = "";
+        console.log("all_this.status : ", this.status);
+      } else if (param === "notTaken") {
+        this.activeFilter = param;
+        this.status = param;
+        console.log("notTaken_this.status : ", this.status);
+        console.log("notTaken_this.param : ", this.param);
+      }
+
+      this.courseTestList();
     },
 
     page: function () {
