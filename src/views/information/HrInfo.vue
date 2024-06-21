@@ -168,6 +168,7 @@ export default {
     
   },
   mounted() {
+    /* 
       let user_type = sessionStorage.getItem('user_type');
       console.log(user_type)
       if(user_type != "a"){
@@ -176,6 +177,7 @@ export default {
       } else {
         this.$router.push('/dashboard/information/hrinfo');
       }
+        */
    },
   data() {
     return {

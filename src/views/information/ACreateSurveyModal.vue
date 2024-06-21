@@ -61,7 +61,7 @@ props: {
 
   methods: {
     getSurveyList(){
-        axios.get('/survey/SurveyList.do')
+        axios.get('/survey/modalSurveyList.do')
         .then(response => {
         console.log('SurveyList response:', response.data); // 전체 응답 데이터 콘솔 출력
         this.surveyList = response.data.listdate; // 데이터 바인딩
