@@ -168,12 +168,11 @@ export default {
     
   },
   mounted() {
-    /**/
     let user_type = sessionStorage.getItem('user_type');
     console.log(user_type)
     user_type === "a" ? this.$router.push('/dashboard/information/hrinfo') : this.$router.push('/dashboard');
-
   }, 
+
   data() {
     return {
       titleText: "인원관리",

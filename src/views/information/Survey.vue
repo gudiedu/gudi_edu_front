@@ -30,14 +30,14 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>강의번호</th>
+            <th>번호</th>
             <th>강의명</th>
             <th>강사명</th>
-            <th>수강인원</th>
+            <th class="space-cell">수강인원</th>
             <th>시작일</th>
             <th>종료일</th>
             <th>현황</th>
-            <th>설문번호</th>
+            <th>설문코드</th>
             <th></th>
           </tr>
         </thead>
@@ -50,14 +50,14 @@
             <td>{{ item.course_no }}</td>
             <!-- <td>{{ totalCnt - ((currentPage - 1) * pageSize + index) }}</td> -->
             <td hidden>{{ item.course_no }}</td>
-            <td>{{ item.course_name }}</td>
+            <td class="space-cell">{{ item.course_name }}</td>
             <td>{{ item.user_name }}</td>
             <td>{{ item.course_quota }}명</td>
             <td>{{ item.course_start_date }}</td>
             <td>{{ item.course_end_date }}</td>
-            <td>({{ item.respondent_count || 0 }} / {{ item.confirmed_count }})</td>
+            <td>{{ item.respondent_count || 0 }} / {{ item.confirmed_count }}</td>
             <td>
-              <span v-if="!item.survey_no" @click="createSurvey(item)">설문생성</span>
+              <span v-if="!item.survey_no" class="survey-create" @click="createSurvey(item)">설문생성</span>
               <span v-else>{{ item.survey_no }}</span>
             </td>
             <td @click="viewSurveyResult(item.course_no)">결과확인</td>
@@ -320,12 +320,19 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
+  transition: background-color 0.3s, color 0.3s, text-decoration 0.3s;
 }
+.survey-create:hover{
+  text-decoration: underline;
+  color: blue;
+}
+
 
 .search-button:hover,
 .insert-button:hover,
 .survey-button:hover {
   background-color: #0056b3;
+  text-decoration: underline;
 }
 
 .dashboard-table {
@@ -340,6 +347,16 @@ export default {
   text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  white-space: nowrap;
+}
+.course-name-cell {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 16px;
+}
+.space-cell {
+  white-space: normal !important;
 }
 
 .dashboard-table th {
