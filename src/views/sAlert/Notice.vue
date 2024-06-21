@@ -36,6 +36,7 @@
               class="search-input"
               placeholder="검색어를 입력해주세요."
               v-model="stitle"
+              @keydown.enter="handleSearch"
             />
           </div>
           <div class="button-group">
