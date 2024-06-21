@@ -5,6 +5,49 @@
         <div class="titletext">{{ titleText }}</div>
         <v-spacer></v-spacer>
       </v-card-title>
+
+      <div class="container">
+        <div class="filter-button-group">
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
+            @click="findStatus('all')"
+            >전체</v-btn
+          >
+          <v-btn
+            :class="{
+              'filter-button': true,
+              active: activeFilter === 'completed',
+            }"
+            @click="findStatus('completed')"
+            >완료</v-btn
+          >
+          <v-btn
+            :class="{
+              'filter-button': true,
+              active: activeFilter === 'incompleted',
+            }"
+            @click="findStatus('incompleted')"
+            >미완료</v-btn
+          >
+        </div>
+
+        <div class="search">
+          <div class="search-container">
+            <v-icon class="search-icon">mdi-magnify</v-icon>
+            <input
+              type="text"
+              class="search-input"
+              placeholder="검색어를 입력해주세요."
+              v-model="stitle"
+              @keydown.enter="handleSearch"
+            />
+          </div>
+          <div class="button-group">
+            <button class="search-button" @click="handleSearch">검색</button>
+          </div>
+        </div>
+      </div>
+
       <v-divider></v-divider>
 
       <v-table class="dashboard-table">
@@ -98,6 +141,9 @@ export default {
     return {
       titleText: "강의관리",
       courseNo: 0,
+      activeFilter: "all",
+      stitle: "",
+      status: "",
       sCourseList: [],
       attendanceModal: false,
       totalCnt: 0,
@@ -133,11 +179,18 @@ export default {
       this.courseList();
     },
 
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.courseList(); // 검색 실행
+    },
+
     courseList() {
       let vm = this;
 
       let params = new URLSearchParams(); //파라미터를 넘길 때 사용
       params.append("pCourseNo", this.pCourseNo);
+      params.append("stitle", this.stitle);
+      params.append("status", this.status);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
 
@@ -155,6 +208,21 @@ export default {
     isAfterEndDate(courseEndDate) {
       // 현재 날짜와 비교하여 강좌 종료일이 이미 지났는지 확인
       return new Date() > new Date(courseEndDate);
+    },
+
+    findStatus(param) {
+      if (param === "all") {
+        this.activeFilter = param;
+        this.status = "";
+      } else if (param === "completed") {
+        this.activeFilter = param;
+        this.status = param;
+      } else if (param === "incompleted") {
+        this.activeFilter = param;
+        this.status = param;
+      }
+
+      this.courseList();
     },
 
     page: function () {
@@ -194,7 +262,7 @@ export default {
   display: flex;
   height: 50px;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .filter-button-group {
