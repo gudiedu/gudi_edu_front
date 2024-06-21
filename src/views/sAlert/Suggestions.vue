@@ -7,26 +7,37 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
+        <div class="filter-button-group">
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
+            @click="findStatus('all')"
             >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
           >
           <v-btn
             :class="{
               'filter-button': true,
-              active: activeFilter === 'teacher',
+              active: activeFilter === 'facilities',
             }"
-            @click="findTeacher"
-            >강사</v-btn
+            @click="findStatus('facilities')"
+            >시설</v-btn
           >
-        </div> -->
+          <v-btn
+            :class="{
+              'filter-button': true,
+              active: activeFilter === 'academicAffairs',
+            }"
+            @click="findStatus('academicAffairs')"
+            >학사</v-btn
+          >
+          <v-btn
+            :class="{
+              'filter-button': true,
+              active: activeFilter === 'others',
+            }"
+            @click="findStatus('others')"
+            >기타</v-btn
+          >
+        </div>
 
         <div class="search">
           <div class="search-container">
@@ -36,10 +47,22 @@
               class="search-input"
               placeholder="검색어를 입력해주세요."
               v-model="stitle"
+              @keydown.enter="handleSearch"
             />
           </div>
+          <!-- <select class="search-category" v-model="scategory">
+            <option value="" disabled>카테고리를 선택하세요.</option>
+            <option value="">선택 취소</option>
+            <option
+              v-for="category in categories"
+              :key="category"
+              :value="category"
+            >
+              {{ category }}
+            </option>
+          </select> -->
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -50,40 +73,80 @@
         <thead>
           <tr>
             <th>글번호</th>
-            <th>작성자</th>
+            <th>분류</th>
             <th>제목</th>
+            <th>작성자</th>
             <th>등록일</th>
-            <th>답변</th>
+            <th>답변여부</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>관리자</td>
-            <td @click="suggestionModify">건의사항입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>강사</td>
-            <td @click="suggestionModify">건의사항2입니다.</td>
-            <td>2024.01.01</td>
-            <td>답변대기</td>
-          </tr>
+          <template v-if="totalCnt > 0">
+            <template v-for="item in suggestionList" :key="item.suggestion_no">
+              <tr
+                class="table_row"
+                @click="suggestionModify(item.suggestion_no)"
+              >
+                <td>{{ item.suggestion_no }}</td>
+                <td>{{ item.suggestion_category }}</td>
+                <td>
+                  {{ item.suggestion_title }}
+                </td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.suggestion_created_at }}</td>
+                <td>{{ item.suggestion_answered ? "완료" : "대기중" }}</td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
+            <tr>
+              <td colspan="10" style="text-align: center">
+                조회된 데이터가 없습니다.
+              </td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
 
-    <!-- 페이지네이션 추가-->
+    <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
+    </div>
 
     <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+      <button class="insert-button" @click="insertSuggestion">등록</button>
     </div>
-    <v-dialog v-model="addModal" max-width="600px">
+
+    <v-dialog v-model="suggestionInsertModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <SSuggestionsModal :action="action" />
+          <SSuggestionsInsertModal
+            @close-modal="closeInsertModal"
+            :action="action"
+          />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="suggestionModifyModal" max-width="600px">
+      <v-card>
+        <v-card-text>
+          <SSuggestionsModifyModal
+            @close-modal="closeModifyModal"
+            :action="action"
+            :suggestionNo="suggestionNo"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -91,51 +154,123 @@
 </template>
 
 <script>
-import SSuggestionsModal from "./SSuggestionsModal.vue";
+import SSuggestionsInsertModal from "./SSuggestionsInsertModal.vue";
+import SSuggestionsModifyModal from "./SSuggestionsModifyModal.vue";
+import Paginate from "vuejs-paginate-next";
+
 export default {
   components: {
-    SSuggestionsModal,
+    SSuggestionsInsertModal,
+    SSuggestionsModifyModal,
+    Paginate,
   },
   data() {
     return {
       titleText: "건의사항",
-      addModal: false,
+      suggestionInsertModal: false,
+      suggestionModifyModal: false,
       action: "",
-      selectedNotice: null,
       activeFilter: "all",
       stitle: "",
+      scategory: "",
+      status: "",
+      suggestionList: [],
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
+      suggestionNo: 0,
+      // categories: ["시설", "학사", "기타"],
     };
   },
+  mounted() {
+    this.searchList();
+  },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
-    searchMethod() {},
-    suggestionModify(suggestion) {
-      this.selectedNotice = suggestion;
-      this.action = "U";
-      this.addModal = true;
+    suggestionModify(suggestionNo) {
+      this.suggestionNo = suggestionNo;
+      this.suggestionModifyModal = true;
     },
-    openAddModal() {
-      this.action = "";
-      this.addModal = true;
+
+    insertSuggestion() {
+      this.suggestionInsertModal = true;
     },
-    closeAddModal() {
-      this.addModal = false;
+
+    closeInsertModal() {
+      this.suggestionInsertModal = false;
+      this.searchList();
+    },
+
+    closeModifyModal() {
+      this.suggestionModifyModal = false;
+      this.searchList();
+    },
+
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.searchList(); // 검색 실행
+    },
+
+    searchList() {
+      let params = new URLSearchParams();
+      params.append("stitle", this.stitle);
+      params.append("status", this.status);
+      params.append("scategory", this.scategory);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+
+      this.axios
+        .post("/sAlert/sSuggestionList.do", params)
+        .then((response) => {
+          this.suggestionList = response.data.listData;
+          this.totalCnt = response.data.totalCnt;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
+
+    findStatus(param) {
+      if (param === "all") {
+        this.activeFilter = param;
+        this.status = "";
+      } else if (param === "facilities") {
+        this.activeFilter = param;
+        this.status = param;
+      } else if (param === "academicAffairs") {
+        this.activeFilter = param;
+        this.status = param;
+      } else if (param === "others") {
+        this.activeFilter = param;
+        this.status = param;
+      }
+
+      this.searchList();
+    },
+
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var xx = total % page;
+      var result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
     },
   },
 };
 </script>
 
 <style scoped>
+.table_row {
+  cursor: pointer;
+}
+
 .dashboard-card {
-  margin: 20px;
+  margin-bottom: 20px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -151,7 +286,7 @@ export default {
   display: flex;
   height: 50px;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .filter-button-group {
@@ -181,6 +316,13 @@ export default {
 .search {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
 }
 
 .search-input {
@@ -189,6 +331,14 @@ export default {
   border: none;
   outline: none;
   font-size: 16px;
+}
+
+.search-category {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-left: 16px;
+  font-size: 16px;
+  background-color: #fff;
 }
 
 .button-group {
@@ -224,14 +374,41 @@ export default {
   text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dashboard-table th {
   background-color: #f4f4f4;
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.filter-button-group {
+  display: flex;
+  margin: 16px 0;
+}
+
+.filter-button {
+  background-color: #f4f6f8;
+  color: #2c3e50;
+  border-radius: 20px;
+  padding: 8px 16px;
+  margin: 0 4px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.filter-button.active {
+  background-color: #407bff;
+  color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.filter-button:hover {
+  background-color: #5a9bff;
 }
 </style>

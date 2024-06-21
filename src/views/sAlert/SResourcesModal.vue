@@ -3,7 +3,7 @@
     <v-btn class="close-button" icon @click="$emit('close-modal')">
       <v-icon>mdi-close</v-icon>
     </v-btn>
-    <h2 class="title">공지사항</h2>
+    <h2 class="title">학습자료</h2>
 
     <v-row>
       <v-col cols="12" sm="2" class="box1">
@@ -12,8 +12,8 @@
           <input
             readonly
             type="text"
-            name="noticeNo"
-            v-model="pNoticeNo"
+            name="pResourceNo"
+            v-model="pResourceNo"
             class="form-input"
           />
         </div>
@@ -38,8 +38,51 @@
           <input
             readonly
             type="text"
-            name="noticeCreateAt"
-            v-model="noticeCreatedAt"
+            name="resourceCreatedAt"
+            v-model="resourceCreatedAt"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12" sm="6" class="box1">
+        <div class="form-group">
+          <div class="form-label">과목명</div>
+          <input
+            readonly
+            type="text"
+            name="courseSubject"
+            v-model="courseSubject"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+
+      <v-col cols="12" sm="6" class="box1">
+        <div class="form-group">
+          <div class="form-label">강의명</div>
+          <input
+            readonly
+            type="text"
+            name="courseName"
+            v-model="courseName"
+            class="form-input"
+          />
+        </div>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12" class="box1">
+        <div class="form-group">
+          <div class="form-label">제목</div>
+          <input
+            readonly
+            type="text"
+            name="resourceTitle"
+            v-model="resourceTitle"
             class="form-input"
           />
         </div>
@@ -47,25 +90,15 @@
     </v-row>
 
     <div class="form-group">
-      <div class="form-label">제목</div>
-      <input
-        readonly
-        type="text"
-        name="noticeTitle"
-        v-model="noticeTitle"
-        class="form-input"
-      />
-    </div>
-
-    <div class="form-group">
       <div class="form-label">내용</div>
       <textarea
         readonly
-        name="noticeContent"
-        v-model="noticeContent"
+        name="resourceContent"
+        v-model="resourceContent"
         class="form-textarea"
       ></textarea>
     </div>
+
     <div class="form-group" v-if="fileName">
       <div class="form-label">첨부파일</div>
       <div id="preview" v-html="previewHtml" @click="downLoad"></div>
@@ -76,35 +109,38 @@
 <script>
 export default {
   props: {
-    noticeNo: Number,
+    resourceNo: Number,
   },
+
   data() {
     return {
-      pNoticeNo: this.noticeNo,
+      pResourceNo: this.resourceNo,
+      courseSubject: "",
+      courseName: "",
       name: "",
-      noticeCreatedAt: "",
-      noticeTitle: "",
-      noticeContent: "",
-      previewHtml: "",
-      fileName: "",
-      etx: "",
+      resourceCreatedAt: "",
+      resourceTitle: "",
+      resourceContent: "",
     };
   },
   mounted() {
-    this.selectNotice();
+    this.selectResource();
   },
   methods: {
-    selectNotice() {
+    selectResource() {
       let params = new URLSearchParams();
-      params.append("pNoticeNo", this.pNoticeNo);
+      params.append("pResourceNo", this.pResourceNo);
 
       this.axios
-        .post("/sAlert/sSelectNotice.do", params)
+        .post("/sAlert/sSelectResource.do", params)
         .then((response) => {
+          this.courseSubject = response.data.result.course_subject;
+          this.courseName = response.data.result.course_name;
           this.name = response.data.result.name;
-          this.noticeCreatedAt = response.data.result.notice_created_at;
-          this.noticeTitle = response.data.result.notice_title;
-          this.noticeContent = response.data.result.notice_content;
+          this.resourceCreatedAt = response.data.result.resource_created_at;
+          this.resourceTitle = response.data.result.resource_title;
+          this.resourceContent = response.data.result.resource_content;
+
           this.ext = response.data.result.file_extension;
 
           //파일 이미지 보여주거나, 파일 이름 보여주기
@@ -142,10 +178,10 @@ export default {
 
     downLoad: function () {
       let params = new URLSearchParams();
-      params.append("pNoticeNo", this.pNoticeNo);
+      params.append("pResourceNo", this.pResourceNo);
 
       this.axios({
-        url: "/sAlert/noticeFileDownload.do",
+        url: "/sAlert/resourceFileDownload.do",
         data: params,
         method: "POST",
         responseType: "blob", //파일에 대한 내용을 받으려면 추가해줘야 한다.
@@ -169,6 +205,10 @@ export default {
 </script>
 
 <style scoped>
+.box1 {
+  padding: 10px;
+}
+
 .lecture-detail {
   padding: 16px;
   background-color: #ffffff;
@@ -223,11 +263,5 @@ export default {
 .form-textarea {
   height: 200px;
   resize: vertical;
-}
-
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
 }
 </style>

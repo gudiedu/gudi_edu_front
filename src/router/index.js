@@ -25,25 +25,23 @@ const routes = [
       },
       {
         path: "/myPage",
-        name:"mypage",
+        name: "mypage",
         component: () => import("../views/MyPage.vue"),
-
-        
-      }, 
+      },
       {
         path: "/tCourse/course/:course_no",
         name: "tCourseDetail",
         component: () => import("@/views/tCourse/TCourseDetail.vue"),
       },
       {
-        path: "/classroom/course",
-        name: "sLectureDetail",
-        component: () => import("@/views/classroom/SLectureDetail.vue"),
+        path: "/classroom/course/:courseNo",
+        name: "sCourseDetail",
+        component: () => import("@/views/classroom/SCourseDetail.vue"),
       },
       {
-        path: "/classroom/enroll",
-        name: "sLectureDetailRegister",
-        component: () => import("@/views/classroom/SLectureDetailRegister.vue"),
+        path: "/classroom/course/:courseNo",
+        name: "sCourseSatisfaction",
+        component: () => import("@/views/classroom/SCourseSatisfaction.vue"),
       },
       {
         path: "/information/student",
@@ -55,19 +53,16 @@ const routes = [
         name: "aSurveyManagement",
         component: () => import("@/views/information/ASurveyManagement.vue"),
       },
-      
-      
     ],
     component: Dashboard,
   },
-  
+
   {
     path: "/myChatRoomList",
     name: "myChatRoomList",
     component: () =>
       import(/* webpackChunkName: "about" */ "@/components/ChatApp.vue"),
   },
-
 ];
 
 const router = createRouter({

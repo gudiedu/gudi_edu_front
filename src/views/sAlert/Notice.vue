@@ -10,12 +10,12 @@
         <div class="filter-button-group">
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
+            @click="findStatus('all')"
             >전체</v-btn
           >
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
+            @click="findStatus('admin')"
             >관리자</v-btn
           >
           <v-btn
@@ -23,7 +23,7 @@
               'filter-button': true,
               active: activeFilter === 'teacher',
             }"
-            @click="findTeacher"
+            @click="findStatus('teacher')"
             >강사</v-btn
           >
         </div>
@@ -36,10 +36,11 @@
               class="search-input"
               placeholder="검색어를 입력해주세요."
               v-model="stitle"
+              @keydown.enter="handleSearch"
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -50,37 +51,59 @@
         <thead>
           <tr>
             <th>글번호</th>
-            <th>작성자</th>
             <th>제목</th>
+            <th>작성자</th>
             <th>등록일</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>관리자</td>
-            <td @click="noticeModify">공지사항입니다.</td>
-            <td>2024.01.01</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>강사</td>
-            <td @click="noticeModify">공지사항2입니다.</td>
-            <td>2024.01.01</td>
-          </tr>
+          <template v-if="totalCnt > 0">
+            <template v-for="item in noticeList" :key="item.notice_no">
+              <tr class="table_row" @click="noticeModify(item.notice_no)">
+                <td>{{ item.notice_no }}</td>
+                <td>
+                  {{ item.notice_title }}
+                </td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.notice_created_at }}</td>
+              </tr>
+            </template>
+          </template>
+          <template v-else>
+            <tr>
+              <td colspan="10" style="text-align: center">
+                조회된 데이터가 없습니다.
+              </td>
+            </tr>
+          </template>
         </tbody>
       </v-table>
     </v-card>
 
     <!-- 페이지네이션 추가-->
-
-    <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+    <div id="noticePagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage"
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="searchList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'"
+      ></paginate>
     </div>
-    <v-dialog v-model="addModal" max-width="600px">
+
+    <v-dialog v-model="noticeModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <NoticeModal :action="action" />
+          <NoticeModal
+            :action="action"
+            :noticeNo="noticeNo"
+            @close-modal="closeNoticeModal"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -89,50 +112,107 @@
 
 <script>
 import NoticeModal from "./SNoticeModal.vue";
+import Paginate from "vuejs-paginate-next";
+
 export default {
   components: {
     NoticeModal,
+    Paginate,
   },
   data() {
     return {
       titleText: "공지사항",
-      addModal: false,
-      action: "",
-      selectedNotice: null,
+      noticeModal: false,
       activeFilter: "all",
       stitle: "",
+      status: "",
+      noticeList: [],
+      totalCnt: 0,
+      pageSize: 10,
+      currentPage: 1,
+      noticeNo: 0,
     };
   },
+  mounted() {
+    this.searchList();
+  },
   methods: {
-    findAll() {
-      this.activeFilter = "all";
+    noticeModify(noticeNo) {
+      this.noticeModal = true;
+      this.noticeNo = noticeNo;
     },
-    findAdmin() {
-      this.activeFilter = "admin";
+
+    closeNoticeModal() {
+      this.noticeModal = false;
+      this.searchList();
     },
-    findTeacher() {
-      this.activeFilter = "teacher";
+
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.searchList(); // 검색 실행
     },
-    searchMethod() {},
-    noticeModify(notice) {
-      this.selectedNotice = notice;
-      this.action = "U";
-      this.addModal = true;
+
+    searchList: function () {
+      let vm = this;
+
+      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("status", this.status);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+
+      this.axios
+        .post("/sAlert/sNoticeList.do", params)
+        .then((response) => {
+          vm.noticeList = response.data.listData;
+          vm.totalCnt = response.data.totalCnt;
+        })
+        .catch(function (error) {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
-    openAddModal() {
-      this.action = "";
-      this.addModal = true;
+
+    findStatus(param) {
+      if (param === "all") {
+        this.activeFilter = param;
+        this.status = "";
+      } else if (param === "admin") {
+        this.activeFilter = param;
+        this.status = param;
+      } else if (param === "teacher") {
+        this.activeFilter = param;
+        this.status = param;
+      }
+
+      this.searchList();
     },
-    // closeAddModal() {
-    //   this.addModal = false;
-    // },
+
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var xx = total % page;
+      var result = parseInt(total / page);
+
+      if (xx == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+      // var result = Math.ceil(this.totalCnt / this.pageSize);
+      // return result;
+    },
   },
 };
 </script>
 
 <style scoped>
+.table_row {
+  cursor: pointer;
+}
+
 .dashboard-card {
-  margin: 20px;
+  margin-bottom: 20px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -221,11 +301,14 @@ export default {
   text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dashboard-table th {
   background-color: #f4f4f4;
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 .dashboard-table tr:hover {

@@ -1,5 +1,13 @@
 <template>
   <div id="background_board">
+    <div v-if="loading">
+      <div class="loading-screen">
+        <div class="loading-content">
+          <img src="@/assets/images/admin/login/duck.png" />
+          <p class="typing-text">Loading...</p>
+        </div>
+      </div>
+    </div>
     <div class="login_form shadow" align="center">
       <div class="login-form-right-side" style="font-size: 15px">
         <div class="top-logo-wrap">
@@ -12,11 +20,25 @@
           <h1>GUDI Login</h1>
           <p class="id">
             <!-- <label for="userId">아이디</label> -->
-            <input v-model="loginId" type="text" placeholder="아이디" style="ime-mode: inactive" id="userId" ref="userId" />
+            <input
+              v-model="loginId"
+              type="text"
+              placeholder="아이디"
+              style="ime-mode: inactive"
+              id="userId"
+              ref="userId"
+            />
           </p>
           <p class="pw">
             <!-- <label for="userPwd">비밀번호</label> -->
-            <input v-model="pwd" type="password" placeholder="비밀번호" onfocus="this.placeholder=''; return true" id="userPwd" ref="userPwd" />
+            <input
+              v-model="pwd"
+              type="password"
+              placeholder="비밀번호"
+              id="userPwd"
+              ref="userPwd"
+            />
+            <!-- onfocus="this.placeholder=''; return true" -->
           </p>
           <p class="member_info">
             <input v-model="saveId" id="cb_saveId" type="checkbox" />
@@ -46,6 +68,7 @@ export default {
       loginId: "",
       pwd: "",
       saveId: false,
+      loading: false,
     };
   },
   mounted() {
@@ -76,11 +99,13 @@ export default {
         return false;
       }
 
+      this.loading = true;
+
       const params = new URLSearchParams();
       params.append("lgn_Id", this.loginId);
       params.append("pwd", this.pwd);
       this.axios
-        .post("/api/loginProc.do", params)
+        .post("/loginProc.do", params)
         .then((res) => {
           console.log(res);
           let data = res.data;
@@ -93,19 +118,25 @@ export default {
             });
             sessionStorage.setItem("loginInfo", JSON.stringify(data));
             sessionStorage.setItem("loginId", data.loginId);
-            this.$router.push("/dashboard");
+            setTimeout(() => {
+              this.loading = true;
+              this.$router.push("/dashboard");
+            }, 2000);
           } else {
+            this.loading = false;
             alert("ID 혹은 비밀번호가 틀립니다.");
           }
         })
         .catch((error) => {
+          this.loading = false;
           console.log(error);
         });
     },
     setCookie: function (name, value, day) {
       let today = new Date();
       today.setDate(today.getDate() + day);
-      document.cookie = name + "=" + value + "; path=/; expires=" + today.toUTCString() + ";";
+      document.cookie =
+        name + "=" + value + "; path=/; expires=" + today.toUTCString() + ";";
     },
     getCookie: function (name) {
       //쿠키에서 loginId 값을 가져온다.
@@ -148,5 +179,63 @@ export default {
   padding: 14.3px 0 15.5px 16.9px;
   width: 380px;
   box-sizing: border-box;
+}
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+}
+.loading-content {
+  text-align: center;
+  animation: jump 1s infinite;
+}
+.loading-content img {
+  width: 200px;
+  margin-bottom: 10px;
+}
+.typing-text {
+  font-size: 24px;
+  color: #fff;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid;
+  animation: typing 2s steps(20), blink 0.5s step-end infinite alternate;
+}
+@keyframes typing {
+  0% {
+    width: 0;
+  }
+  50% {
+    width: 6ch;
+  }
+  100% {
+    width: 12ch;
+  }
+}
+@keyframes blink {
+  from {
+    border-color: transparent;
+  }
+  to {
+    border-color: #fff;
+  }
+}
+@keyframes jump {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 </style>

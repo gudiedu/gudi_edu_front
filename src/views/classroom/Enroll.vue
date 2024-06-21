@@ -6,28 +6,7 @@
         <v-spacer></v-spacer>
       </v-card-title>
 
-      <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >관리자</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >강사</v-btn
-          >
-        </div> -->
-
+       <div class="container">
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -35,61 +14,67 @@
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
-              v-model="stitle"
+              v-model="searchKeyword"
+              @keydown.enter = "handleSearch"
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
 
       <v-divider></v-divider>
 
-      <v-table class="dashboard-table">
-        <thead>
-          <tr>
-            <th>강의명</th>
-            <th>강사명</th>
-            <th>강의실</th>
-            <th>시작일</th>
-            <th>종료일</th>
-            <th>수강인원</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td @click="lectureModify('Java 기초')">Java 기초</td>
-            <td>강사</td>
-            <td>101호</td>
-            <td>2024.01.02</td>
-            <td>2024.05.01</td>
-            <td>20</td>
-          </tr>
-          <tr>
-            <td @click="lectureModify('Vue')">Vue</td>
-            <td>강사</td>
-            <td>101호</td>
-            <td>2024.01.02</td>
-            <td>2024.05.01</td>
-            <td>20</td>
-          </tr>
-        </tbody>
-      </v-table>
+      <form id="enrollment">
+        <v-table class="dashboard-table">
+          <thead>
+            <tr>
+              <!-- <td>과목번호</td> -->
+              <th>수강신청</th>
+              <th>과목명</th>
+              <th>강의명</th>
+              <th>강사명</th>
+              <th>강의실</th>
+              <th>시작일</th>
+              <th>종료일</th>
+              <th>수강정원</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="course in enrollAvailable" :key="course.course_no">
+              <tr>
+                <td @click="courseEnroll(course.course_no)">
+                  <div class="enroll-button">신청</div>
+                </td>
+                <!-- <td @click="courseDetail(course.course_no)">{{ course.course_no }}</td> -->
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_subject }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_name }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.name }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_loc }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_start_date }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_end_date }}
+                </td>
+                <td @click="courseDetail(course.course_no)">
+                  {{ course.course_quota }}
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </v-table>
+      </form>
     </v-card>
-
-    <!-- 페이지네이션 추가-->
-
-    <!-- <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
-    </div>
-    <v-dialog v-model="addModal" max-width="600px">
-      <v-card>
-        <v-card-text>
-          <SLearningMaterialsModal :action="action" />
-        </v-card-text>
-      </v-card>
-    </v-dialog> -->
   </v-container>
 </template>
 
@@ -100,47 +85,78 @@ export default {
     return {
       titleText: "수강신청",
       action: "",
-      selectedNotice: null,
-      activeFilter: "all",
-      stitle: "",
-      satisfactionModal: false,
-      attendanceModal: false,
+      sEnrollList: [],
+      enrollAvailable: [],
+      courseNo: "",
+      studentSignedID: "",
+      searchKeyword: "",
+      selectedOption: "과목명",
+      options: ["과목명", "강의명", "강사명"],
+      searchResults: [],
+      searched: false,
     };
   },
+  mounted() {
+    this.enrollList();
+  },
   methods: {
-    // findAll() {
-    //   this.activeFilter = "all";
-    // },
-    // findAdmin() {
-    //   this.activeFilter = "admin";
-    // },
-    // findTeacher() {
-    //   this.activeFilter = "teacher";
-    // },
-    searchMethod() {},
-    // lectureModify(lecture) {
-    //   this.selectedNotice = lecture;
-    //   this.action = "U";
-    //   this.addModal = true;
-    // },
-    // openAddModal() {
-    //   this.action = "";
-    //   this.addModal = true;
-    // },
-    // closeAddModal() {
-    //   this.addModal = false;
-    // },
-    lectureModify(lectureName) {
+
+    handleSearch() {
+      console.log(this.searchKeyword);
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.enrollList(); // 검색 실행
+    },
+
+    enrollList() {
+      let enrollListParams = new URLSearchParams();
+      enrollListParams.append("searchKeyword", this.searchKeyword);
+      
+
+      this.axios
+        .post("/classroom/sEnrollList.do", enrollListParams)
+        .then((response) => {
+          console.log(JSON.stringify(response));
+
+          this.enrollAvailable = response.data.enrollList;
+
+          response.data.enrollList.forEach((each) => {
+            this.openedNo = each.course_no;
+            this.openedSubject = each.course_subject;
+            this.openedName = each.course_name;
+            this.openedQuota = each.course_quota;
+            this.openedBegins = each.course_start_date;
+            this.openedEnds = each.course_end_date;
+            this.teacherName = each.name;
+          });
+        });
+    },
+    courseDetail(courseNo) {
       this.$router.push({
-        name: "sLectureDetailRegister",
-        params: { name: lectureName },
+        name: "sCourseDetail",
+        params: { courseNo: courseNo },
       });
     },
-    classSatisfaction() {
-      this.satisfactionModal = true;
-    },
-    attendance() {
-      this.attendanceModal = true;
+
+    courseEnroll(courseNo) {
+      this.courseNo = courseNo;
+
+      let enrollInfo = document.getElementById("enrollment");
+      let data = new FormData(enrollInfo);
+      data.append("openedNo", this.courseNo);
+      data.append("studentSignedID", this.studentSignedID);
+
+      console.log("수강신청번호: ", this.courseNo);
+
+      this.axios.post("/classroom/sEnrollInsert.do", data).then((response) => {
+        console.log("수강신청JSON: ", JSON.stringify(response));
+
+        if (response.data.result > 0) {
+          alert(response.data.resultMsg);
+          console.log("너왜안나오냐: ", response.data.resultMsg);
+        } else {
+          alert(response.data.resultMsg);
+        }
+      });
     },
   },
 };
@@ -148,7 +164,7 @@ export default {
 
 <style scoped>
 .dashboard-card {
-  margin: 20px;
+  margin-bottom: 20px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -229,22 +245,58 @@ export default {
   width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
+  cursor: pointer;
 }
 
 .dashboard-table th,
 .dashboard-table td {
-  padding: 12px;
-  text-align: left;
+  padding: 12px 8px;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dashboard-table th {
   background-color: #f4f4f4;
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+/*
+.search-select {
+  margin-left: 10px;
+  min-width: 100px; /* 선택적으로 너비를 조정할 수 있습니다 
+} */
+
+.enroll-button {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 50px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.enroll-button:hover {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
 }
 </style>

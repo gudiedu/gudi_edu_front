@@ -3,34 +3,22 @@
     <v-card class="dashboard-card">
       <v-card-title class="d-flex align-center pe-2">
         <div class="titletext">{{ titleText }}</div>
-        <v-spacer></v-spacer>
       </v-card-title>
-
       <div class="container">
         <div class="filter-button-group">
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findStatus('all')"
+            @click="filtered('all')"
             >전체</v-btn
           >
           <v-btn
             :class="{
               'filter-button': true,
-              active: activeFilter === 'completed',
+              active: activeFilter === 'replied',
             }"
-            @click="findStatus('completed')"
-            >완료</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'incompleted',
-            }"
-            @click="findStatus('incompleted')"
-            >미완료</v-btn
-          >
+            @click="filtered('replied')"
+            >답변</v-btn>
         </div>
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -38,8 +26,8 @@
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
-              v-model="stitle"
-              @keydown.enter="handleSearch"
+              v-model="searchKeyword"
+              @keydown.enter = "handleSearch"
             />
           </div>
           <div class="button-group">
@@ -47,198 +35,197 @@
           </div>
         </div>
       </div>
-
-      <v-divider></v-divider>
-
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>과목명</th>
-            <th>강의명</th>
-            <th>강사명</th>
-            <th>시작일</th>
-            <th>종료일</th>
-            <th>만족도</th>
-            <th>출결</th>
+            <th>과목</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>등록일</th>
+            <th>답변여부</th>
           </tr>
         </thead>
         <tbody>
           <template v-if="totalCnt > 0">
-            <template v-for="item in sCourseList" :key="item.course_no">
-              <tr>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_subject }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_name }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.teacher_name }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_start_date }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_end_date }}
-                </td>
-                <td>
-                  <span v-if="isAfterEndDate(item.course_end_date)">
-                    <span v-if="item.survey_completed === 'Y'">완료</span>
-                    <span v-else @click="classSatisfaction(item.course_no)"
-                      >미완료</span
-                    >
-                  </span>
-                </td>
-                <td @click="attendance(item.course_no)">출결</td>
+            <!--해당 게시글에 대한 세부정보는 SQnaSelectModal로 열기-->
+            <template v-for="item in listQna" :key="item.question_no">
+              <tr class="table_row" @click="sQnaSelected(item.question_no)">
+                <td>{{ item.course_name }}</td>
+                <td>{{ item.question_title }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.question_created_at }}</td>
+                <td>{{ item.reply_no > 0 ? "Y" : "N" }}</td>
               </tr>
             </template>
           </template>
           <template v-else>
-            <tr>
-              <td colspan="10" style="text-align: center">
-                조회된 데이터가 없습니다.
-              </td>
+            <tr style="text-align: center">
+              <td>조회된 데이터가 없습니다.</td>
             </tr>
           </template>
         </tbody>
       </v-table>
     </v-card>
-
     <!-- 페이지네이션 추가-->
-    <div id="noticePagination">
+    <div id="qnaPagination">
       <paginate
         class="justify-content-center"
         v-model="currentPage"
         :page-count="page()"
         :page-range="5"
         :margin-pages="0"
-        :click-handler="courseList"
+        :click-handler="qna_list"
         :prev-text="'이전'"
         :next-text="'다음'"
         :container-class="'pagination'"
         :page-class="'page-item'"
-      ></paginate>
+      >
+      </paginate>
     </div>
 
-    <v-dialog v-model="attendanceModal" max-width="800px">
+    <div class="button-group">
+      <button class="insert-button" @click="sQnaSubmit()">등록</button>
+    </div>
+
+    <v-dialog v-model="sQnaSubmitModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <AttendanceModal
-            :courseNo="courseNo"
-            @close-modal="closeAttendanceModal"
+          <sQnaSubmitModal @close-modal="closeSubmitModal" :action="action" />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="sQnaSelectedModal" max-width="1000px">
+      <v-card>
+        <v-card-text>
+          <sQnaSelectedModal
+            :action="action"
+            :sQuestionNo="sQuestionNo"
+            @close-modal="sQnaSelectedClosed"
           />
         </v-card-text>
       </v-card>
     </v-dialog>
   </v-container>
 </template>
+
 <script>
-import AttendanceModal from "./SAttendanceModal.vue";
+import sQnaSubmitModal from "./SQnaSubmitModal.vue";
+import sQnaSelectedModal from "./SQnaSelectModal.vue";
 import Paginate from "vuejs-paginate-next";
+
 export default {
-  components: { AttendanceModal, Paginate },
+  components: {
+    sQnaSubmitModal,
+    sQnaSelectedModal,
+    Paginate,
+  },
+  // modal setup
+
   data() {
     return {
-      titleText: "강의관리",
-      courseNo: 0,
+      titleText: "질의응답",
+      sQnaSubmitModal: false,
+      sQnaSelectedModal: false,
+      action: "",
       activeFilter: "all",
-      stitle: "",
-      status: "",
-      sCourseList: [],
-      attendanceModal: false,
+      listQna: [],
+      sQuestionNo: 0,
+      currentPage: 1,
       totalCnt: 0,
       pageSize: 10,
-      currentPage: 1,
+      searchKeyword: "",
+      status: "",
+      studentSignedID:""
     };
   },
   mounted() {
-    this.courseList();
+    this.qna_list();
   },
   methods: {
-    courseDetailed(courseNo) {
-      this.$router.push({
-        name: "sCourseDetail",
-        params: { courseNo },
-      });
+    // Qna 등록 모달 열기
+    sQnaSubmit() {
+      this.action = "I";
+      this.sQnaSubmitModal = true;
+    },
+    // Qna 등록 모달 닫기
+    closeSubmitModal() {
+      this.sQnaSubmitModal = false;
+      this.qna_list();
     },
 
-    classSatisfaction(courseNo) {
-      this.$router.push({
-        name: "sCourseSatisfaction",
-        params: { courseNo },
-      });
+    // 질의응답 세부조회 모달 열기
+    sQnaSelected(sQuestionNo) {
+      this.sQnaSelectedModal = true;
+      this.sQuestionNo = sQuestionNo;
+      this.action = "S";
     },
 
-    attendance(courseNo) {
-      this.courseNo = courseNo;
-      this.attendanceModal = true;
+    // 질의응답 세부조회 모달 닫기
+    sQnaSelectedClosed() {
+      this.sQnaSelectedModal = false;
+      this.qna_list();
     },
 
-    closeAttendanceModal() {
-      this.attendanceModal = false;
-      this.courseList();
-    },
+    // Qna 리스트 조회 which will be mounted.
+    qna_list: function () {
+      // qna로 넘겨줄 parameter 정리
+      let vm = this; // axios에서 this를 사용하기 위해 vm에 담아봄
 
-    handleSearch() {
-      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
-      this.courseList(); // 검색 실행
-    },
-
-    courseList() {
-      let vm = this;
-
-      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
-      params.append("pCourseNo", this.pCourseNo);
-      params.append("stitle", this.stitle);
-      params.append("status", this.status);
-      params.append("currentPage", this.currentPage);
-      params.append("pageSize", this.pageSize);
+      let qnaParams = new URLSearchParams();
+      qnaParams.append("question_title", this.question_title);
+      qnaParams.append("question_no", this.question_no);
+      qnaParams.append("question_content", this.question_content);
+      qnaParams.append("question_created_at", this.question_created_at);
+      qnaParams.append("name", this.name);
+      qnaParams.append("searchKeyword", this.searchKeyword);
+      qnaParams.append("status", this.status);
+      qnaParams.append("currentPage", this.currentPage);
+      qnaParams.append("pageSize", this.pageSize);
+      qnaParams.append("studentSignedID", this.studentSignedID);
 
       this.axios
-        .post("/classroom/sStudentCourseList.do", params)
+        .post("/sAlert/sQnaList.do", qnaParams)
         .then((response) => {
-          vm.sCourseList = response.data.sStudentCourseInfo;
           vm.totalCnt = response.data.totalCnt;
+          vm.listQna = response.data.listQna;
+          console.log(response.data.listQna);
         })
         .catch(function (error) {
-          alert("에러! API 요청에 오류가 있습니다. " + error);
+          alert("ERROR" + error);
         });
     },
 
-    isAfterEndDate(courseEndDate) {
-      // 현재 날짜와 비교하여 강좌 종료일이 이미 지났는지 확인
-      return new Date() > new Date(courseEndDate);
+    handleSearch() {
+      console.log("searchKeyword: ", this.searchKeyword);
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.qna_list(); // 검색 실행
     },
 
-    findStatus(param) {
+    filtered(param) {
       if (param === "all") {
         this.activeFilter = param;
         this.status = "";
-      } else if (param === "completed") {
-        this.activeFilter = param;
-        this.status = param;
-      } else if (param === "incompleted") {
+      } else if (param === "replied") {
         this.activeFilter = param;
         this.status = param;
       }
 
-      this.courseList();
+      this.qna_list();
     },
 
     page: function () {
       var total = this.totalCnt;
       var page = this.pageSize;
-      var xx = total % page;
+      var remaining = total % page;
       var result = parseInt(total / page);
 
-      if (xx == 0) {
+      if (remaining == 0) {
         return result;
       } else {
         result = result + 1;
         return result;
       }
-      // var result = Math.ceil(this.totalCnt / this.pageSize);
-      // return result;
     },
   },
 };
@@ -328,7 +315,6 @@ export default {
   border-collapse: collapse;
   margin: 16px 0;
   cursor: pointer;
-  /* Ensure table expands to fit card */
 }
 
 .dashboard-table th,

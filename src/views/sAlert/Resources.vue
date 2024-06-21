@@ -7,30 +7,6 @@
       </v-card-title>
 
       <div class="container">
-        <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findStatus('all')"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'completed',
-            }"
-            @click="findStatus('completed')"
-            >완료</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'incompleted',
-            }"
-            @click="findStatus('incompleted')"
-            >미완료</v-btn
-          >
-        </div>
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -53,43 +29,26 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
+            <th>글번호</th>
             <th>과목명</th>
             <th>강의명</th>
-            <th>강사명</th>
-            <th>시작일</th>
-            <th>종료일</th>
-            <th>만족도</th>
-            <th>출결</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>등록일</th>
           </tr>
         </thead>
         <tbody>
           <template v-if="totalCnt > 0">
-            <template v-for="item in sCourseList" :key="item.course_no">
-              <tr>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_subject }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_name }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.teacher_name }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_start_date }}
-                </td>
-                <td @click="courseDetailed(item.course_no)">
-                  {{ item.course_end_date }}
-                </td>
+            <template v-for="item in resourceList" :key="item.resource_no">
+              <tr class="table_row" @click="resourceModify(item.resource_no)">
+                <td>{{ item.resource_no }}</td>
+                <td>{{ item.course_subject }}</td>
+                <td>{{ item.course_name }}</td>
                 <td>
-                  <span v-if="isAfterEndDate(item.course_end_date)">
-                    <span v-if="item.survey_completed === 'Y'">완료</span>
-                    <span v-else @click="classSatisfaction(item.course_no)"
-                      >미완료</span
-                    >
-                  </span>
+                  {{ item.resource_title }}
                 </td>
-                <td @click="attendance(item.course_no)">출결</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.resource_created_at }}</td>
               </tr>
             </template>
           </template>
@@ -112,7 +71,7 @@
         :page-count="page()"
         :page-range="5"
         :margin-pages="0"
-        :click-handler="courseList"
+        :click-handler="searchList"
         :prev-text="'이전'"
         :next-text="'다음'"
         :container-class="'pagination'"
@@ -120,109 +79,80 @@
       ></paginate>
     </div>
 
-    <v-dialog v-model="attendanceModal" max-width="800px">
+    <v-dialog v-model="resourceModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <AttendanceModal
-            :courseNo="courseNo"
-            @close-modal="closeAttendanceModal"
+          <ResourceModal
+            :action="action"
+            :resourceNo="resourceNo"
+            @close-modal="closeResourceModal"
           />
         </v-card-text>
       </v-card>
     </v-dialog>
   </v-container>
 </template>
+
 <script>
-import AttendanceModal from "./SAttendanceModal.vue";
+import ResourceModal from "../sAlert/SResourcesModal.vue";
 import Paginate from "vuejs-paginate-next";
 export default {
-  components: { AttendanceModal, Paginate },
+  components: {
+    ResourceModal,
+    Paginate,
+  },
   data() {
     return {
-      titleText: "강의관리",
-      courseNo: 0,
+      titleText: "학습자료",
+      resourceModal: false,
+      action: "",
+      selectedNotice: null,
       activeFilter: "all",
       stitle: "",
-      status: "",
-      sCourseList: [],
-      attendanceModal: false,
+      resourceList: [],
       totalCnt: 0,
       pageSize: 10,
       currentPage: 1,
+      resourceNo: 0,
     };
   },
   mounted() {
-    this.courseList();
+    this.searchList();
   },
   methods: {
-    courseDetailed(courseNo) {
-      this.$router.push({
-        name: "sCourseDetail",
-        params: { courseNo },
-      });
+    resourceModify(resourceNo) {
+      this.resourceModal = true;
+      this.resourceNo = resourceNo;
     },
 
-    classSatisfaction(courseNo) {
-      this.$router.push({
-        name: "sCourseSatisfaction",
-        params: { courseNo },
-      });
-    },
-
-    attendance(courseNo) {
-      this.courseNo = courseNo;
-      this.attendanceModal = true;
-    },
-
-    closeAttendanceModal() {
-      this.attendanceModal = false;
-      this.courseList();
+    closeResourceModal() {
+      this.resourceModal = false;
+      this.searchList();
     },
 
     handleSearch() {
       this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
-      this.courseList(); // 검색 실행
+      this.searchList(); // 검색 실행
     },
 
-    courseList() {
+    searchList: function () {
       let vm = this;
 
       let params = new URLSearchParams(); //파라미터를 넘길 때 사용
-      params.append("pCourseNo", this.pCourseNo);
       params.append("stitle", this.stitle);
-      params.append("status", this.status);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
 
       this.axios
-        .post("/classroom/sStudentCourseList.do", params)
+        .post("/sAlert/sListResources.do", params)
         .then((response) => {
-          vm.sCourseList = response.data.sStudentCourseInfo;
+          vm.resourceList = response.data.listData;
+          console.log(vm.resourceList);
           vm.totalCnt = response.data.totalCnt;
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
-    },
-
-    isAfterEndDate(courseEndDate) {
-      // 현재 날짜와 비교하여 강좌 종료일이 이미 지났는지 확인
-      return new Date() > new Date(courseEndDate);
-    },
-
-    findStatus(param) {
-      if (param === "all") {
-        this.activeFilter = param;
-        this.status = "";
-      } else if (param === "completed") {
-        this.activeFilter = param;
-        this.status = param;
-      } else if (param === "incompleted") {
-        this.activeFilter = param;
-        this.status = param;
-      }
-
-      this.courseList();
     },
 
     page: function () {
@@ -245,6 +175,10 @@ export default {
 </script>
 
 <style scoped>
+.table_row {
+  cursor: pointer;
+}
+
 .dashboard-card {
   margin-bottom: 20px;
   padding: 20px;
@@ -262,7 +196,7 @@ export default {
   display: flex;
   height: 50px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 .filter-button-group {
@@ -327,13 +261,12 @@ export default {
   width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
-  cursor: pointer;
-  /* Ensure table expands to fit card */
 }
 
 .dashboard-table th,
 .dashboard-table td {
-  padding: 12px 8px;
+  padding: 12px;
+  text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
   white-space: nowrap;
