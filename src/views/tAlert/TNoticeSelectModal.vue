@@ -3,16 +3,12 @@
     <h2 class="title">공지사항</h2>
 
     <table class="info-table">
-      <!-- <tr>
-        <td class="label">번호</td>
-        <td class="content">
-          <input readonly type="text" pNoticeNo="pNoticeNo" v-model="pNoticeNo" class="form-input" />
-        </td>
-      </tr> -->
-
       <tr>
         <td class="label">제목</td>
-        <td class="content">{{ noticeTitle }}</td>
+        <td class="content">
+          <span v-if="!noticeEditing">{{ noticeTitle }}</span>
+          <input v-else type="text" v-model="noticeTitle" class="form-input" />
+        </td>
       </tr>
 
       <tr>
@@ -32,21 +28,24 @@
       <tr class="content">
         <td class="label">내용</td>
         <td class="content">
-          <textarea readonly noticeContent="noticeContent" v-model="noticeContent" class="form-textarea"></textarea>
+          <div v-if="!noticeEditing" style="height: 400px; overflow-y: auto">{{ noticeContent }}</div>
+          <textarea v-else v-model="noticeContent" class="form-textarea"></textarea>
         </td>
       </tr>
 
       <tr class="content" v-if="fileName">
         <td class="label">첨부파일</td>
         <td class="content">
-          <div id="preview" @click="downLoad">{{ fileName }}</div>
+          <div v-if="!noticeEditing" id="preview" @click="downLoad">{{ fileName }}</div>
+          <input v-else type="file" id="file-insert" @change="handleFileChange" />
         </td>
       </tr>
     </table>
     <div class="button-group">
-      <!-- <v-btn class="update-button" @click="updateNotice" v-if="isMyNotice">수정</v-btn> -->
+      <v-btn v-if="noticeEditing" class="save-button" @click="saveNotice">저장</v-btn>
+      <v-btn v-else-if="isMyNotice" class="update-button" @click="noticeEditing = true">수정</v-btn>
       <v-btn class="delete-button" @click="deleteNotice" v-if="isMyNotice">삭제</v-btn>
-      <v-btn class="cancel-button" @click="cancel">닫기</v-btn>
+      <v-btn class="cancel-button" @click="cancelEdit">{{ noticeEditing ? "취소" : "닫기" }}</v-btn>
     </div>
   </div>
 </template>
@@ -69,6 +68,8 @@ export default {
       name: "",
       previewHtml: "",
       fileName: "",
+      selectedFile: null,
+      noticeEditing: false,
     };
   },
   computed: {
@@ -76,11 +77,9 @@ export default {
       return this.sessionLoginId === this.userLoginId;
     },
   },
-
   mounted() {
     this.selectNotice();
   },
-
   methods: {
     selectNotice() {
       let params = new URLSearchParams();
@@ -89,7 +88,6 @@ export default {
       this.axios
         .post("/tAlert/selectNotice.do", params)
         .then((response) => {
-          //console.log(JSON.stringify(response));
           console.log(response.data);
 
           this.sessionLoginId = response.data.loginId;
@@ -97,40 +95,38 @@ export default {
           this.noticeCreatedAt = response.data.result.notice_created_at;
           this.noticeTitle = response.data.result.notice_title;
           this.noticeContent = response.data.result.notice_content;
-
-          console.log("Session Login ID:", this.sessionLoginId);
-          console.log("User Login ID:", this.userLoginId);
-
-          this.ext = response.data.result.file_extension;
-
-          // //파일 이미지 보여주거나, 파일 이름 보여주기
-          // if (response.data.result.file_origin === "" || response.data.result.file_origin === null) {
-          //   this.previewHtml = "";
-          //   this.fileName = "";
-          // } else {
-          //   this.previewHtml = response.data.result.file_origin;
-          //   this.fileName = response.data.result.file_origin;
-
-          //   let ext = response.data.result.file_extension;
-
-          //   if (["jpg", "jpeg", "png", "gif"].includes(ext.toLowerCase())) {
-          //     this.previewHtml = "<img src='" + response.data.result.file_local_path + "' id 'imgFile' style='width:100px; height 100px;' />";
-          //   } else {
-          //     this.previewHtml = response.data.result.file_origin;
-          //   }
-          // }
-
-          if (response.data.result.file_origin) {
-            this.fileName = response.data.result.file_origin;
-          } else {
-            this.fileName = "";
-          }
+          this.fileName = response.data.result.file_origin || "";
         })
-        .catch(function (error) {
+        .catch((error) => {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
+    handleFileChange(event) {
+      this.selectedFile = event.target.files[0];
+    },
+    saveNotice() {
+      let formData = new FormData();
+      formData.append("noticeTitle", this.noticeTitle);
+      formData.append("noticeContent", this.noticeContent);
+      formData.append("pNoticeNo", this.pNoticeNo);
+      if (this.selectedFile) {
+        formData.append("file", this.selectedFile);
+      }
 
+      this.axios
+        .post("/tAlert/updateNotice.do", formData)
+        .then((response) => {
+          console.log(response.data);
+          if (response.data.result > 0) {
+            alert(response.data.resultMsg);
+            this.noticeEditing = false;
+            this.selectNotice(); // 다시 조회하여 최신 정보로 업데이트
+          }
+        })
+        .catch((error) => {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
     deleteNotice() {
       if (this.isMyNotice) {
         let params = new URLSearchParams();
@@ -151,13 +147,15 @@ export default {
         alert("삭제할 수 없습니다");
       }
     },
-
-    cancel() {
-      // 취소 로직을 여기에 추가
-      this.$router.go(-1);
+    cancelEdit() {
+      if (this.noticeEditing) {
+        this.selectNotice(); // 변경사항 무시하고 다시 조회하여 원래 정보로 복구
+        this.noticeEditing = false;
+      } else {
+        this.$router.go(-1); // 취소 시 이전 페이지로 이동
+      }
     },
-
-    downLoad: function () {
+    downLoad() {
       let params = new URLSearchParams();
       params.append("pNoticeNo", this.pNoticeNo);
 
@@ -165,20 +163,14 @@ export default {
         url: "/tAlert/noticeFileDownload.do",
         data: params,
         method: "POST",
-        responseType: "blob", //파일에 대한 내용을 받으려면 추가해줘야 한다.
+        responseType: "blob",
       }).then((response) => {
-        //브라우저 있는 자바스크립 버전은 사용안함, node.js꺼 사용 => 그래서 이런 작업을 처리 해야함
-        console.log(response);
-        console.log(response.data);
-        //Blob 데이터를 이진파일로 변환, 파일 데이터를 받아 바이너리 데이터로 만든 후 URL을 만든다.
         let FILE = window.URL.createObjectURL(new Blob([response.data]));
-        //a 태그를 만들어서 이 태그 안에 파일 이름을 넣어
         let docUrl = document.createElement("a");
         docUrl.href = FILE;
         docUrl.setAttribute("download", this.fileName);
-        document.body.appendChild(docUrl); //만든 a태그를 끼어넣어
-        docUrl.click(); //강제로 클릭하게 만들어 //url을 클릭하면 다운로드가 됨
-        //console.log('FILE : ' + FILE)
+        document.body.appendChild(docUrl);
+        docUrl.click();
       });
     },
   },
@@ -214,13 +206,13 @@ export default {
   font-weight: bold;
   text-align: center;
   border: 1px solid #ddd;
-  width: 15%; /* 레이블 셀의 너비를 15%로 설정 */
-  padding: 8px; /* 추가: 패딩 설정 */
+  width: 15%;
+  padding: 8px;
 }
 
 .info-table .content {
   background-color: #ffffff;
-  width: 85%; /* 내용 셀의 너비를 85%로 설정 */
+  width: 85%;
   text-align: left;
   border: 1px solid #ddd;
   padding: 8px;
@@ -236,7 +228,7 @@ export default {
 }
 
 .form-input {
-  width: 100%; /* 입력 필드의 너비를 100%로 설정 */
+  width: 100%;
   padding: 10px;
   border: 1px solid #dcdcdc;
   border-radius: 4px;
@@ -252,7 +244,7 @@ export default {
 }
 
 .form-textarea {
-  height: 400px; /* 높이를 400px로 조정 */
+  height: 400px;
   width: 100%;
   padding: 10px;
   border: 1px solid #dcdcdc;
@@ -263,8 +255,8 @@ export default {
 }
 
 .content-input {
-  height: 400px; /* 높이를 400px로 설정 */
-  overflow-y: scroll; /* 세로 스크롤바 적용 */
+  height: 400px;
+  overflow-y: scroll;
 }
 
 .button-group {
@@ -274,9 +266,9 @@ export default {
 }
 
 .update-button,
+.save-button,
 .delete-button,
 .cancel-button {
-  /* padding: 10px 16px; */
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -292,6 +284,15 @@ export default {
 .update-button:hover {
   background-color: #5a9bff;
   box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
+}
+
+.save-button {
+  background-color: #4caf50;
+}
+
+.save-button:hover {
+  background-color: #66bb6a;
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
 }
 
 .delete-button {

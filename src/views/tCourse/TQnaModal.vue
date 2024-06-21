@@ -32,10 +32,9 @@
       <tbody>
         <template v-if="listdata.length > 0">
           <template v-for="(item, index) in listdata" :key="item.reply_no">
-            <tr @click="flag_changed(true, item.reply_no)" :class="{ selected: reply_num === item.reply_no, 'non-selected': reply_num !== item.reply_no }">
+            <tr @click="selectReply(item.reply_no)" :class="{ selected: reply_num === item.reply_no, 'non-selected': reply_num !== item.reply_no }">
               <td style="text-align: center">
                 {{ index + 1 }}
-                <!-- 여기서 index를 사용합니다 -->
               </td>
               <td>{{ item.reply_content }}</td>
               <td style="text-align: center">{{ item.name }}</td>
@@ -55,17 +54,19 @@
 
     <div class="form-group">
       <div class="form-label">답변</div>
-      <textarea name="content" class="form-textarea content-scroll" v-model="reply_content"></textarea>
+      <textarea name="content" class="form-textarea content-scroll" v-model="reply_content" :readonly="isReplySelected && !replyEditing"></textarea>
     </div>
 
-    <!-- CKEditor 사용 -->
-    <!-- 첨부파일 input 추가 -->
-
     <div class="button-group">
-      <template v-if="this.flag_seleted">
-        <v-btn class="update-button" @click="updateReply">수정</v-btn>
+      <template v-if="isReplySelected">
+        <template v-if="replyEditing">
+          <v-btn class="save-button" @click="saveReply">저장</v-btn>
+        </template>
+        <template v-else>
+          <v-btn class="update-button" @click="editReply">수정</v-btn>
+        </template>
         <v-btn class="delete-button" @click="deleteReply">삭제</v-btn>
-        <v-btn class="cancel-button" @click="flag_changed(false)">취소</v-btn>
+        <v-btn class="cancel-button" @click="cancelEdit">취소</v-btn>
       </template>
       <template v-else>
         <v-btn class="insert-button" @click="insertReply">등록</v-btn>
@@ -90,60 +91,31 @@ export default {
     return {
       listdata: [],
       paction: this.action,
-      flag_seleted: false,
+      isReplySelected: false,
       reply_num: null,
       reply_no: this.reply_no,
       reply_content: "",
       reply_created_at: "",
       course_no: 0,
+      replyEditing: false, // 수정 상태를 관리하기 위한 변수
     };
   },
   mounted() {
     this.selectQuestion();
-    console.log(name);
+    console.log(this.name);
   },
   methods: {
-    flag_changed(stat, reply_no) {
-      this.reply_num = stat ? reply_no : null;
-      this.flag_seleted = stat;
-      if (stat) {
-        const selectedReply = this.listdata.find((item) => item.reply_no === reply_no);
-        this.reply_content = selectedReply ? selectedReply.reply_content : "";
-      } else {
-        this.reply_content = "";
-      }
+    selectReply(reply_no) {
+      this.reply_num = reply_no;
+      this.isReplySelected = true;
+      const selectedReply = this.listdata.find((item) => item.reply_no === reply_no);
+      this.reply_content = selectedReply ? selectedReply.reply_content : "";
+      this.replyEditing = false; // 초기에는 수정 상태가 아님
     },
-
-    close() {
-      // 취소 로직을 여기에 추가
-      this.$router.go(-1);
+    editReply() {
+      this.replyEditing = true; // 수정 상태로 변경
     },
-
-    insertReply() {
-      this.axios
-        .post("/tCourse/insertquestionreply.do", {
-          question_no: this.question_no,
-
-          reply_content: this.reply_content,
-          reply_created_at: this.reply_created_at,
-          course_no: this.course_no,
-        })
-        .then((response) => {
-          if (response.data.result >= 0) {
-            alert(response.data.resultMsg);
-            // 필요한 경우 추가 후 목록을 갱신합니다.
-            this.selectQuestion();
-            this.reply_content = "";
-          } else {
-            alert(response.data.resultMsg);
-          }
-        })
-        .catch((error) => {
-          alert("에러! API 요청에 오류가 있습니다. " + error);
-        });
-    },
-
-    updateReply() {
+    saveReply() {
       this.axios
         .post("/tCourse/updatequestionreply.do", {
           reply_no: this.reply_num,
@@ -154,7 +126,8 @@ export default {
           if (response.data.result >= 0) {
             alert(response.data.resultMsg);
             this.selectQuestion();
-            this.flag_changed(false); // 수정 완료 후 상태 초기화
+            this.isReplySelected = false; // 수정 완료 후 상태 초기화
+            this.replyEditing = false; // 수정 상태 해제
           } else {
             alert(response.data.resultMsg);
           }
@@ -163,7 +136,35 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
-
+    cancelEdit() {
+      this.isReplySelected = false;
+      this.replyEditing = false;
+      this.reply_content = "";
+    },
+    close() {
+      this.$router.go(-1);
+    },
+    insertReply() {
+      this.axios
+        .post("/tCourse/insertquestionreply.do", {
+          question_no: this.question_no,
+          reply_content: this.reply_content,
+          reply_created_at: this.reply_created_at,
+          course_no: this.course_no,
+        })
+        .then((response) => {
+          if (response.data.result >= 0) {
+            alert(response.data.resultMsg);
+            this.selectQuestion();
+            this.reply_content = "";
+          } else {
+            alert(response.data.resultMsg);
+          }
+        })
+        .catch((error) => {
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
+    },
     deleteReply() {
       console.log("Deleting reply with reply_no:", this.reply_num);
       this.axios
@@ -173,8 +174,9 @@ export default {
         .then((response) => {
           if (response.data.result >= 0) {
             alert(response.data.resultMsg);
-            // 필요한 경우 삭제 후 목록을 갱신합니다.
             this.selectQuestion();
+            this.reply_content = ""; // 답변 내용을 초기화
+            this.isReplySelected = false; // 선택 상태를 초기화
           } else {
             alert(response.data.resultMsg);
           }
@@ -183,7 +185,6 @@ export default {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
     },
-
     selectQuestion() {
       console.log(this.question_no);
       this.axios
@@ -195,7 +196,6 @@ export default {
         .then((response) => {
           this.listdata = response.data.listdata.map((reply) => {
             console.log(reply);
-            // 날짜에 "수정됨"을 추가
             if (reply.is_updated) {
               reply.reply_created_at += " (수정됨)";
             }
@@ -241,7 +241,7 @@ export default {
 }
 
 .form-input {
-  flex: 1; /* 변경: 남은 공간을 입력 필드에 할당 */
+  flex: 1;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -268,12 +268,11 @@ export default {
   resize: vertical;
 }
 
-/* 새로운 answer-box 스타일 */
 .answer-box {
   padding: 16px;
-  background-color: #f9f9f9; /* 배경 색상을 약간 회색으로 설정 */
-  border: 1px solid #ddd; /* 연한 테두리 설정 */
-  border-radius: 8px; /* 모서리를 둥글게 설정 */
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   margin-top: 20px;
 }
 
@@ -291,8 +290,8 @@ export default {
 .delete-button,
 .insert-button,
 .cancel-button,
+.save-button,
 .close-button {
-  /* padding: 10px 16px; */
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -309,6 +308,14 @@ export default {
 .update-button:hover,
 .insert-button:hover {
   background-color: #5a9bff;
+  box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
+}
+.save-button {
+  background-color: #00b445;
+}
+
+.save-button:hover {
+  background-color: #3dcc6c;
   box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
 }
 
@@ -328,7 +335,7 @@ export default {
   margin: 0;
 }
 
-.cancel-button,
+.cancel-button:hover,
 .close-button:hover {
   background-color: #c2c2c2;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
@@ -345,12 +352,12 @@ export default {
   font-weight: bold;
   text-align: center;
   border: 1px solid #ddd;
-  width: 15%; /* 레이블 셀의 너비를 20%로 설정 */
+  width: 15%;
 }
 
 .info-table .content {
   background-color: #ffffff;
-  width: 40%; /* 내용 셀의 너비를 40%로 설정 */
+  width: 40%;
   text-align: left;
   border: 1px solid #ddd;
   padding: 8px;
@@ -387,7 +394,7 @@ export default {
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
 }
-/* 열 너비 조정 */
+
 .col-number {
   width: 10%;
   text-align: center;
@@ -417,11 +424,11 @@ export default {
 .content-scroll {
   height: 200px;
   overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .content-scroll::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
 }
 </style>
