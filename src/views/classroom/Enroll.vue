@@ -6,31 +6,23 @@
         <v-spacer></v-spacer>
       </v-card-title>
 
-      <!-- <div class="container">
+       <div class="container">
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-             <v-select
-              v-model="selectedOption"
-              :items="options"
-              label="검색조건"
-              outlined
-              class="search-select"
-              item-height="10"
-              dense
-              max-height="100"></v-select> 
             <input
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
               v-model="searchKeyword"
+              @keydown.enter = "handleSearch"
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
-      </div> -->
+      </div>
 
       <v-divider></v-divider>
 
@@ -108,8 +100,17 @@ export default {
     this.enrollList();
   },
   methods: {
+
+    handleSearch() {
+      console.log(this.searchKeyword);
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.enrollList(); // 검색 실행
+    },
+
     enrollList() {
       let enrollListParams = new URLSearchParams();
+      enrollListParams.append("searchKeyword", this.searchKeyword);
+      
 
       this.axios
         .post("/classroom/sEnrollList.do", enrollListParams)
@@ -128,38 +129,6 @@ export default {
             this.teacherName = each.name;
           });
         });
-    },
-
-    searchMethod() {
-      switch (this.selectedOption) {
-        case "과목명":
-          console.log("검색조건: subject, keyWord:", this.searchKeyword);
-          this.searchResults = this.items.filter((item) =>
-            item.subject
-              .toLowerCase()
-              .includes(this.searchKeyword.toLowerCase())
-          );
-          break;
-        case "강사명":
-          console.log("검색조건: teacher, keyWord:", this.searchKeyword);
-          this.searchResults = this.items.filter((item) =>
-            item.instructor
-              .toLowerCase()
-              .includes(this.searchKeyword.toLowerCase())
-          );
-          break;
-        case "강의명":
-          console.log("검색조건: course, keyWord: ", this.searchKeyword);
-          this.searchResults = this.items.filter((item) =>
-            item.lecture
-              .toLowerCase()
-              .includes(this.searchKeyword.toLowerCase())
-          );
-          break;
-        default:
-          console.warn("검색 조건을 다시 확인해주세요.");
-      }
-      this.searched = true; // 검색을 수행했음을 표시
     },
     courseDetail(courseNo) {
       this.$router.push({

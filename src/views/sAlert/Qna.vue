@@ -8,19 +8,17 @@
         <div class="filter-button-group">
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findStatus('all')"
+            @click="filtered('all')"
             >전체</v-btn
           >
           <v-btn
             :class="{
               'filter-button': true,
-              active: activeFilter === 'reply',
+              active: activeFilter === 'replied',
             }"
-            @click="findStatus('reply')"
-            >답변</v-btn
-          >
+            @click="filtered('replied')"
+            >답변</v-btn>
         </div>
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -28,11 +26,12 @@
               type="text"
               class="search-input"
               placeholder="검색어를 입력해주세요."
-              v-model="searchedWords"
+              v-model="searchKeyword"
+              @keydown.enter = "handleSearch"
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="qna_list">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -135,7 +134,9 @@ export default {
       currentPage: 1,
       totalCnt: 0,
       pageSize: 10,
-      searchedWords: "",
+      searchKeyword: "",
+      status: "",
+      studentSignedID:""
     };
   },
   mounted() {
@@ -177,9 +178,11 @@ export default {
       qnaParams.append("question_content", this.question_content);
       qnaParams.append("question_created_at", this.question_created_at);
       qnaParams.append("name", this.name);
-      qnaParams.append("searchedWords", this.searchedWords);
+      qnaParams.append("searchKeyword", this.searchKeyword);
+      qnaParams.append("status", this.status);
       qnaParams.append("currentPage", this.currentPage);
       qnaParams.append("pageSize", this.pageSize);
+      qnaParams.append("studentSignedID", this.studentSignedID);
 
       this.axios
         .post("/sAlert/sQnaList.do", qnaParams)
@@ -193,11 +196,17 @@ export default {
         });
     },
 
-    findStatus(param) {
+    handleSearch() {
+      console.log("searchKeyword: ", this.searchKeyword);
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.qna_list(); // 검색 실행
+    },
+
+    filtered(param) {
       if (param === "all") {
         this.activeFilter = param;
         this.status = "";
-      } else if (param === "reply") {
+      } else if (param === "replied") {
         this.activeFilter = param;
         this.status = param;
       }
