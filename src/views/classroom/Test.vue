@@ -5,8 +5,8 @@
         <div class="titletext">{{ titleText }}</div>
         <v-spacer></v-spacer>
       </v-card-title>
-     <div class="container">
-      <div class="filter-button-group">
+      <div class="container">
+        <div class="filter-button-group">
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'all' }"
             @click="filtered('all')"
@@ -18,7 +18,8 @@
               active: activeFilter === 'notTaken',
             }"
             @click="filtered('notTaken')"
-            >미응시</v-btn>
+            >미응시</v-btn
+          >
         </div>
         <div class="search">
           <div class="search-container">
@@ -28,7 +29,7 @@
               class="search-input"
               placeholder="검색어를 입력해주세요."
               v-model="searchKeyword"
-              @keydown.enter = "handleSearch"
+              @keydown.enter="handleSearch"
             />
           </div>
           <div class="button-group">
@@ -151,7 +152,7 @@ export default {
       pageSize: 10,
       testCategory: "",
       searchKeyword: "",
-      status:"",
+      status: "",
       testResultNo: "",
     };
   },
@@ -288,7 +289,7 @@ export default {
   display: flex;
   height: 50px;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .filter-button-group {
