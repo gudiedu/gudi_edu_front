@@ -62,7 +62,7 @@
             <th>이메일</th>
             <th>휴대전화</th>
             <th> 회원수정 </th>
-            <th>출석</th>
+            <th v-if="activeFilter === 's'">출석</th>
           </tr>
         </thead>
         <!-- 전체 조회 -->
@@ -74,7 +74,7 @@
             <td>{{person.email}}</td>
             <td>{{person.hp}}</td>
             <td><button id="edit" @click="EditMemberModal(person.loginID, person.hp, person.name, person.email)"> 편집</button></td>
-            <td><a href=""></a></td>
+            <td></td>
           </tr>
         </tbody>
         <!-- 관리자 조회 -->
@@ -86,7 +86,7 @@
             <td>{{admin.email}}</td>
             <td>{{admin.hp}}</td>
             <td><button id="edit" @click="EditMemberModal(admin.loginID, admin.hp, admin.name, admin.email)" >편집</button></td>
-            <td><a href=""></a></td>
+            <td></td>
           </tr>
         </tbody>
         <!-- 강사 조회 -->
@@ -98,7 +98,7 @@
             <td>{{teacher.email}}</td>
             <td>{{teacher.hp}}</td>
             <td><button id="edit" @click="EditMemberModal(teacher.loginID, teacher.hp, teacher.name, teacher.email)" >편집</button></td>
-            <td><a href=""></a></td>
+            <td></td>
           </tr>
         </tbody>
         <!-- 학생 조회 -->
@@ -110,7 +110,7 @@
             <td>{{student.email}}</td>
             <td>{{student.hp}}</td>
             <td><button id="edit" @click="EditMemberModal(student.loginID, student.hp, student.name, student.email)" >편집</button></td>
-            <td><a href=""></a></td>
+            <td @click="navigateToStudentAttendance(student)">이동</td>
           </tr>
         </tbody>
         <!-- 검색 -->
@@ -153,7 +153,7 @@
 
     <!-- 페이지네이션 추가-->
   </v-container>
-</template>
+</template> 
 
 <script>
 import AMemberRegistration from "./AMemberRegistration.vue";
@@ -269,6 +269,10 @@ export default {
     },
     closeAddModal() {
       this.RegMemberModall = false;
+    },
+    navigateToStudentAttendance(student){
+      // this.$store.dispatch('updateStudentInfo', student);
+      this.$router.push({ name : 'aStudentAttendance', params: {studentId: student.loginID} });
     },
   },
 };

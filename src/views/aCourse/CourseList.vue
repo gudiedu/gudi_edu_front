@@ -11,29 +11,19 @@
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'all' }"
             @click="findAll"
-            >전체</v-btn
-          >
+          >전체</v-btn>
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
             @click="findAdmin"
-            >진행중</v-btn
-          >
+          >진행중</v-btn>
           <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
+            :class="{ 'filter-button': true, active: activeFilter === 'teacher' }"
             @click="findTeacher"
-            >진행완료</v-btn
-          >
+          >진행완료</v-btn>
           <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >진행예정</v-btn
-          >
+            :class="{ 'filter-button': true, active: activeFilter === 'scheduled' }"
+            @click="findScheduled"
+          >진행예정</v-btn>
         </div>
 
         <div class="search">
@@ -57,7 +47,7 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>글번호</th>
+            <th>번호</th>
             <th>강의명</th>
             <th>강사명</th>
             <th>수강인원</th>
@@ -69,48 +59,32 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Vue</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행중</td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>Java</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행예정</td>
+          <tr v-for="(item, index) in filteredCourseList" :key="item.course_no">
+            <td>{{ index + 1 }}</td>
+            <td>{{ item.course_name }}</td>
+            <td>{{ item.user_name }}</td>
+            <td>{{ item.course_quota }}명</td>
+            <td>{{ item.course_period }}일</td>
+            <td>{{ item.course_start_date }}</td>
+            <td>{{ item.course_end_date }}</td>
+            <td>{{ item.course_loc }}</td>
+            <td>
+              <span v-if="new Date() > new Date(item.course_end_date)">진행완료</span>
+              <span v-else-if="new Date() < new Date(item.course_start_date)">진행예정</span>
+              <span v-else>진행중</span>
+            </td>
           </tr>
         </tbody>
       </v-table>
     </v-card>
+    
 
-    <!-- 페이지네이션 추가-->
 
-    <!-- <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
-    </div>
-    <v-dialog v-model="addModal" max-width="600px">
-      <v-card>
-        <v-card-text>
-          <NoticeModal :action="action" />
-        </v-card-text>
-      </v-card>
-    </v-dialog> -->
   </v-container>
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   components: {},
   data() {
@@ -121,19 +95,81 @@ export default {
       selectedNotice: null,
       activeFilter: "all",
       stitle: "",
+      courseList: [], // 강의 코드 목록을 저장할 배열
+      filteredCourseList: [], // 필터링된 강의 목록을 저장할 배열
+
     };
   },
+  mounted() {
+    // 페이지 로드될 때 강의 코드 목록을 가져오는 메서드 호출
+    this.getCourseList();
+  },
   methods: {
-    findAll() {
-      this.activeFilter = "all";
+    getCourseList() {
+      let vm = this;
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
+
+
+  axios.post('/course/CourseList.do',params)
+    .then(response => {
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+      vm.courseList = response.data.listdate; // 데이터 바인딩
+      this.filteredCourseList = this.courseList;
+      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching course list:', error);
+     });
     },
-    findAdmin() {
-      this.activeFilter = "admin";
+    filterCourses() {
+    const now = new Date();
+    if (this.activeFilter === "all") {
+      this.filteredCourseList = this.courseList;
+    } else if (this.activeFilter === "admin") {
+      this.filteredCourseList = this.courseList.filter(item => now > new Date(item.course_start_date) && now < new Date(item.course_end_date));
+    } else if (this.activeFilter === "teacher") {
+      this.filteredCourseList = this.courseList.filter(item => now > new Date(item.course_end_date));
+    } else if (this.activeFilter === "scheduled") {
+      this.filteredCourseList = this.courseList.filter(item => now < new Date(item.course_start_date));
+    }
+  },
+  findAll() {
+    this.activeFilter = "all";
+    this.filterCourses();
+  },
+  findAdmin() {
+    this.activeFilter = "admin";
+    this.filterCourses();
+  },
+  findTeacher() {
+    this.activeFilter = "teacher";
+    this.filterCourses();
+  },
+  findScheduled() {
+    this.activeFilter = "scheduled";
+    this.filterCourses();
+  },
+
+    searchMethod() {
+      console.log(this.stitle);
+      axios.get('/course/courseSearch.do', {
+          params: {
+            word: this.stitle
+          }
+        })
+    .then(response => {
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+      this.courseList = response.data.listdate; // 데이터 바인딩
+      this.filterCourses();
+      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching course list:', error);
+    });
+
+
+
     },
-    findTeacher() {
-      this.activeFilter = "teacher";
-    },
-    searchMethod() {},
     noticeModify(notice) {
       this.selectedNotice = notice;
       this.action = "U";
@@ -146,6 +182,7 @@ export default {
     closeAddModal() {
       this.addModal = false;
     },
+    
   },
 };
 </script>
@@ -202,12 +239,10 @@ export default {
 
 .search-container {
   display: flex;
-    align-items: center;
-    /* padding: 10px; */
-    /* padding: 20px; */
-    border: 1px solid #ccc;
-    border-radius: 25px;
-    margin: 16px 0;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  margin: 16px 0;
 }
 
 .search-icon {

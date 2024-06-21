@@ -45,7 +45,7 @@ const routes = [
         component: () => import("@/views/classroom/SLectureDetailRegister.vue"),
       },
       {
-        path: "/information/student",
+        path: "/information/student/:studentId",
         name: "aStudentAttendance",
         component: () => import("@/views/information/AStudentAttendance.vue"),
       },
@@ -58,6 +58,12 @@ const routes = [
         path: "/information/survey",
         name: "aSurveyManagement",
         component: () => import("@/views/information/ASurveyManagement.vue"),
+      },
+      {
+        path: "/information/ASurveyQuestion/:survey_no/:survey_name",
+        name: "aSurveyQuestion",
+        component: () => import("@/views/information/ASurveyQuestion.vue"),
+        props: true, // 이 부분이 파라미터를 컴포넌트의 props로 전달하도록 함
       },
       
       

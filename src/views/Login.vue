@@ -113,6 +113,7 @@ export default {
           sessionStorage.setItem('loginID', JSON.stringify(data.loginId))
           sessionStorage.setItem('name', JSON.stringify(data.name));
           
+
           if(data.user_type === 'a'){
             this.$router.push('/dashboard/aAlert/notice');
           } else if(data.user_type === 't'){

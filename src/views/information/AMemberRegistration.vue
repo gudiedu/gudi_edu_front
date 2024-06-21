@@ -159,11 +159,11 @@ export default {
         try{
             //const mail_regex = new RegExp('[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]{2,3}$');
             //const isMailTrue = mail_regex.test(this.email)
-            ///^[a-zA-Z0-9._-]{2,20} + @[a-zA-Z0-9.-]{2,20} + \.[a-zA-Z0-9-.]{2,4}$/i;
+
+            // const email_regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
             const email_regex = new RegExp('^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$', 'i');
-            //const email_regex = /^[a-zA-Z0-9._-]{2,20} + @[a-zA-Z0-9.-]{2,20} + \.[a-zA-Z0-9-.]{2,4}$/i;
             const isEmailTrue = email_regex.test(this.email);
-            console.log("isEmailTrue"+isEmailTrue)
+
             const ph_regex = new RegExp('[0-9]{10,11}');
             const isPhTrue = ph_regex.test(this.hp);
           if(this.user_type === ''){

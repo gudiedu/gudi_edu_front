@@ -7,34 +7,7 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findAll"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findAdmin"
-            >진행중</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >진행완료</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >진행예정</v-btn
-          >
-        </div> -->
+
 
         <div class="search">
           <div class="search-container">
@@ -61,47 +34,34 @@
             <th>강의명</th>
             <th>강사명</th>
             <th>수강인원</th>
-            <th>수강기간</th>
             <th>시작일</th>
             <th>종료일</th>
-            <th>강의실</th>
             <th>현황</th>
-            <th></th>
+            <th>설문번호</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Vue</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행중</td>
-            <td @click="createSurvey">설문조사생성</td>
-            <td @click="viewSurveyResult">결과확인</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Java</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행완료</td>
-            <td @click="createSurvey">설문조사생성</td>
-            <td @click="viewSurveyResult">결과확인</td>
+          <tr v-for="(item, index) in courseList" :key="item.course_no">
+            <td>{{ index + 1 }}</td>
+            <!-- <td>{{ totalCnt - ((currentPage - 1) * pageSize + index) }}</td> -->
+            <td hidden>{{ item.course_no }}</td>
+            <td>{{ item.course_name }}</td>
+            <td>{{ item.user_name }}</td>
+            <td>{{ item.course_quota }}명</td>
+            <td>{{ item.course_start_date }}</td>
+            <td>{{ item.course_end_date }}</td>
+            <td>({{ item.respondent_count || 0 }} / {{ item.confirmed_count }})</td>
+            <td>
+              <span v-if="!item.survey_no" @click="createSurvey(item)">설문생성</span>
+              <span v-else>{{ item.survey_no }}</span>
+            </td>
+            <td @click="viewSurveyResult(item.course_no)">결과확인</td>
           </tr>
         </tbody>
       </v-table>
     </v-card>
 
-    <!-- 페이지네이션 추가-->
 
     <div class="button-group">
       <button class="survey-button" @click="surveyManagement">
@@ -112,15 +72,20 @@
     <v-dialog v-model="createSurveyModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <CreateSurvey :action="action" />
+          <CreateSurvey 
+          :action="action" 
+          :course_no="course_no"
+          :course_name="course_name"
+          @close="closeAddModal"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="viewServeyResultModal" max-width="600px">
+    <v-dialog v-model="viewSurveyResultModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ViewSurveyResult :action="action" />
+          <viewSurveyResultModal :courseNo="selectedCourseNo" @close="viewSurveyResultModal = false" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -128,33 +93,85 @@
 </template>
 
 <script>
+import axios from 'axios';
 import CreateSurvey from "./ACreateSurveyModal.vue";
-import ViewSurveyResult from "./AViewSurveyResultModal.vue";
+import viewSurveyResultModal from "./TClassSurveyModal.vue";
 
 export default {
-  components: { CreateSurvey, ViewSurveyResult },
+  components: { 
+    CreateSurvey,
+    viewSurveyResultModal,
+    },
   data() {
     return {
       titleText: "수업만족도관리",
       createSurveyModal: false,
-      viewServeyResultModal: false,
+      viewSurveyResultModal: false,
+      selectedCourseNo: null, // 추가된 부분
+      addModal: false,
       action: "",
       selectedNotice: null,
       activeFilter: "all",
+      courseList: [],
       stitle: "",
     };
   },
+  mounted() {
+    // 페이지 로드될 때 강의 코드 목록을 가져오는 메서드 호출
+    this.getCourseList();
+    this.page();
+  },
+
   methods: {
-    findAll() {
-      this.activeFilter = "all";
+    handlePageClick(pageNumber) {
+    this.currentPage = pageNumber;
+    this.getCourseList();
+  },
+
+    viewSurveyResult(courseNo) {
+      console.log("Selected course_no: ", courseNo); // 디버깅 로그 추가
+      if (courseNo !== null && courseNo !== undefined && courseNo !== "null") {
+        this.selectedCourseNo = String(courseNo); // 문자열로 변환
+        this.viewSurveyResultModal = true;
+      } else {
+        console.error("Invalid course_no:", courseNo); // course_no가 잘못된 경우 로그 출력
+      }
     },
-    findAdmin() {
-      this.activeFilter = "admin";
+    getCourseList() {
+      let vm = this;
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+
+  axios.post('/course/searchClassSurvey.do',params)
+    .then(response => {
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+      vm.courseList = response.data.listdate; // 데이터 바인딩
+      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching course list:', error);
+     });
     },
-    findTeacher() {
-      this.activeFilter = "teacher";
+
+    searchMethod() {
+      console.log(this.stitle);
+      axios.get('/course/courseSearch.do', {
+          params: {
+            word: this.stitle
+          }
+        })
+    .then(response => {
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+      this.courseList = response.data.listdate; // 데이터 바인딩
+      this.filterCourses();
+      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching course list:', error);
+    });
     },
-    searchMethod() {},
     noticeModify(notice) {
       this.selectedNotice = notice;
       this.action = "U";
@@ -166,13 +183,29 @@ export default {
     },
     closeAddModal() {
       this.addModal = false;
+      this.createSurveyModal =false;
+      this.getCourseList();
     },
-    createSurvey() {
+    createSurvey(course) {
+      this.course_no = course.course_no;
+      this.course_name = course.course_name;
       this.createSurveyModal = true;
+
     },
-    viewSurveyResult() {
-      this.viewServeyResultModal = true;
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var remaining = total % page;
+      var result = parseInt(total / page);
+
+      if (remaining == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
     },
+   
     surveyManagement() {
       this.$router.push({
         name: "aSurveyManagement",
