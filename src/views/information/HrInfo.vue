@@ -168,15 +168,12 @@ export default {
     
   },
   mounted() {
-      let user_type = sessionStorage.getItem('user_type');
-      console.log(user_type)
-      if(user_type != "a"){
-        alert('관리자 페이지입니다!')
-        this.$router.push('/dashboard');
-      } else {
-        this.$router.push('/dashboard/information/hrinfo');
-      }
-   },
+    /**/
+    let user_type = sessionStorage.getItem('user_type');
+    console.log(user_type)
+    user_type === "a" ? this.$router.push('/dashboard/information/hrinfo') : this.$router.push('/dashboard');
+
+  }, 
   data() {
     return {
       titleText: "인원관리",
