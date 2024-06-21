@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import PieChart from "./PieChart.vue";
+import PieChart from "../support/PieChart.vue";
 
 export default {
   components: {

@@ -20,7 +20,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -30,7 +30,7 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>글번호</th>
+            <th>강의번호</th>
             <th>강의명</th>
             <th>강사명</th>
             <th>수강인원</th>
@@ -42,8 +42,12 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="courseList.length === 0">
+            <td colspan="9" class="no-results">검색 결과가 없습니다.</td>
+          </tr>
+
           <tr v-for="(item, index) in courseList" :key="item.course_no">
-            <td>{{ index + 1 }}</td>
+            <td>{{ item.course_no }}</td>
             <!-- <td>{{ totalCnt - ((currentPage - 1) * pageSize + index) }}</td> -->
             <td hidden>{{ item.course_no }}</td>
             <td>{{ item.course_name }}</td>
@@ -62,6 +66,21 @@
       </v-table>
     </v-card>
 
+    <!-- 페이지네이션 추가-->
+    <div id="Pagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage" 
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="getCourseList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'">
+      </paginate>
+     </div>
 
     <div class="button-group">
       <button class="survey-button" @click="surveyManagement">
@@ -94,13 +113,16 @@
 
 <script>
 import axios from 'axios';
+import Paginate from "vuejs-paginate-next";
 import CreateSurvey from "./ACreateSurveyModal.vue";
+
 import viewSurveyResultModal from "./TClassSurveyModal.vue";
 
 export default {
   components: { 
     CreateSurvey,
     viewSurveyResultModal,
+    Paginate,
     },
   data() {
     return {
@@ -114,6 +136,9 @@ export default {
       activeFilter: "all",
       courseList: [],
       stitle: "",
+      currentPage: 1,
+      totalCnt: 0,
+      pageSize: 10,
     };
   },
   mounted() {
@@ -124,8 +149,8 @@ export default {
 
   methods: {
     handlePageClick(pageNumber) {
-    this.currentPage = pageNumber;
-    this.getCourseList();
+      this.getCourseList();
+      this.currentPage = pageNumber;
   },
 
     viewSurveyResult(courseNo) {
@@ -146,8 +171,10 @@ export default {
 
   axios.post('/course/searchClassSurvey.do',params)
     .then(response => {
-      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
       vm.courseList = response.data.listdate; // 데이터 바인딩
+      vm.totalCnt = response.data.totalCnt;
+
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
       console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
     })
     .catch(error => {
@@ -155,23 +182,23 @@ export default {
      });
     },
 
-    searchMethod() {
-      console.log(this.stitle);
-      axios.get('/course/courseSearch.do', {
-          params: {
-            word: this.stitle
-          }
-        })
-    .then(response => {
-      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
-      this.courseList = response.data.listdate; // 데이터 바인딩
-      this.filterCourses();
-      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
-    })
-    .catch(error => {
-      console.error('Error fetching course list:', error);
-    });
-    },
+    // searchMethod() {
+    //   console.log(this.stitle);
+    //   axios.get('/course/courseSearch.do', {
+    //       params: {
+    //         word: this.stitle
+    //       }
+    //     })
+    // .then(response => {
+    //   console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+    //   this.courseList = response.data.listdate; // 데이터 바인딩
+    //   this.filterCourses();
+    //   console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    // })
+    // .catch(error => {
+    //   console.error('Error fetching course list:', error);
+    // });
+    // },
     noticeModify(notice) {
       this.selectedNotice = notice;
       this.action = "U";
@@ -204,6 +231,10 @@ export default {
         result = result + 1;
         return result;
       }
+    },
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.getCourseList(); // 검색 실행
     },
    
     surveyManagement() {
