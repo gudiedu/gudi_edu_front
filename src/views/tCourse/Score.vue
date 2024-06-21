@@ -226,10 +226,17 @@ export default {
   cursor: pointer;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
 .pagination-container {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+  flex-wrap: wrap-reverse;
 }
 
 .pagination-page {

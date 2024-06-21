@@ -10,7 +10,14 @@
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" />
+            <input
+              type="text"
+              class="search-input"
+              placeholder="검색어를 입력해주세요."
+              v-model="stitle"
+              @keyup.enter="searchMethod"
+              @input="handleInputChange"
+            />
           </div>
           <div class="button-group">
             <button class="search-button" @click="searchMethod">검색</button>
@@ -32,14 +39,28 @@
         </thead>
         <tbody>
           <tr v-for="(item, index) in lectureItems" :key="item.resource_no">
-            <td class="centered">{{ index + 1 }}</td>
+            <td class="centered">{{ (currentPage - 1) * pageSize + index + 1 }}</td>
             <td @click="learningMaterialsModify(item)" class="centered clickable">{{ item.resource_title }}</td>
             <td @click="learningMaterialsModify(item)" class="centered clickable">{{ item.course_name }}</td>
-            <td class="centered">{{ item.name }}</td> <!-- name 필드로 수정 -->
+            <td class="centered">{{ item.name }}</td>
             <td class="centered">{{ item.resource_created_at }}</td>
           </tr>
         </tbody>
       </v-table>
+
+      <div class="pagination">
+        <paginate
+          v-model="currentPage"
+          :page-count="Math.max(pageCount, 1)"
+          :page-range="3"
+          :margin-pages="2"
+          :click-handler="handlePageChange"
+          :container-class="'pagination-container'"
+          :page-class="'pagination-page'"
+          :prev-text="'Prev'"
+          :next-text="'Next'"
+        ></paginate>
+      </div>
     </v-card>
 
     <div class="button-group">
@@ -67,10 +88,12 @@
 <script>
 import TResourcesModal from "./TResourcesModal.vue";
 import axios from 'axios';
+import Paginate from 'vuejs-paginate-next';
 
 export default {
   components: {
     TResourcesModal,
+    Paginate,
   },
   data() {
     return {
@@ -80,29 +103,50 @@ export default {
       selectedNotice: null,
       stitle: "",
       lectureItems: [],
+      currentPage: 1,
+      pageSize: 5,
+      totalItems: 0,
     };
   },
   created() {
     this.fetchResourceList();
   },
+  watch: {
+    stitle(newVal) {
+      if (newVal === "") {
+        this.fetchResourceList();
+      }
+    },
+  },
   methods: {
     searchMethod() {
-      // 검색 로직 추가
+      this.fetchResourceList();
+    },
+    handleInputChange() {
+      if (this.stitle === "") {
+        this.fetchResourceList();
+      }
     },
     fetchResourceList() {
       axios.get('/tCourse/resourceList', {
         params: {
-          currentPage: 1,
-          pageSize: 5
+          currentPage: this.currentPage,
+          pageSize: this.pageSize,
+          stitle: this.stitle // 검색어 추가
         }
       })
         .then(response => {
           this.lectureItems = response.data.resourceList;
+          this.totalItems = response.data.totalCnt;
           console.log(this.lectureItems);
         })
         .catch(error => {
           console.error("There was an error fetching the resource list!", error);
         });
+    },
+    handlePageChange(pageNum) {
+      this.currentPage = pageNum;
+      this.fetchResourceList();
     },
     openAddModal() {
       this.addModal = true;
@@ -118,6 +162,11 @@ export default {
     closeModifyModal() {
       this.modifyModal = false;
       this.fetchResourceList(); // 모달을 닫을 때 목록을 갱신
+    },
+  },
+  computed: {
+    pageCount() {
+      return Math.ceil(this.totalItems / this.pageSize);
     },
   },
 };
@@ -188,13 +237,10 @@ export default {
 .dashboard-table td {
   padding: 12px;
   text-align: center;
-  /* 가운데 정렬 */
   vertical-align: middle;
-  /* 세로 가운데 정렬 */
   border-bottom: 1px solid #ddd;
   font-size: 16px;
   color: #000;
-  /* 검은색 텍스트 설정 */
 }
 
 .dashboard-table th {
@@ -209,7 +255,6 @@ export default {
 .clickable {
   cursor: pointer;
   color: #000;
-  /* 검은색 텍스트 설정 */
 }
 
 .clickable:hover {
@@ -217,7 +262,6 @@ export default {
 }
 
 .dashboard-table td:nth-child(4) {
-  /* 제목 컬럼 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -226,6 +270,31 @@ export default {
 
 .centered {
   text-align: center !important;
-  /* 강제 가운데 정렬 */
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap-reverse;
+}
+
+.pagination-page {
+  margin: 0 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border-radius: 10px;
+}
+
+.pagination-page:hover {
+  background-color: #0056b3;
 }
 </style>

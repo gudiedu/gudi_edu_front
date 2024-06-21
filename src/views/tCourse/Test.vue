@@ -514,6 +514,12 @@ export default {
   /* 커서 모양 설정 */
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
 .pagination-container {
   display: flex;
   /* Flexbox 레이아웃 사용 */
@@ -521,6 +527,7 @@ export default {
   /* 가운데 정렬 */
   margin-top: 20px;
   /* 상단 여백 설정 */
+  flex-wrap: wrap-reverse;
 }
 
 .pagination-page {

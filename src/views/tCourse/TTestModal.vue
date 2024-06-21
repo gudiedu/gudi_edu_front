@@ -73,11 +73,7 @@
         <div class="course-subject">{{ courseSubject }}</div>
         <div class="course-name">{{ courseName }} - {{ testCategory }}</div>
       </div>
-      <div>
-        <label><input type="checkbox" v-model="selectAll" @change="toggleSelectAll" /> 전체 선택</label>
-      </div>
       <div v-for="(question, index) in tempQuestions" :key="index">
-        <label><input type="checkbox" v-model="selectedQuestions" :value="index" /> 문제 {{ index + 1 }}</label>
         <div class="form-group">
           <label for="testQuestion">문제명</label>
           <input type="text" v-model="question.test_question" id="testQuestion" required />
@@ -119,16 +115,12 @@
       </div>
       <div class="score-display">총 점수: {{ totalScore }}</div> <!-- 총 점수 표시 영역 -->
       <div class="main-button-group">
-        <button @click="addQuestion" class="addQuestion-button">추가</button>
-        <button @click="deleteSelectedQuestions" class="removeQuestion-button spaced">삭제</button> <!-- 삭제 버튼 수정 -->
         <button @click="saveQuestion" class="insert-button">저장</button>
+        <button @click="confirmDeleteExam" class="removeQuestion-button">시험 삭제</button>
       </div>
     </div>
   </div>
 </template>
-
-
-
 
 <script>
 export default {
@@ -229,13 +221,8 @@ export default {
     },
     saveQuestion() {
       this.updateTotalScore();
-      // 문제가 없는 상태에서 저장하면 시험이 삭제됩니다.
-      if (this.tempQuestions.length === 0) {
-        if (confirm("문제가 없는 상태에서 저장하면 시험이 삭제됩니다. 삭제하시겠습니까?")) {
-          this.$emit('deleteExam', { courseNo: this.courseNo, testCategory: this.testCategory });
-          return;
-        }
-      } else if (this.totalScore !== 100) { // 남아있는 문제의 총점이 100점인지 확인합니다.
+
+      if (this.totalScore !== 100) { // 남아있는 문제의 총점이 100점인지 확인합니다.
         alert("총 점수가 100점이 되질 않습니다.");
         return;
       }
@@ -255,21 +242,17 @@ export default {
         deletedQuestions: deletedQuestionsCopy
       });
     },
+    confirmDeleteExam() {
+      if (confirm('정말로 시험을 삭제하시겠습니까?')) {
+        this.$emit('deleteExam', { courseNo: this.courseNo, testCategory: this.testCategory });
+      }
+    },
     toggleSelectAll() {
       this.selectedQuestions = this.selectAll ? this.tempQuestions.map((_, index) => index) : [];
     }
   },
 };
 </script>
-
-
-
-
-
-
-
-
-
 
 <style scoped>
 .modal-header {
@@ -360,7 +343,7 @@ export default {
 .insert-button {
   background-color: #28a745;
   color: white;
-  margin-left: auto;
+  margin-left: 10px;
 }
 
 .insert-button:hover {
