@@ -69,7 +69,7 @@
         :page-count="page()"
         :page-range="5"
         :margin-pages="0"
-        :click-handler="searchList"
+        :click-handler="courseList"
         :prev-text="'이전'"
         :next-text="'다음'"
         :container-class="'pagination'"
@@ -275,7 +275,7 @@ export default {
 
 .dashboard-table th {
   background-color: #f4f4f4;
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 .dashboard-table tr:hover {

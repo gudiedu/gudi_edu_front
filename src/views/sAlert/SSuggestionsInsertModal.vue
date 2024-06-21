@@ -68,8 +68,10 @@ export default {
   },
   methods: {
     insertSuggestion() {
-      let formTag = document.getElementById("file-form");
-      let dataWithFile = new FormData(formTag);
+      //FormData 객체를 직접 생성하고, 이를 통해 파일과 폼 데이터를 함께 전송하기 때문에 파일이 중복저장됨.
+      //let formTag = document.getElementById("file-form");
+      //let dataWithFile = new FormData(formTag);
+      let dataWithFile = new FormData();
       dataWithFile.append("suggestionTitle", this.suggestionTitle);
       dataWithFile.append("suggestionContent", this.suggestionContent);
       dataWithFile.append("suggestionCategory", this.suggestionCategory);
