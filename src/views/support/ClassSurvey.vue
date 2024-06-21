@@ -10,7 +10,12 @@
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" />
+            <input
+              type="text"
+              class="search-input"
+              placeholder="검색어를 입력해주세요."
+              v-model="stitle"
+            />
           </div>
           <div class="button-group">
             <button class="search-button" @click="searchList">검색</button>
@@ -21,7 +26,12 @@
       <v-divider></v-divider>
 
       <div v-if="isLoading" class="loading-container">
-        <v-progress-circular :size="50" :width="4" color="primary" indeterminate></v-progress-circular>
+        <v-progress-circular
+          :size="50"
+          :width="4"
+          color="primary"
+          indeterminate
+        ></v-progress-circular>
       </div>
       <v-table v-else class="dashboard-table">
         <thead>
@@ -36,13 +46,19 @@
         </thead>
         <tbody>
           <template v-if="totalCnt > 0">
-            <template v-for="(item, index) in ClassSurveyList" :key="item.ClassSurvey_no">
+            <template
+              v-for="(item, index) in ClassSurveyList"
+              :key="item.ClassSurvey_no"
+            >
               <tr>
                 <td>{{ totalCnt - ((currentPage - 1) * pageSize + index) }}</td>
                 <td>{{ item.course_name }}</td>
                 <td>{{ item.course_start_date }}</td>
                 <td>{{ item.course_end_date }}</td>
-                <td>({{ item.respondent_count || 0 }} / {{ item.confirmed_count }})</td>
+                <td>
+                  ({{ item.respondent_count || 0 }} /
+                  {{ item.confirmed_count }})
+                </td>
                 <td @click="viewSurveyResult(item.course_no)">결과확인</td>
               </tr>
             </template>
@@ -75,7 +91,10 @@
     <v-dialog v-model="viewSurveyResultModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ViewSurveyResultModal :courseNo="selectedCourseNo" @close="viewSurveyResultModal = false" />
+          <ViewSurveyResultModal
+            :courseNo="selectedCourseNo"
+            @close="viewSurveyResultModal = false"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -83,7 +102,7 @@
 </template>
 
 <script>
-import ViewSurveyResultModal from "./TClassSurveyModal.vue";
+import ViewSurveyResultModal from "../information/TClassSurveyModal.vue";
 import Paginate from "vuejs-paginate-next";
 
 export default {

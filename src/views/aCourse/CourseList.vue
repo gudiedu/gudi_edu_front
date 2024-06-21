@@ -11,29 +11,19 @@
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'all' }"
             @click="findAll"
-            >전체</v-btn
-          >
+          >전체</v-btn>
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
             @click="findAdmin"
-            >진행중</v-btn
-          >
+          >진행중</v-btn>
           <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
+            :class="{ 'filter-button': true, active: activeFilter === 'teacher' }"
             @click="findTeacher"
-            >진행완료</v-btn
-          >
+          >진행완료</v-btn>
           <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'teacher',
-            }"
-            @click="findTeacher"
-            >진행예정</v-btn
-          >
+            :class="{ 'filter-button': true, active: activeFilter === 'scheduled' }"
+            @click="findScheduled"
+          >진행예정</v-btn>
         </div>
 
         <div class="search">
@@ -47,7 +37,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -57,11 +47,11 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>글번호</th>
+            <th>번호</th>
             <th>강의명</th>
             <th>강사명</th>
-            <th>수강인원</th>
-            <th>수강기간</th>
+            <th class="space-cell">수강인원</th>
+            <!-- <th>수강기간</th> -->
             <th>시작일</th>
             <th>종료일</th>
             <th>강의실</th>
@@ -69,50 +59,56 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Vue</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행중</td>
+          <tr v-if="filteredCourseList.length === 0">
+            <td colspan="9" class="no-results">검색 결과가 없습니다.</td>
           </tr>
-          <tr>
-            <td>1</td>
-            <td>Java</td>
-            <td>강사.</td>
-            <td>25</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>2024.01.01</td>
-            <td>201A</td>
-            <td>진행예정</td>
+
+          <tr v-for="(item, index) in filteredCourseList" :key="item.course_no">
+            <td>{{ item.course_no }}</td>
+            <td class="space-cell">{{ item.course_name }}</td>
+            <td>{{ item.user_name }}</td>
+            <td>{{ item.course_quota }}명</td>
+            <!-- <td>{{ item.course_period }}일</td> -->
+            <td>{{ formatDateToShort(item.course_start_date) }}</td>
+            <td>{{ formatDateToShort(item.course_end_date) }}</td>
+            <td>{{ item.course_loc }}</td>
+            <td>
+              <span v-if="new Date() > new Date(item.course_end_date)">진행완료</span>
+              <span v-else-if="new Date() < new Date(item.course_start_date)">진행예정</span>
+              <span v-else>진행중</span>
+            </td>
           </tr>
         </tbody>
       </v-table>
     </v-card>
 
     <!-- 페이지네이션 추가-->
+    <div id="Pagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage" 
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="getCourseList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'">
+      </paginate>
+     </div>
 
-    <!-- <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
-    </div>
-    <v-dialog v-model="addModal" max-width="600px">
-      <v-card>
-        <v-card-text>
-          <NoticeModal :action="action" />
-        </v-card-text>
-      </v-card>
-    </v-dialog> -->
+
   </v-container>
 </template>
 
 <script>
+import axios from 'axios';
+import Paginate from "vuejs-paginate-next";
 export default {
-  components: {},
+  components: {
+    Paginate,
+  },
   data() {
     return {
       titleText: "강의목록",
@@ -121,19 +117,107 @@ export default {
       selectedNotice: null,
       activeFilter: "all",
       stitle: "",
+      courseList: [], // 강의 코드 목록을 저장할 배열
+      filteredCourseList: [], // 필터링된 강의 목록을 저장할 배열
+      currentPage: 1,
+      totalCnt: 0,
+      pageSize: 30,
+
     };
   },
+  mounted() {
+    // 페이지 로드될 때 강의 코드 목록을 가져오는 메서드 호출
+    this.getCourseList();
+    this.page();
+  },
   methods: {
-    findAll() {
-      this.activeFilter = "all";
+    handlePageClick(pageNumber) {
+      this.currentPage = pageNumber;
+      this.getCourseList();
+  },
+  formatDateToShort(dateString) {
+    const dateParts = dateString.split("-");
+    const year = dateParts[0].slice(2); // Get last two digits of the year
+    const month = dateParts[1];
+    const day = dateParts[2];
+    return `${year}-${month}-${day}`;
+  },
+    getCourseList() {
+      
+      let vm = this;
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+
+
+  axios.post('/course/CourseList.do',params)
+    .then(response => {
+      vm.courseList = response.data.listdate; // 데이터 바인딩
+      vm.totalCnt = response.data.totalCnt;
+      
+      this.filteredCourseList = this.courseList;
+
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching course list:', error);
+     });
     },
-    findAdmin() {
-      this.activeFilter = "admin";
+
+
+    filterCourses() {
+    const now = new Date();
+    if (this.activeFilter === "all") {
+      this.filteredCourseList = this.courseList;
+    } else if (this.activeFilter === "admin") {
+      this.filteredCourseList = this.courseList.filter(item => now > new Date(item.course_start_date) && now < new Date(item.course_end_date));
+    } else if (this.activeFilter === "teacher") {
+      this.filteredCourseList = this.courseList.filter(item => now > new Date(item.course_end_date));
+    } else if (this.activeFilter === "scheduled") {
+      this.filteredCourseList = this.courseList.filter(item => now < new Date(item.course_start_date));
+    }
+  },
+  findAll() {
+    this.activeFilter = "all";
+    this.filterCourses();
+  },
+  findAdmin() {
+    this.activeFilter = "admin";
+    this.filterCourses();
+  },
+  findTeacher() {
+    this.activeFilter = "teacher";
+    this.filterCourses();
+  },
+  findScheduled() {
+    this.activeFilter = "scheduled";
+    this.filterCourses();
+  },
+  handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.getCourseList(); // 검색 실행
     },
-    findTeacher() {
-      this.activeFilter = "teacher";
-    },
-    searchMethod() {},
+
+    // searchMethod() {
+    //   console.log(this.stitle);
+    //   axios.get('/course/courseSearch.do', {
+    //       params: {
+    //         word: this.stitle
+    //       }
+    //     })
+    // .then(response => {
+    //   console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+    //   this.courseList = response.data.listdate; // 데이터 바인딩
+    //   this.filterCourses();
+    //   console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    // })
+    // .catch(error => {
+    //   console.error('Error fetching course list:', error);
+    // });
+    // },
+
     noticeModify(notice) {
       this.selectedNotice = notice;
       this.action = "U";
@@ -146,6 +230,20 @@ export default {
     closeAddModal() {
       this.addModal = false;
     },
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var remaining = total % page;
+      var result = parseInt(total / page);
+
+      if (remaining == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+    },
+    
   },
 };
 </script>
@@ -202,12 +300,10 @@ export default {
 
 .search-container {
   display: flex;
-    align-items: center;
-    /* padding: 10px; */
-    /* padding: 20px; */
-    border: 1px solid #ccc;
-    border-radius: 25px;
-    margin: 16px 0;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  margin: 16px 0;
 }
 
 .search-icon {
@@ -252,10 +348,15 @@ export default {
 
 .dashboard-table th,
 .dashboard-table td {
-  padding: 12px;
+  padding: 10px;
   text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  white-space: nowrap;
+  
+}
+.space-cell {
+  white-space: normal !important;
 }
 
 .dashboard-table th {

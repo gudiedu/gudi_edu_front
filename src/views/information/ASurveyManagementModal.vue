@@ -1,14 +1,19 @@
 <template>
   <div class="lecture-detail">
-    <h2 class="title">설문조사문항관리</h2>
+    <h2 class="title">설문지관리</h2>
 
     <div class="form-group">
-      <div class="form-label">글번호</div>
-      <input type="text" name="title" class="form-input" />
+      <div class="form-label">설문코드</div>
+      <!-- <template v-if="paction === 'U'"> -->
+      <input type="text" name="title" :value="nextsurvey_no" class="form-input" readonly />
+    <!-- </template> -->
+    <!-- <template v-else>
+    <input type="text" name="title" :value="survey_no" class="form-input" readonly />
+  </template> -->
     </div>
     <div class="form-group">
-      <div class="form-label">설문문항</div>
-      <input type="text" name="author" class="form-input" />
+      <div class="form-label">설문조사명</div>
+      <input type="text" v-model="localSurvey_name" class="form-input"  />
     </div>
 
     <div class="button-group">
@@ -24,19 +29,101 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   props: {
     action: String,
+    survey_no: String,
+    survey_name: String
   },
   data() {
     return {
       paction: this.action,
+      nextsurvey_no: this.survey_no || "", // 처음에는 survey_no를 사용하고, 없는 경우에만 nextSurveyCode를 가져옴
+      localSurvey_name: this.survey_name || '',
+
     };
   },
+  mounted() {
+    // 페이지 로드될 때 설문 코드 목록을 가져오는 메서드 호출 (수정인 경우에는 가져오지 않음)
+    if (!this.survey_no) {
+      this.getNextSurveyNo();
+    }
+  },
+  
   methods: {
-    updateNotice() {},
-    deleteNotice() {},
-    insertNotice() {},
+    getNextSurveyNo(){
+      axios.get('/survey/nextSurveyCode.do')
+      .then(response => {
+      console.log('nextSurvey_no response:', response.data); // 전체 응답 데이터 콘솔 출력
+      this.nextsurvey_no = response.data; // 데이터 바인딩
+      console.log('nextSurveyCode:', this.nextsurvey_no); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching nextSurveyCode:', error);
+     });
+    },
+    
+
+    updateNotice() {
+      if (this.localSurvey_name.trim() === '') {
+        alert('설문지 이름을 입력해주세요.');
+        return;
+      }
+      const params = new URLSearchParams()
+      params.append('survey_name', this.localSurvey_name);
+      params.append('survey_no', this.survey_no);
+
+      axios.post('/survey/surveyUpdate.do', params)
+      .then(response => {
+          console.log("updatNotice:", response)
+          alert(this.localSurvey_name + " 설문지 이름이 수정되었습니다.");
+          this.$emit('close');
+        })
+        .catch(error => {
+          alert(this.localSurvey_name + " 설문지 이름이 수정되었습니다.");
+          console.error('Error updating survey:', error);
+          // alert('Error updating course');
+          this.$emit('close');
+        })
+    },
+    deleteNotice() {
+      if (confirm(this.localSurvey_name + " 이 설문지를 정말로 삭제하시겠습니까?")) {
+        axios.delete('/survey/surveyDelete.do', {
+          params: {
+            survey_no: this.survey_no
+          }
+        })
+        .then(response => {
+          console.log("deleteNotice:", response)
+          alert(this.localSurvey_name + " 설문지가 삭제되었습니다.");
+          this.$emit('close'); // 부모 컴포넌트에서 모달을 닫도록 이벤트 발생
+        })
+        .catch(error => {
+          console.error('Error deleting survey:', error);
+          alert('Error deleting survey');
+        });
+      }
+
+    },
+    
+    insertNotice() {
+      if (this.localSurvey_name.trim() === '') {
+        alert('설문지 이름을 입력해주세요.');
+        return;
+      }
+      axios.post('/survey/surveyInsert.do', {
+        survey_name: this.localSurvey_name,
+      })
+      .then(response => {
+        alert(this.localSurvey_name + " 설문지가 새로 등록되었습니다.");
+        this.$emit('close'); // 부모 컴포넌트에서 모달을 닫도록 이벤트 발생
+      })
+      .catch(error => {
+        console.error('Error adding survey_name:', error);
+        alert('Error adding survey_name');
+      });
+    },
   },
 };
 </script>

@@ -7,34 +7,7 @@
       </v-card-title>
 
       <div class="container">
-        <!-- <div class="filter-button-group">
-			<v-btn
-			  :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-			  @click="findAll"
-			  >전체</v-btn
-			>
-			<v-btn
-			  :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-			  @click="findAdmin"
-			  >진행중</v-btn
-			>
-			<v-btn
-			  :class="{
-				'filter-button': true,
-				active: activeFilter === 'teacher',
-			  }"
-			  @click="findTeacher"
-			  >진행완료</v-btn
-			>
-			<v-btn
-			  :class="{
-				'filter-button': true,
-				active: activeFilter === 'teacher',
-			  }"
-			  @click="findTeacher"
-			  >진행예정</v-btn
-			>
-		  </div> -->
+
 
         <div class="search">
           <div class="search-container">
@@ -47,7 +20,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch">검색</button>
           </div>
         </div>
       </div>
@@ -57,38 +30,63 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>글번호</th>
-            <th>설문문항</th>
+            <th>번호</th>
+            <th>설문코드</th>
+            <th>설문조사명</th>
+            <th>총문항수</th>
+            <th>객관식문항수</th>
+            <th>주관식문항수</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td @click="surveyModify">
-              기업 연수 환경 중 연수원 시설 (강의실 시설, 컴퓨터 장비 등)은 만족
-              하십니까?
-            </td>
+          <tr v-if="surveyList.length === 0">
+            <td colspan="7" class="no-results">검색 결과가 없습니다.</td>
           </tr>
-          <tr>
-            <td>2</td>
-            <td @click="surveyModify">
-              교재나 커리큘럼은 실무교육을 받는데 적절 하다고 생각하십니까?
-            </td>
+          
+          <tr v-for="(item, index) in surveyList" :key="item.survey_no">
+            <td>{{ index + 1 }}</td>
+            <td>{{ item.survey_no }}</td>
+            <td  @click="surveyRegister(item.survey_no, item.survey_name)">{{ item.survey_name }}</td>
+            <td>{{ item.total_questions }}</td>
+            <td>{{ item.choice_questions }}</td>
+            <td>{{ item.written_questions }}</td>
+            <td @click="surveyModify(item)"><img src="https://cdn-icons-png.flaticon.com/512/17/17452.png" alt="setting" width="20" height="20"></td>
           </tr>
+         
         </tbody>
       </v-table>
     </v-card>
 
-    <!-- 페이지네이션 추가-->
+      <!-- 페이지네이션 추가-->
+      <div id="Pagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage" 
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="getSurveyList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'">
+      </paginate>
+     </div>
     <!-- 설문지 세트 만들기 추가 -->
 
     <div class="button-group">
-      <button class="insert-button" @click="openAddModal">등록</button>
+      <button class="insert-button" @click="openAddModal">설문지 등록</button>
     </div>
-    <v-dialog v-model="addModal" max-width="600px">
+    <v-dialog v-model="addModal" max-width="800px">
       <v-card>
         <v-card-text>
-          <ASurveyManagementModal :action="action" />
+          <ASurveyManagementModal 
+            :action="action" 
+            :survey_no="survey_no" 
+            :survey_name="survey_name" 
+            @close="closeAddModal" 
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -96,19 +94,75 @@
 </template>
 
 <script>
+import axios from 'axios';
 import ASurveyManagementModal from "./ASurveyManagementModal.vue";
+import Paginate from "vuejs-paginate-next";
 export default {
-  components: { ASurveyManagementModal },
+  components: { 
+    ASurveyManagementModal,
+    Paginate, },
   data() {
     return {
       titleText: "설문조사문항관리",
       addModal: false,
       action: "",
       activeFilter: "all",
+      selectedNotice: null,
       stitle: "",
+      surveyList: [], //설문지 리스트 목록 저장할 배열
+      survey_no: "",
+      survey_name: "",
+      currentPage: 1,
+      totalCnt: 0,
+      pageSize: 10,
     };
   },
+  mounted(){
+    this.getSurveyList();
+    this.page();
+  },
+
+
   methods: {
+    handlePageClick(pageNumber) {
+      this.currentPage = pageNumber;
+      this.getSurveyList();
+  },
+
+    getSurveyList(){
+      let vm = this;
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+
+    axios.post('/survey/SurveyList.do',params)
+      .then(response => {
+      vm.surveyList = response.data.listdate; // 데이터 바인딩
+      vm.totalCnt = response.data.totalCnt;
+
+      console.log('SurveyList response:', response.data); // 전체 응답 데이터 콘솔 출력
+      console.log('SurveyList:', this.surveyList); // 바인딩된 데이터 콘솔 출력
+    })
+    .catch(error => {
+      console.error('Error fetching surveyList:', error);
+    });
+    },
+
+    surveyModify(survey){
+      this.selectedNotice = survey;
+      this.survey_no = survey.survey_no;
+      this.survey_name = survey.survey_name;
+      this.action = "U";
+      this.addModal = true;
+      
+    },
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.getSurveyList(); // 검색 실행
+    },
+    
+
     findAll() {
       this.activeFilter = "all";
     },
@@ -118,17 +172,39 @@ export default {
     findTeacher() {
       this.activeFilter = "teacher";
     },
-    searchMethod() {},
-    surveyModify() {
-      this.action = "U";
-      this.addModal = true;
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var remaining = total % page;
+      var result = parseInt(total / page);
+
+      if (remaining == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
     },
+
+    surveyRegister(survey_no,survey_name) {
+      this.$router.push({
+        name: "aSurveyQuestion",
+        params: { 
+          survey_no,
+          survey_name
+         },
+      });
+    },
+    
     openAddModal() {
       this.action = "";
+      this.survey_no = "";
+      this.survey_name = "";
       this.addModal = true;
     },
     closeAddModal() {
       this.addModal = false;
+      this.getSurveyList();
     },
   },
 };

@@ -47,7 +47,7 @@
             />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchMethod">검색</button>
+            <button class="search-button" @click="handleSearch()">검색</button>
           </div>
         </div>
       </div>
@@ -63,29 +63,46 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td @click="lectureCodeModify">A001</td>
-            <td>Java</td>
+          <tr v-if="courseList.length === 0">
+            <td colspan="3" class="no-results">검색 결과가 없습니다.</td>
           </tr>
-          <tr>
-            <td>2</td>
-            <td @click="lectureCodeModify">A002</td>
-            <td>Python</td>
+
+          <tr v-for="(item, index) in courseList" :key="item.detail_code">
+            <td>{{ index + 1 }}</td>
+            <td @click="lectureCodeModify(item)">{{ item.detail_code }}</td>
+            <td>{{ item.detail_name }}</td>
           </tr>
         </tbody>
       </v-table>
     </v-card>
 
     <!-- 페이지네이션 추가-->
+    <div id="Pagination">
+      <paginate
+        class="justify-content-center"
+        v-model="currentPage" 
+        :page-count="page()"
+        :page-range="5"
+        :margin-pages="0"
+        :click-handler="getCourseList"
+        :prev-text="'이전'"
+        :next-text="'다음'"
+        :container-class="'pagination'"
+        :page-class="'page-item'">
+      </paginate>
+     </div>
+
+
+
+
 
     <div class="button-group">
       <button class="insert-button" @click="openAddModal">등록</button>
     </div>
-    <v-dialog v-model="addModal" max-width="600px">
+    <v-dialog v-model="addModal" max-width="600px" persistent @click:outside="closeAddModal">
       <v-card>
         <v-card-text>
-          <ALectureLCodeModal :action="action" />
+          <ALectureLCodeModal :action="action" :detail_code="detail_code" :detail_name="detail_name" @close="closeAddModal" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -93,20 +110,71 @@
 </template>
 
 <script>
+import axios from 'axios';
 import ALectureLCodeModal from "./ACourseCodeModal.vue";
+import Paginate from "vuejs-paginate-next";
+
 export default {
-  components: { ALectureLCodeModal },
+  components: { 
+    ALectureLCodeModal,
+    Paginate,
+   },
   data() {
     return {
       titleText: "강의코드관리",
       addModal: false,
       action: "",
       selectedNotice: null,
-      activeFilter: "all",
       stitle: "",
+      detail_code: "",
+      detail_name: "", // detail_name 추가
+      courseList: [] ,// 강의 코드 목록을 저장할 배열
+      currentPage: 1,
+      totalCnt: 0,
+      pageSize: 10,
     };
   },
+  mounted() {
+    // 페이지 로드될 때 강의 코드 목록을 가져오는 메서드 호출
+    this.getCourseList();
+    this.page();
+  },
   methods: {
+    handlePageClick(pageNumber) {
+      this.getCourseList();
+      this.currentPage = pageNumber;
+  },
+    getCourseList() {
+      let vm = this;
+      let courseParams = new URLSearchParams();
+      courseParams.append("stitle", this.stitle);
+      courseParams.append("currentPage", this.currentPage);
+      courseParams.append("pageSize", this.pageSize);
+      courseParams.append("detail_name", this.detail_name);
+      courseParams.append("detail_code", this.detail_code);
+
+    //   let courseParams = {
+    //   currentPage: this.currentPage,
+    //   pageSize: this.pageSize,
+    //   detail_name: this.detail_name,
+    //   detail_code: this.detail_code
+    // }; 위와 같은 코드임
+
+  axios.post('/acourse/aCourseList.do', courseParams)
+    .then(response => {
+      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+      vm.courseList = response.data.listdate; // 데이터 바인딩
+      vm.totalCnt = response.data.totalCnt;
+
+      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+      console.log("JSON.stringify(response) : " + JSON.stringify(response));
+    })
+    .catch(error => {
+      console.error('Error fetching course list:', error);
+    });
+},
+
+
     findAll() {
       this.activeFilter = "all";
     },
@@ -116,19 +184,74 @@ export default {
     findTeacher() {
       this.activeFilter = "teacher";
     },
-    searchMethod() {},
+
+    handleSearch() {
+      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
+      this.getCourseList(); // 검색 실행
+    },
+    // searchMethod() {
+    //   console.log(this.stitle);
+    //   axios.get('/acourse/codeSearch.do', {
+    //       params: {
+    //         word: this.stitle
+    //       }
+    //     })
+    // .then(response => {
+    //   console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
+    //   this.courseList = response.data.listdate; // 데이터 바인딩
+    //   console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
+    // })
+    // .catch(error => {
+    //   console.error('Error fetching course list:', error);
+    // });
+
+
+    // },
+    
     lectureCodeModify(lecture) {
       this.selectedNotice = lecture;
+      this.detail_code = lecture.detail_code;
+      this.detail_name = lecture.detail_name;
       this.action = "U";
       this.addModal = true;
     },
+    
     openAddModal() {
-      this.action = "";
-      this.addModal = true;
+      axios.get('/acourse/nextCodeSelect.do')
+        .then(response => {
+          this.detail_code = response.data; // 새로운 강의 코드 저장
+          this.action = "";
+          this.addModal = true;
+        })
+        .catch(error => {
+          console.error('Error generating course code:', error);
+        });
     },
     closeAddModal() {
+      this.detail_name = '';
+      console.log("모달닫힘");
       this.addModal = false;
+      if(this.stitle == ''){
+        this.getCourseList(); // 모달이 닫힐 때 강의 목록을 갱신합니다.
+      }else{
+        this.getCourseList();
+      }
+
     },
+    page: function () {
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var remaining = total % page;
+      var result = parseInt(total / page);
+
+      if (remaining == 0) {
+        return result;
+      } else {
+        result = result + 1;
+        return result;
+      }
+    },
+
   },
 };
 </script>

@@ -51,7 +51,7 @@
             <a href=""><strong>[아이디/비밀번호 찾기]</strong></a>
           </div> -->
           <!-- Login Btn -->
-          <a class="btn_login" id="btn_login" @click="fLoginProc">
+          <a class="btn_login" id="btn_login" @click="fLoginProc($event)">
             <strong>로그인</strong>
           </a>
         </fieldset>
@@ -65,17 +65,16 @@ import "../assets/css/admin/login.css";
 export default {
   data: function () {
     return {
-      loginId: "",
-      pwd: "",
-      saveId: false,
-      loading: false,
+      loginID: "",
+      password: "",
+      saveId: false, //기존 false
     };
   },
   mounted() {
     let id = this.getCookie("LOGIN_ID");
     console.log("id:::" + id);
     this.loginId = id;
-    this.saveId = id != "" ? true : false;
+    this.saveId = id != "" ? true : false; //this.saveId = id != "" ? true : false
 
     //document.querySelector("#userPwd")
     //document.getElementById("userPwd")
@@ -83,11 +82,14 @@ export default {
     //this.$refs.userPwd.focus()
   },
   methods: {
-    fLoginProc: function () {
+    fLoginProc: function (event) {
+      console.log("event객체");
+      console.log(event);
+      event.preventDefault();
+
       console.log("saveId::" + this.saveId);
-
-      this.setCookie("LOGIN_ID", this.loginId, this.saveId == true ? 7 : -1);
-
+      // cookie 1일 설정
+      this.setCookie("LOGIN_ID", this.loginId, 1); //false his.setCookie("LOGIN_ID", this.loginId, this.saveId == true ? 7 : -1)
       //로그인 전에 필수 체크
       if (this.$refs.userId.value == "") {
         alert("로그인 ID를 입력하세요.");
@@ -102,53 +104,79 @@ export default {
       this.loading = true;
 
       const params = new URLSearchParams();
-      params.append("lgn_Id", this.loginId);
-      params.append("pwd", this.pwd);
+      params.append("loginID", this.loginId);
+      params.append("password", this.pwd);
       this.axios
-        .post("/loginProc.do", params)
+        .post("/api/loginProc.do", params)
         .then((res) => {
+          console.log("res:");
           console.log(res);
           let data = res.data;
           if (data.result == "SUCCESS") {
             this.$store.commit("setLoginInfo", {
               loginId: data.loginId,
-              userNm: data.userNm,
-              userType: data.userType,
+              userNm: data.name,
+              userType: data.user_type,
               usrMnuAtrt: data.usrMnuAtrt,
             });
+
             sessionStorage.setItem("loginInfo", JSON.stringify(data));
-            sessionStorage.setItem("loginId", data.loginId);
-            setTimeout(() => {
-              this.loading = true;
-              this.$router.push("/dashboard");
-            }, 2000);
+            sessionStorage.setItem("loginID", data.loginId);
+            sessionStorage.setItem("name", data.name);
+            sessionStorage.setItem("user_type", data.user_type);
+
+            if (data.user_type === "a") {
+              setTimeout(() => {
+                this.loading = true;
+                this.$router.push("/dashboard/aAlert/notice");
+              }, 2000);
+            } else if (data.user_type === "t") {
+              setTimeout(() => {
+                this.loading = true;
+                this.$router.push("/dashboard/tAlert/notice");
+              }, 2000);
+            } else if (data.user_type === "s") {
+              setTimeout(() => {
+                this.loading = true;
+                this.$router.push("/dashboard/sAlert/notice");
+              }, 2000);
+            } else {
+              setTimeout(() => {
+                this.loading = true;
+                this.$router.push("/dashboard");
+              }, 2000);
+            }
+            //sessionStroage 값 확인
+            //sessionStorage.getItem("세션값:" + JSON.stringify(data.loginId))
           } else {
-            this.loading = false;
             alert("ID 혹은 비밀번호가 틀립니다.");
           }
         })
         .catch((error) => {
-          this.loading = false;
           console.log(error);
         });
     },
+    //쿠키 설정
     setCookie: function (name, value, day) {
       let today = new Date();
       today.setDate(today.getDate() + day);
       document.cookie =
         name + "=" + value + "; path=/; expires=" + today.toUTCString() + ";";
+      console.log("document.cookie:" + document.cookie); //LOGIN_ID=admin
     },
     getCookie: function (name) {
       //쿠키에서 loginId 값을 가져온다.
       let cookie = document.cookie + ";";
-      let idx = cookie.indexOf(name, 0);
+      console.log("cookie:" + cookie); //LOGIN_ID=admin;
+      let idx = cookie.indexOf(name, 0); // 0은 찾기 시작하는 위치
       let val = "";
       console.log("idx::" + idx);
       if (idx > -1) {
-        cookie = cookie.substring(idx, cookie.length);
+        cookie = cookie.substring(idx, cookie.length); //LOGIN_ID=admin;
         let begin = cookie.indexOf("=", 0) + 1;
+
         let end = cookie.indexOf(";", begin);
-        val = unescape(cookie.substring(begin, end));
+        val = cookie.substring(begin, end);
       }
       console.log("val::" + val);
       return val;

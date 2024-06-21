@@ -8,40 +8,19 @@
 
     <div v-else>
       <div v-if="surveyResults.length > 0">
-        <template
-          v-for="(result, index) in surveyResults"
-          :key="result.survey_question_no"
-        >
-          <div
-            class="modal-content"
-            v-if="
-              index === 0 ||
-              surveyResults[index - 1].survey_question_no !==
-                result.survey_question_no
-            "
-          >
-            <h2 id="surveyNumber" class="survey-number">
-              {{ result.survey_question_no }}번 문항
-            </h2>
-            <p id="qsurveyText" class="survey-text">
-              {{ result.survey_question_text }}
-            </p>
+        <template v-for="(result, index) in surveyResults" :key="result.survey_question_no">
+          <div class="modal-content" v-if="index === 0 || surveyResults[index - 1].survey_question_no !== result.survey_question_no">
+            <h2 id="surveyNumber" class="survey-number">{{ result.survey_question_no }}번 문항</h2>
+            <p id="qsurveyText" class="survey-text">{{ result.survey_question_text }}</p>
 
             <div v-if="hasChoices(result.survey_question_no)">
               <div class="chart-wrapper">
-                <PieChart
-                  :results="getResultsByQuestionNo(result.survey_question_no)"
-                />
+                <PieChart :results="getResultsByQuestionNo(result.survey_question_no)" />
               </div>
             </div>
 
             <div v-else>
-              <div
-                v-for="answer in getResultsByQuestionNo(
-                  result.survey_question_no
-                )"
-                :key="answer.survey_question_no"
-              >
+              <div v-for="answer in getResultsByQuestionNo(result.survey_question_no)" :key="answer.survey_question_no">
                 <p v-if="answer.written_answer">{{ answer.written_answer }}</p>
               </div>
             </div>
@@ -56,7 +35,8 @@
 </template>
 
 <script>
-import PieChart from "./PieChart.vue";
+import PieChart from "../support/PieChart.vue";
+
 export default {
   components: {
     PieChart,
@@ -88,23 +68,16 @@ export default {
           this.loading = false; // 데이터 로드 완료 후 로딩 상태 false로 변경
         })
         .catch((error) => {
-          console.error(
-            "설문조사 결과를 가져오는 도중 오류가 발생했습니다.",
-            error
-          );
+          console.error("설문조사 결과를 가져오는 도중 오류가 발생했습니다.", error);
           this.surveyResults = [];
           this.loading = false; // 오류 발생 시에도 로딩 상태 false로 변경
         });
     },
     getResultsByQuestionNo(questionNo) {
-      return this.surveyResults.filter(
-        (result) => result.survey_question_no === questionNo
-      );
+      return this.surveyResults.filter((result) => result.survey_question_no === questionNo);
     },
     hasChoices(questionNo) {
-      return this.getResultsByQuestionNo(questionNo).some(
-        (result) => result.choice_count > 0
-      );
+      return this.getResultsByQuestionNo(questionNo).some((result) => result.choice_count > 0);
     },
     cancel() {
       this.$emit("close");

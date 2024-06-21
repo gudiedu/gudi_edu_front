@@ -5,6 +5,7 @@ import Login from "../views/Login.vue";
 import Dashboard from "../views/Dashboard.vue";
 
 const routes = [
+  /**/
   {
     path: "/",
     name: "home",
@@ -28,6 +29,7 @@ const routes = [
         name: "mypage",
         component: () => import("../views/MyPage.vue"),
       },
+
       {
         path: "/tCourse/course/:course_no",
         name: "tCourseDetail",
@@ -44,14 +46,25 @@ const routes = [
         component: () => import("@/views/classroom/SCourseSatisfaction.vue"),
       },
       {
-        path: "/information/student",
+        path: "/information/student/:studentId",
         name: "aStudentAttendance",
         component: () => import("@/views/information/AStudentAttendance.vue"),
+      },
+      {
+        path: "information/hrinfo", // / 주의
+        name: "hrInfo",
+        component: () => import("@/views/information/HrInfo.vue"),
       },
       {
         path: "/information/survey",
         name: "aSurveyManagement",
         component: () => import("@/views/information/ASurveyManagement.vue"),
+      },
+      {
+        path: "/information/ASurveyQuestion/:survey_no/:survey_name",
+        name: "aSurveyQuestion",
+        component: () => import("@/views/information/ASurveyQuestion.vue"),
+        props: true, // 이 부분이 파라미터를 컴포넌트의 props로 전달하도록 함
       },
     ],
     component: Dashboard,

@@ -119,6 +119,11 @@ export default {
   methods: {
     logoutProc() {
       this.$store.commit("setLogout");
+      sessionStorage.removeItem('loginInfo');
+      sessionStorage.removeItem('user_type');
+      sessionStorage.removeItem('name');
+      sessionStorage.removeItem('loginID');
+      
       this.$router.push("/login");
       /*
       this.axios.post("/api/loginOut.do")
