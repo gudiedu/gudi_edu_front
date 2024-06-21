@@ -54,7 +54,7 @@
 
     <div class="form-group">
       <div class="form-label">답변</div>
-      <textarea name="content" class="form-textarea content-scroll" v-model="reply_content" :readonly="isReplySelected && !replyEditing"></textarea>
+      <textarea name="content" class="form-textarea content-scroll" v-model="reply_content" :readonly="isReplySelected && !replyEditing" maxlength="2000"></textarea>
     </div>
 
     <div class="button-group">
@@ -166,24 +166,26 @@ export default {
         });
     },
     deleteReply() {
-      console.log("Deleting reply with reply_no:", this.reply_num);
-      this.axios
-        .post("/tCourse/deletequestionreply.do", {
-          reply_no: this.reply_num,
-        })
-        .then((response) => {
-          if (response.data.result >= 0) {
-            alert(response.data.resultMsg);
-            this.selectQuestion();
-            this.reply_content = ""; // 답변 내용을 초기화
-            this.isReplySelected = false; // 선택 상태를 초기화
-          } else {
-            alert(response.data.resultMsg);
-          }
-        })
-        .catch((error) => {
-          alert("에러! API 요청에 오류가 있습니다. " + error);
-        });
+      if (confirm("삭제하시겠습니까?")) {
+        console.log("Deleting reply with reply_no:", this.reply_num);
+        this.axios
+          .post("/tCourse/deletequestionreply.do", {
+            reply_no: this.reply_num,
+          })
+          .then((response) => {
+            if (response.data.result >= 0) {
+              alert(response.data.resultMsg);
+              this.selectQuestion();
+              this.reply_content = ""; // 답변 내용을 초기화
+              this.isReplySelected = false; // 선택 상태를 초기화
+            } else {
+              alert(response.data.resultMsg);
+            }
+          })
+          .catch((error) => {
+            alert("에러! API 요청에 오류가 있습니다. " + error);
+          });
+      }
     },
     selectQuestion() {
       console.log(this.question_no);

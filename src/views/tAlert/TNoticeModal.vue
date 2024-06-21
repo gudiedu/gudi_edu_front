@@ -7,13 +7,13 @@
         <tr>
           <td class="label">제목</td>
           <td class="content">
-            <input type="text" name="noticeTitle" v-model="noticeTitle" class="form-input" />
+            <input type="text" name="noticeTitle" v-model="noticeTitle" class="form-input" maxlength="50" />
           </td>
         </tr>
         <tr class="content">
           <td class="label">내용</td>
           <td class="content">
-            <textarea name="noticeContent" v-model="noticeContent" class="form-textarea"></textarea>
+            <textarea name="noticeContent" v-model="noticeContent" class="form-textarea" maxlength="2000"></textarea>
           </td>
         </tr>
         <tr>

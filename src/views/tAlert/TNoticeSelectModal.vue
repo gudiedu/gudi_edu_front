@@ -33,11 +33,17 @@
         </td>
       </tr>
 
-      <tr class="content" v-if="fileName">
+      <tr class="content" v-if="fileName || noticeEditing">
         <td class="label">첨부파일</td>
         <td class="content">
-          <div v-if="!noticeEditing" id="preview" @click="downLoad">{{ fileName }}</div>
-          <input v-else type="file" id="file-insert" @change="handleFileChange" />
+          <div v-if="!noticeEditing && fileName" id="preview" @click="downLoad">{{ fileName }}</div>
+          <div v-else>
+            <div v-if="fileName">
+              <span>{{ fileName }}</span>
+              <v-btn class="remove-file-button" @click="removeFile">파일 삭제</v-btn>
+            </div>
+            <input type="file" id="file-insert" @change="handleFileChange" />
+          </div>
         </td>
       </tr>
     </table>
@@ -70,6 +76,7 @@ export default {
       fileName: "",
       selectedFile: null,
       noticeEditing: false,
+      fileToDelete: false,
     };
   },
   computed: {
@@ -103,14 +110,38 @@ export default {
     },
     handleFileChange(event) {
       this.selectedFile = event.target.files[0];
+      if (this.selectedFile) {
+        this.fileName = this.selectedFile.name;
+      }
+    },
+    removeFile() {
+      this.selectedFile = null;
+      this.fileName = "";
+      // 서버에 기존 파일 삭제 요청을 보낼 수 있습니다.
     },
     saveNotice() {
       let formData = new FormData();
       formData.append("noticeTitle", this.noticeTitle);
       formData.append("noticeContent", this.noticeContent);
       formData.append("pNoticeNo", this.pNoticeNo);
+
       if (this.selectedFile) {
         formData.append("file", this.selectedFile);
+
+        // 파일 삭제 요청
+        this.axios
+          .post("/tAlert/deleteNoticeFile.do", { pNoticeNo: this.pNoticeNo })
+          .then((response) => {
+            console.log(response.data);
+            if (response.data.result > 0) {
+              console.log("Existing file deleted successfully.");
+            } else {
+              console.log("No file to delete or error occurred.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error deleting existing file:", error);
+          });
       }
 
       this.axios
@@ -128,23 +159,25 @@ export default {
         });
     },
     deleteNotice() {
-      if (this.isMyNotice) {
-        let params = new URLSearchParams();
-        params.append("pNoticeNo", this.pNoticeNo);
+      if (confirm("삭제하시겠습니까?")) {
+        if (this.isMyNotice) {
+          let params = new URLSearchParams();
+          params.append("pNoticeNo", this.pNoticeNo);
 
-        this.axios
-          .post("/tAlert/deleteNotice.do", params)
-          .then((response) => {
-            if (response.data.result > 0) {
-              alert(response.data.resultMsg);
-              this.$emit("close-modal"); // 모달 닫기 이벤트 발생
-            }
-          })
-          .catch((error) => {
-            alert("에러! API 요청에 오류가 있습니다. " + error);
-          });
-      } else {
-        alert("삭제할 수 없습니다");
+          this.axios
+            .post("/tAlert/deleteNotice.do", params)
+            .then((response) => {
+              if (response.data.result > 0) {
+                alert(response.data.resultMsg);
+                this.$emit("close-modal"); // 모달 닫기 이벤트 발생
+              }
+            })
+            .catch((error) => {
+              alert("에러! API 요청에 오류가 있습니다. " + error);
+            });
+        } else {
+          alert("삭제할 수 없습니다");
+        }
       }
     },
     cancelEdit() {
@@ -313,6 +346,21 @@ export default {
 .cancel-button:hover {
   background-color: #c2c2c2;
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
+}
+
+.remove-file-button {
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  border-radius: 4px;
+  padding: 8px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.remove-file-button:hover {
+  background-color: #ece2e4;
+  box-shadow: 0 4px 8px rgba(253, 192, 204, 0.2);
 }
 
 #preview {
