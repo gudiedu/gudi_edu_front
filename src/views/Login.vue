@@ -109,10 +109,10 @@ export default {
             usrMnuAtrt: data.usrMnuAtrt,
           })
           
-          sessionStorage.setItem('loginInfo', JSON.stringify(data))
-          sessionStorage.setItem('loginID', data.loginId)
+          sessionStorage.setItem('loginInfo', JSON.stringify(data));
+          sessionStorage.setItem('loginID', data.loginId);
           sessionStorage.setItem('name', data.name);
-          sessionStorage.setItem('user_type', data.user_type)
+          sessionStorage.setItem('user_type', data.user_type);
 
           if(data.user_type === 'a'){
             this.$router.push('/dashboard/aAlert/notice');

@@ -127,9 +127,14 @@ export default{
      updateUserinfo(){
 
       const selectedName = this.nameAction ? this.name_updated : this.name;
-      
-      const name_regEx = /^[a-zA-Z0-9]{2,}/i;
+      console.log(selectedName)
+      //const name_regEx = new RegExp('^[a-zA-Z가-힣]{2,}$', 'i');
+      //new RegExp('^(?:[a-zA-Z]{2,}|[가-힣]{2,})$', 'i');
+      //const name_regEx = new RegExp('^[a-zA-Z가-힣]{1,}$', 'i');
+      const name_regEx = new RegExp('^[가-힣]{2,}|[a-z]{2,}$', 'i');
       const isName = name_regEx.test(selectedName);
+      console.log("isName");
+      console.log(isName)
       const email_regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
       const selectedEmail = this.emailAction ? this.email_updated : this.email;
       const isEmailTrue = email_regex.test(selectedEmail);  
@@ -139,7 +144,7 @@ export default{
       const isPhTrue = ph_regex.test(selectedPh);
       
       if(!isName){
-        alert('이름을 2글자 이상 적어주세요!')
+        alert('이름을 명확하게 적어주세요!')
       }else if(!isPhTrue){
         alert('휴대폰 번호 형식을 확인해 주세요!')
       } else if(!isEmailTrue){

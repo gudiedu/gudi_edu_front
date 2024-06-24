@@ -40,13 +40,10 @@ export default {
   },
     mounted:function(){
     //sessioin
-    console.log("세션 loginId ?")
     console.log(sessionStorage.getItem("loginID"))
-    console.log("세션 name ?")
     console.log(sessionStorage.getItem('name'))
     //cookie 값
-    console.log("쿠키 값:")
-    console.log(document.cookie);    //LOGIN_ID=admin10
+
   },
   components: {Menu},
   
