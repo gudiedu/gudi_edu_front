@@ -2,19 +2,20 @@
   <div class="lecture-detail">
     <h2 class="title">출석부</h2>
 
-   <div class="form-group">
+    <div class="form-group">
       <v-table class="dashboard-table">
-      <colgroup>
+        <colgroup>
           <col width="7%" />
           <col width="9%" />
           <col width="*%" />
-
-      </colgroup>
+        </colgroup>
         <thead>
           <tr>
             <th>이름</th>
             <th>휴대폰</th>
-            <th v-for="date in uniqueDates" :key="date">{{ formatDate(date) }}</th>
+            <th v-for="date in uniqueDates" :key="date">
+              {{ formatDate(date) }}
+            </th>
             <th>출석률</th>
           </tr>
         </thead>
@@ -22,19 +23,18 @@
           <tr v-for="(student, index) in students" :key="index">
             <td>{{ student.name }}</td>
             <td>{{ student.hp }}</td>
-            <td v-for="date in uniqueDates" :key="date">{{ getStatus(student, date) }}</td>
-            <td>{{getAttendanceRate(student)}}%</td>
+            <td v-for="date in uniqueDates" :key="date">
+              {{ getStatus(student, date) }}
+            </td>
+            <td>{{ getAttendanceRate(student) }}%</td>
           </tr>
         </tbody>
       </v-table>
-   </div>
-
-
-    <div class="button-group">
-        <v-btn class="insert-button" @click="excel">엑셀다운로드</v-btn>
     </div>
 
-
+    <div class="button-group">
+      <v-btn class="insert-button" @click="excel">엑셀다운로드</v-btn>
+    </div>
   </div>
 </template>
 
@@ -42,59 +42,54 @@
 import moment from "moment";
 
 export default {
-  
   props: {
     courseNo: String,
-
   },
   data() {
     return {
       attendanceData: [],
-      holidays: []
+      holidays: [],
     };
   },
   mounted() {
     this.searchList();
   },
   computed: {
-    
     uniqueDates() {
-      const dates = this.attendanceData.map(item => item.attendance_date);
+      const dates = this.attendanceData.map((item) => item.attendance_date);
       return [...new Set(dates)];
     },
     students() {
       const studentsMap = {};
-      this.attendanceData.forEach(item => {
+      this.attendanceData.forEach((item) => {
         if (!studentsMap[item.name]) {
           studentsMap[item.name] = {
             name: item.name,
             hp: item.hp,
-            attendance: {}
+            attendance: {},
           };
         }
-        studentsMap[item.name].attendance[item.attendance_date] = item.attendance_status;
+        studentsMap[item.name].attendance[item.attendance_date] =
+          item.attendance_status;
       });
       return Object.values(studentsMap);
-    }
+    },
   },
   methods: {
     searchList() {
-      
-        let params = new URLSearchParams()
-        params.append('courseNo', this.courseNo)
+      let params = new URLSearchParams();
+      params.append("courseNo", this.courseNo);
 
-
-        this.axios
-          .post('/support/allListAttendance', params)
-          .then((response) => {
-            // console.log(JSON.stringify(response))
-            // this.holidays = response.data.listDay.map(day => day.dayoff_date);
-            this.attendanceData = response.data.allAttendance;
-          })
-          .catch(function (error) {
-            alert('에러! api요청 ' + error)
-          })
-
+      this.axios
+        .post("/support/allListAttendance", params)
+        .then((response) => {
+          // console.log(JSON.stringify(response))
+          // this.holidays = response.data.listDay.map(day => day.dayoff_date);
+          this.attendanceData = response.data.allAttendance;
+        })
+        .catch(function (error) {
+          alert("에러! api요청 " + error);
+        });
     },
     formatDate(date) {
       return moment(date).format("YYYY-MM-DD");
@@ -107,7 +102,7 @@ export default {
       // if (day === 0 || day === 6) {
       //   return '주말';
       // }
-      return student.attendance[date] || '';
+      return student.attendance[date] || "";
     },
     getAttendanceRate(student) {
       const totalDays = this.uniqueDates.length;
@@ -122,32 +117,31 @@ export default {
 
       // const ssdate = this.attendanceData.map(item => item.attendance_date);
 
-      let params = new URLSearchParams()
-      params.append('courseNo', this.courseNo)
+      let params = new URLSearchParams();
+      params.append("courseNo", this.courseNo);
       // params.append('ssdate', ssdate)
       // params.append('sedate', this.courseNo)
 
       this.axios({
-        url: '/support/attendanceExcelDownload',
+        url: "/support/attendanceExcelDownload",
         data: params,
-        method: 'POST',
-        responseType: 'blob', //파일에 대한 내용을 받으려면 추가해줘야 한다.
+        method: "POST",
+        responseType: "blob", //파일에 대한 내용을 받으려면 추가해줘야 한다.
       }).then((response) => {
         //브라우저 있는 자바스크립 버전은 사용안함, node.js꺼 사용 => 그래서 이런 작업을 처리 해야함
-        console.log(response)
-        console.log(response.data)
+        console.log(response);
+        console.log(response.data);
         //Blob 데이터를 이진파일로 변환, 파일 데이터를 받아 바이너리 데이터로 만든 후 URL을 만든다.
-        let FILE = window.URL.createObjectURL(new Blob([response.data]))
+        let FILE = window.URL.createObjectURL(new Blob([response.data]));
         //a 태그를 만들어서 이 태그 안에 파일 이름을 넣어
-        let docUrl = document.createElement('a')
-        docUrl.href = FILE
-        docUrl.setAttribute('download', 'attendance.xlsx')
-        document.body.appendChild(docUrl) //만든 a태그를 끼어넣어
-        docUrl.click() //강제로 클릭하게 만들어 //url을 클릭하면 다운로드가 됨
+        let docUrl = document.createElement("a");
+        docUrl.href = FILE;
+        docUrl.setAttribute("download", "attendance.xlsx");
+        document.body.appendChild(docUrl); //만든 a태그를 끼어넣어
+        docUrl.click(); //강제로 클릭하게 만들어 //url을 클릭하면 다운로드가 됨
         //console.log('FILE : ' + FILE)
-      })
+      });
     },
-
   },
 };
 </script>
@@ -159,7 +153,7 @@ export default {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   margin-top: 16px;
-  height:600px;
+  height: 600px;
   margin: auto;
 }
 
@@ -170,7 +164,7 @@ export default {
   color: #2c3e50;
 }
 
- .form-group {
+.form-group {
   display: flex;
   flex-direction: column;
   margin-bottom: 16px;
@@ -207,7 +201,7 @@ export default {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-} 
+}
 
 .update-button,
 .delete-button,
@@ -253,7 +247,7 @@ export default {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .dashboard-table th {

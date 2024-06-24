@@ -10,8 +10,14 @@
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle"
-              @keyup.enter="searchLectures" @input="handleInputChange" />
+            <input
+              type="text"
+              class="search-input"
+              placeholder="검색어를 입력해주세요."
+              v-model="stitle"
+              @keyup.enter="searchLectures"
+              @input="handleInputChange"
+            />
           </div>
           <div class="button-group">
             <button class="search-button" @click="searchLectures">검색</button>
@@ -21,7 +27,12 @@
 
       <v-divider></v-divider>
 
-      <v-progress-circular v-if="loading" indeterminate color="primary" class="mx-auto"></v-progress-circular>
+      <v-progress-circular
+        v-if="loading"
+        indeterminate
+        color="primary"
+        class="mx-auto"
+      ></v-progress-circular>
 
       <v-table v-else class="dashboard-table">
         <thead>
@@ -36,12 +47,26 @@
         </thead>
         <tbody>
           <tr v-for="(lecture, index) in lectureList" :key="lecture.course_no">
-            <td class="text-center">{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-            <td class="text-center course-link" @click="showTestResult(lecture.course_name, lecture.course_no)">{{ lecture.course_name }}</td>
+            <td class="text-center">
+              {{ (currentPage - 1) * pageSize + index + 1 }}
+            </td>
+            <td
+              class="text-center course-link"
+              @click="showTestResult(lecture.course_name, lecture.course_no)"
+            >
+              {{ lecture.course_name }}
+            </td>
             <td class="text-center">{{ lecture.course_start_date }}</td>
             <td class="text-center">{{ lecture.course_end_date }}</td>
             <td class="text-center">{{ lecture.course_quota }}</td>
-            <td class="text-center"><button class="result-button" @click="showTestResult(lecture.course_name, lecture.course_no)">결과확인</button></td>
+            <td class="text-center">
+              <button
+                class="result-button"
+                @click="showTestResult(lecture.course_name, lecture.course_no)"
+              >
+                결과확인
+              </button>
+            </td>
           </tr>
           <tr v-if="lectureList.length === 0">
             <td colspan="6" class="text-center">조회된 데이터가 없습니다.</td>
@@ -50,9 +75,17 @@
       </v-table>
 
       <div class="pagination">
-        <paginate v-model="currentPage" :page-count="Math.max(pageCount, 1)" :page-range="3" :margin-pages="2"
-          :click-handler="handlePageChange" :container-class="'pagination-container'" :page-class="'pagination-page'"
-          :prev-text="'Prev'" :next-text="'Next'"></paginate>
+        <paginate
+          v-model="currentPage"
+          :page-count="Math.max(pageCount, 1)"
+          :page-range="3"
+          :margin-pages="2"
+          :click-handler="handlePageChange"
+          :container-class="'pagination-container'"
+          :page-class="'pagination-page'"
+          :prev-text="'Prev'"
+          :next-text="'Next'"
+        ></paginate>
       </div>
     </v-card>
 
@@ -61,7 +94,10 @@
         <div class="titletext">{{ selectedLecture.name }} 시험응시결과</div>
         <v-spacer></v-spacer>
       </v-card-title>
-      <TScoreResult :lectureName="selectedLecture.name" :courseNo="selectedLecture.no" />
+      <TScoreResult
+        :lectureName="selectedLecture.name"
+        :courseNo="selectedLecture.no"
+      />
     </v-card>
   </v-container>
 </template>
@@ -94,7 +130,7 @@ export default {
       if (newVal === "") {
         this.searchLectures();
       }
-    }
+    },
   },
   methods: {
     searchLectures() {
@@ -129,7 +165,7 @@ export default {
       if (event.target.value === "") {
         this.searchLectures(); // 검색어가 빈 문자열이면 초기 데이터를 로드합니다.
       }
-    }
+    },
   },
   computed: {
     pageCount() {
@@ -178,8 +214,7 @@ export default {
   padding: 16px;
 }
 
-.search-button,
-.result-button {
+.search-button {
   padding: 10px 17px;
   background-color: #007bff;
   color: white;
@@ -192,6 +227,35 @@ export default {
 .search-button:hover,
 .result-button:hover {
   background-color: #0056b3;
+}
+
+.result-button {
+  margin: 0 auto;
+  display: flex;
+  width: 85px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.result-button:hover {
+  display: flex;
+  width: 85px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .dashboard-table {

@@ -20,12 +20,20 @@
             <div class="search-container">
               <v-icon class="search-icon">mdi-magnify</v-icon>
               <!-- 검색 아이콘 -->
-              <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle"
-                @keyup.enter="searchLectures" @input="handleInputChange" />
+              <input
+                type="text"
+                class="search-input"
+                placeholder="검색어를 입력해주세요."
+                v-model="stitle"
+                @keyup.enter="searchLectures"
+                @input="handleInputChange"
+              />
               <!-- 검색 입력창, 엔터 시 검색 실행 -->
             </div>
             <div class="button-group">
-              <button class="search-button" @click="searchLectures">검색</button>
+              <button class="search-button" @click="searchLectures">
+                검색
+              </button>
               <!-- 검색 버튼, 클릭 시 검색 실행 -->
             </div>
           </div>
@@ -35,7 +43,12 @@
         <!-- 구분선 -->
 
         <!-- 로딩 중일 때 표시되는 로딩 애니메이션 -->
-        <v-progress-circular v-if="loading" indeterminate color="primary" class="mx-auto"></v-progress-circular>
+        <v-progress-circular
+          v-if="loading"
+          indeterminate
+          color="primary"
+          class="mx-auto"
+        ></v-progress-circular>
 
         <!-- 로딩이 끝나면 표시되는 강의 목록 테이블 -->
         <v-table v-else class="dashboard-table">
@@ -43,19 +56,40 @@
             <tr>
               <th class="text-center">번호</th>
               <th class="text-center">강의명</th>
-              <th class="text-center">문제등록</th>
+              <th>문제등록</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(lecture, index) in lectureList" :key="lecture.course_no">
+            <tr
+              v-for="(lecture, index) in lectureList"
+              :key="lecture.course_no"
+            >
               <!-- 강의 목록 반복 렌더링 -->
-              <td class="text-center">{{ (currentPage - 1) * pageSize + index + 1 }}</td>
+              <td class="text-center">
+                {{ (currentPage - 1) * pageSize + index + 1 }}
+              </td>
               <!-- 강의 목록 번호 계산 -->
-              <td class="text-center course-link" @click="fetchExamQuestions(lecture.course_no)">{{ lecture.course_name
-                }}</td>
+              <td
+                class="text-center course-link"
+                @click="fetchExamQuestions(lecture.course_no)"
+              >
+                {{ lecture.course_name }}
+              </td>
               <!-- 강의명, 클릭 시 해당 강의의 시험 문제 조회 -->
-              <td class="text-center"><button class="insert-button"
-                  @click="openAddModal(lecture.course_no, lecture.course_name, lecture.course_subject)">등록</button></td>
+              <td>
+                <button
+                  class="test-insert-button"
+                  @click="
+                    openAddModal(
+                      lecture.course_no,
+                      lecture.course_name,
+                      lecture.course_subject
+                    )
+                  "
+                >
+                  등록
+                </button>
+              </td>
               <!-- 등록 버튼, 클릭 시 시험 등록 모달 열기 -->
             </tr>
             <tr v-if="lectureList.length === 0">
@@ -67,9 +101,17 @@
 
         <!-- 강의 목록 페이징 버튼 -->
         <div class="pagination">
-          <paginate v-model="currentPage" :page-count="Math.max(pageCount, 1)" :page-range="3" :margin-pages="2"
-            :click-handler="handlePageChange" :container-class="'pagination-container'" :page-class="'pagination-page'"
-            :prev-text="'Prev'" :next-text="'Next'"></paginate>
+          <paginate
+            v-model="currentPage"
+            :page-count="Math.max(pageCount, 1)"
+            :page-range="3"
+            :margin-pages="2"
+            :click-handler="handlePageChange"
+            :container-class="'pagination-container'"
+            :page-class="'pagination-page'"
+            :prev-text="'Prev'"
+            :next-text="'Next'"
+          ></paginate>
           <!-- 페이징 컴포넌트 설정 -->
         </div>
       </v-card>
@@ -82,8 +124,12 @@
           <v-spacer></v-spacer>
         </v-card-title>
 
-        <v-progress-circular v-if="loadingQuestions" indeterminate color="primary"
-          class="mx-auto"></v-progress-circular>
+        <v-progress-circular
+          v-if="loadingQuestions"
+          indeterminate
+          color="primary"
+          class="mx-auto"
+        ></v-progress-circular>
         <!-- 문제 목록 로딩 애니메이션 -->
 
         <v-table v-else class="dashboard-table">
@@ -101,7 +147,12 @@
               <td class="text-center">{{ category.test_category }}</td>
               <td class="text-center">{{ category.question_count }}</td>
               <td class="text-center">
-                <button class="insert-button" @click="editCategory(category.test_category)">수정</button>
+                <button
+                  class="test-insert-button"
+                  @click="editCategory(category.test_category)"
+                >
+                  수정
+                </button>
                 <!-- 수정 버튼, 클릭 시 문제 수정 모달 열기 -->
               </td>
             </tr>
@@ -114,9 +165,17 @@
 
         <!-- 문제 목록 페이징 버튼 -->
         <div class="pagination">
-          <paginate v-model="currentQuestionPage" :page-count="Math.max(questionPageCount, 1)" :page-range="3"
-            :margin-pages="2" :click-handler="handleQuestionPageChange" :container-class="'pagination-container'"
-            :page-class="'pagination-page'" :prev-text="'Prev'" :next-text="'Next'"></paginate>
+          <paginate
+            v-model="currentQuestionPage"
+            :page-count="Math.max(questionPageCount, 1)"
+            :page-range="3"
+            :margin-pages="2"
+            :click-handler="handleQuestionPageChange"
+            :container-class="'pagination-container'"
+            :page-class="'pagination-page'"
+            :prev-text="'Prev'"
+            :next-text="'Next'"
+          ></paginate>
           <!-- 페이징 컴포넌트 설정 -->
         </div>
       </v-card>
@@ -124,20 +183,20 @@
       <v-dialog v-model="addModal" @click:outside="closeAddModal">
         <!-- 모달 다이얼로그 -->
         <v-card>
-      <v-card-text>
-        <TTestModal
-          :action="action"
-          :courseNo="selectedCourseNo"
-          :courseName="selectedCourseName"
-          :courseSubject="selectedCourseSubject"
-          :question="currentQuestion"
-          @saveExam="handleSaveExam"
-          @updateExam="handleUpdateExam"
-          @deleteExam="handleDeleteExam"
-          @close="closeAddModal"
-        />
-      </v-card-text>
-    </v-card>
+          <v-card-text>
+            <TTestModal
+              :action="action"
+              :courseNo="selectedCourseNo"
+              :courseName="selectedCourseName"
+              :courseSubject="selectedCourseSubject"
+              :question="currentQuestion"
+              @saveExam="handleSaveExam"
+              @updateExam="handleUpdateExam"
+              @deleteExam="handleDeleteExam"
+              @close="closeAddModal"
+            />
+          </v-card-text>
+        </v-card>
       </v-dialog>
     </v-container>
   </div>
@@ -220,13 +279,18 @@ export default {
     fetchExamQuestions(course_no) {
       this.loadingQuestions = true;
       this.selectedCourseNo = course_no;
-      this.selectedCourseName = this.lectureList.find(lecture => lecture.course_no === course_no).course_name;
-      this.selectedCourseSubject = this.lectureList.find(lecture => lecture.course_no === course_no).course_subject;
+      this.selectedCourseName = this.lectureList.find(
+        (lecture) => lecture.course_no === course_no
+      ).course_name;
+      this.selectedCourseSubject = this.lectureList.find(
+        (lecture) => lecture.course_no === course_no
+      ).course_subject;
 
       const params = new URLSearchParams();
-      params.append('course_no', course_no);
+      params.append("course_no", course_no);
 
-      axios.get('/tCourse/getExamQuestions?' + params.toString())
+      axios
+        .get("/tCourse/getExamQuestions?" + params.toString())
         .then((response) => {
           if (response.data.success) {
             this.questionCategories = response.data.questionCategories;
@@ -251,15 +315,19 @@ export default {
     },
     handleSaveExam(formData) {
       axios
-        .post('/tCourse/registerExam', {
-          courseNo: this.selectedCourseNo,
-          testCategory: formData.testCategory,
-          questions: formData.questions
-        }, {
-          headers: {
-            "Content-Type": "application/json",
+        .post(
+          "/tCourse/registerExam",
+          {
+            courseNo: this.selectedCourseNo,
+            testCategory: formData.testCategory,
+            questions: formData.questions,
           },
-        })
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
         .then((response) => {
           if (response.data.success) {
             alert("시험이 성공적으로 등록되었습니다.");
@@ -276,15 +344,19 @@ export default {
     },
     handleUpdateExam(formData) {
       axios
-        .post('/tCourse/updateExam', {
-          courseNo: this.selectedCourseNo,
-          testCategory: formData.testCategory,
-          questions: formData.questions
-        }, {
-          headers: {
-            "Content-Type": "application/json",
+        .post(
+          "/tCourse/updateExam",
+          {
+            courseNo: this.selectedCourseNo,
+            testCategory: formData.testCategory,
+            questions: formData.questions,
           },
-        })
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
         .then((response) => {
           if (response.data.success) {
             alert("시험이 성공적으로 수정되었습니다.");
@@ -300,34 +372,35 @@ export default {
         });
     },
     handleDeleteExam(data) {
-    axios
-      .post('/tCourse/deleteExam', data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      .then((response) => {
-        if (response.data.success) {
-          alert('시험이 성공적으로 삭제되었습니다.');
-          this.fetchExamQuestions(this.selectedCourseNo);
-          this.searchLectures();
-          this.addModal = false;
-        } else {
-          alert("에러! " + response.data.message);
-        }
-      })
-      .catch((error) => {
-        alert('에러! 시험 삭제에 실패했습니다. ' + error);
-      });
+      axios
+        .post("/tCourse/deleteExam", data, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          if (response.data.success) {
+            alert("시험이 성공적으로 삭제되었습니다.");
+            this.fetchExamQuestions(this.selectedCourseNo);
+            this.searchLectures();
+            this.addModal = false;
+          } else {
+            alert("에러! " + response.data.message);
+          }
+        })
+        .catch((error) => {
+          alert("에러! 시험 삭제에 실패했습니다. " + error);
+        });
     },
     editCategory(testCategory) {
       this.action = "U";
       this.testCategory = testCategory;
-      axios.post('/tCourse/getExamFixCategory', {
-        course_no: this.selectedCourseNo,
-        test_category: testCategory
-      })
-        .then(response => {
+      axios
+        .post("/tCourse/getExamFixCategory", {
+          course_no: this.selectedCourseNo,
+          test_category: testCategory,
+        })
+        .then((response) => {
           if (response.data.success) {
             this.currentQuestion = response.data.questionList;
             this.addModal = true;
@@ -335,24 +408,28 @@ export default {
             alert("에러! " + response.data.message);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           alert("에러! 시험 문제를 가져오는 데 실패했습니다. " + error);
         });
     },
     deleteQuestion() {
-      if (confirm('정말로 이 시험을 삭제하시겠습니까?')) {
+      if (confirm("정말로 이 시험을 삭제하시겠습니까?")) {
         axios
-          .post('/tCourse/deleteExam', {
-            course_no: this.selectedCourseNo,
-            test_category: this.testCategory
-          }, {
-            headers: {
-              "Content-Type": "application/json"
+          .post(
+            "/tCourse/deleteExam",
+            {
+              course_no: this.selectedCourseNo,
+              test_category: this.testCategory,
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
             }
-          })
+          )
           .then((response) => {
             if (response.data.success) {
-              alert('시험이 성공적으로 삭제되었습니다.');
+              alert("시험이 성공적으로 삭제되었습니다.");
               this.fetchExamQuestions(this.selectedCourseNo);
               this.addModal = false;
             } else {
@@ -360,7 +437,7 @@ export default {
             }
           })
           .catch((error) => {
-            alert('에러! 시험 삭제에 실패했습니다. ' + error);
+            alert("에러! 시험 삭제에 실패했습니다. " + error);
           });
       }
     },
@@ -368,7 +445,7 @@ export default {
       if (event.target.value === "") {
         this.searchLectures();
       }
-    }
+    },
   },
   computed: {
     pageCount() {
@@ -380,8 +457,6 @@ export default {
   },
 };
 </script>
-
-
 
 <style scoped>
 .dashboard-card {
@@ -473,7 +548,7 @@ export default {
   /* 테두리 겹침 제거 */
   margin: 16px 0;
   /* 외부 여백 설정 */
-  table-layout: fixed;
+  /* table-layout: fixed; */
   /* 테이블 레이아웃 고정 */
 }
 
@@ -481,7 +556,7 @@ export default {
 .dashboard-table td {
   padding: 12px;
   /* 내부 여백 설정 */
-  text-align: center;
+  text-align: center !important;
   /* 텍스트 가운데 정렬 */
   border-bottom: 1px solid #ddd;
   /* 하단 테두리 설정 */
@@ -495,6 +570,9 @@ export default {
   /* 넘치는 내용 줄임표(...) */
   max-width: 150px;
   /* 최대 너비 설정 */
+}
+
+.dashboard-table td button {
 }
 
 .dashboard-table th {
@@ -577,5 +655,34 @@ export default {
 .v-dialog {
   max-width: 1000px;
   /* 최대 너비를 800px로 설정 */
+}
+
+.test-insert-button {
+  margin: 0 auto;
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 50px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.test-insert-button:hover {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
 }
 </style>

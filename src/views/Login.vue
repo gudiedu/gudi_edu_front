@@ -27,6 +27,7 @@
               style="ime-mode: inactive"
               id="userId"
               ref="userId"
+              @keyup.enter="fLoginProc"
             />
           </p>
           <p class="pw">
@@ -37,6 +38,7 @@
               placeholder="비밀번호"
               id="userPwd"
               ref="userPwd"
+              @keyup.enter="fLoginProc"
             />
             <!-- onfocus="this.placeholder=''; return true" -->
           </p>
@@ -130,22 +132,22 @@ export default {
               setTimeout(() => {
                 this.loading = true;
                 this.$router.push("/dashboard/aAlert/notice");
-              }, 2000);
+              }, 1500);
             } else if (data.user_type === "t") {
               setTimeout(() => {
                 this.loading = true;
                 this.$router.push("/dashboard/tAlert/notice");
-              }, 2000);
+              }, 1500);
             } else if (data.user_type === "s") {
               setTimeout(() => {
                 this.loading = true;
                 this.$router.push("/dashboard/sAlert/notice");
-              }, 2000);
+              }, 1500);
             } else {
               setTimeout(() => {
                 this.loading = true;
                 this.$router.push("/dashboard");
-              }, 2000);
+              }, 1500);
             }
             //sessionStroage 값 확인
             //sessionStorage.getItem("세션값:" + JSON.stringify(data.loginId))

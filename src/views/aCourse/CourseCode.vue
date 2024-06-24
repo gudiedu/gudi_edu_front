@@ -58,8 +58,8 @@
         <thead>
           <tr>
             <th>글번호</th>
-            <th>강의코드</th>
-            <th>강의명</th>
+            <th>과목코드</th>
+            <th>과목명</th>
           </tr>
         </thead>
         <tbody>
@@ -128,7 +128,7 @@ export default {
   },
   data() {
     return {
-      titleText: "강의코드관리",
+      titleText: "과목코드관리",
       addModal: false,
       action: "",
       selectedNotice: null,

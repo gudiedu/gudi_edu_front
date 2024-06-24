@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-card class="dashboard-card">
       <v-card-title class="d-flex align-center pe-2">
-        <div class="titletext">{{ titleText }} </div>
+        <div class="titletext">{{ titleText }}</div>
         <v-spacer></v-spacer>
       </v-card-title>
 
@@ -19,8 +19,12 @@
           <template v-if="totalCnt > 0">
             <template v-for="item in schedulelist" :key="item.dayoff_no">
               <tr>
-                <td @click="holidayModify(item.dayoff_no)">{{ item.dayoff_date }}</td>
-                <td @click="holidayModify(item.dayoff_no)">{{ item.dayoff_detail}}</td>
+                <td @click="holidayModify(item.dayoff_no)">
+                  {{ item.dayoff_date }}
+                </td>
+                <td @click="holidayModify(item.dayoff_no)">
+                  {{ item.dayoff_detail }}
+                </td>
               </tr>
             </template>
           </template>
@@ -57,11 +61,12 @@
     <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <TClassScheduleManagementModal 
-          :action="this.action" 
-          :dayoff_no="this.dayoff_no" 
-          @execute-search-list="searchList()" 
-          @close-modal="closeModal()" />
+          <TClassScheduleManagementModal
+            :action="this.action"
+            :dayoff_no="this.dayoff_no"
+            @execute-search-list="searchList()"
+            @close-modal="closeModal()"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -70,7 +75,7 @@
 
 <script>
 import TClassScheduleManagementModal from "./TClassScheduleModal.vue";
-import Paginate from 'vuejs-paginate-next';
+import Paginate from "vuejs-paginate-next";
 
 export default {
   components: { TClassScheduleManagementModal, Paginate },
@@ -82,53 +87,47 @@ export default {
       totalCnt: 0,
       pageSize: 5,
       currentPage: 1,
-      schedulelist:[],
-      dayoff_no:"",
-
-
+      schedulelist: [],
+      dayoff_no: "",
     };
   },
   mounted() {
-    this.searchList()
+    this.searchList();
   },
   methods: {
     searchList: function () {
+      let vm = this;
 
-      let vm = this 
-
-      let params = new URLSearchParams() 
-      params.append('currentPage', this.currentPage)
-      params.append('pageSize', this.pageSize)
+      let params = new URLSearchParams();
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
 
       this.axios
-        .post('/support/listClassSchedule', params)
+        .post("/support/listClassSchedule", params)
         .then((response) => {
           // console.log(JSON.stringify(response))
 
-          vm.schedulelist = response.data.listdata
-          vm.totalCnt = response.data.totalcnt
+          vm.schedulelist = response.data.listdata;
+          vm.totalCnt = response.data.totalcnt;
         })
         .catch(function (error) {
-          alert('에러! API 요청에 오류가 있습니다. ' + error)
-        })
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
     publicApi() {
-      if (confirm("기존 데이터를 모두 삭제합니다 진행 하시겠습니까?")) { 
-        
+      if (confirm("기존 데이터를 모두 삭제합니다 진행 하시겠습니까?")) {
         this.axios
-        .post('/support/apiHoliday')
-        .then((response) => {
-           console.log(JSON.stringify(response))
-           alert(response.data.resultMsg);
+          .post("/support/apiHoliday")
+          .then((response) => {
+            console.log(JSON.stringify(response));
+            alert(response.data.resultMsg);
 
-           this.searchList();
-
-        })
-        .catch(function (error) {
-          alert('에러! API 요청에 오류가 있습니다. ' + error)
-        })
+            this.searchList();
+          })
+          .catch(function (error) {
+            alert("에러! API 요청에 오류가 있습니다. " + error);
+          });
       }
-
     },
     holidayModify(dayoff_no) {
       this.action = "U";
@@ -143,16 +142,16 @@ export default {
       this.addModal = false;
     },
     page: function () {
-      var total = this.totalCnt
-      var page = this.pageSize
-      var xx = total % page
-      var result = parseInt(total / page)
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var xx = total % page;
+      var result = parseInt(total / page);
 
       if (xx == 0) {
-        return result
+        return result;
       } else {
-        result = result + 1
-        return result
+        result = result + 1;
+        return result;
       }
     },
   },
@@ -250,6 +249,7 @@ export default {
   text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  text-align: center !important;
 }
 
 .dashboard-table th {

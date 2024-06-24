@@ -103,7 +103,9 @@
             </template>
             <template v-else>
               <tr>
-                <td colspan="9">조회된 데이터가 없습니다.</td>
+                <td colspan="9" style="text-align: center">
+                  조회된 데이터가 없습니다.
+                </td>
               </tr>
             </template>
           </tbody>

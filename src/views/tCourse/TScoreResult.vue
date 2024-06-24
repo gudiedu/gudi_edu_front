@@ -13,9 +13,13 @@
         <tr v-for="result in paginatedResults" :key="result.loginID">
           <td class="text-center">{{ result.name }}</td>
           <td class="text-center">{{ result.result_score }}</td>
-          <td class="text-center">{{ result.result_no ? '응시' : '미응시' }}</td>
           <td class="text-center">
-            <button class="result-button" @click="showStudentDetails(result)">더보기</button>
+            {{ result.result_no ? "응시" : "미응시" }}
+          </td>
+          <td class="text-center">
+            <button class="result-button" @click="showStudentDetails(result)">
+              더보기
+            </button>
           </td>
         </tr>
         <tr v-if="paginatedResults.length === 0">
@@ -24,9 +28,17 @@
       </tbody>
     </v-table>
     <div class="pagination">
-      <paginate v-model="currentPage" :page-count="pageCount" :page-range="3" :margin-pages="2"
-        :click-handler="handlePageChange" :container-class="'pagination-container'" :page-class="'pagination-page'"
-        :prev-text="'Prev'" :next-text="'Next'"></paginate>
+      <paginate
+        v-model="currentPage"
+        :page-count="pageCount"
+        :page-range="3"
+        :margin-pages="2"
+        :click-handler="handlePageChange"
+        :container-class="'pagination-container'"
+        :page-class="'pagination-page'"
+        :prev-text="'Prev'"
+        :next-text="'Next'"
+      ></paginate>
     </div>
 
     <!-- 통계 정보 표시 -->
@@ -40,50 +52,70 @@
     <v-dialog v-model="showDetails" max-width="700">
       <v-card>
         <v-card-title class="title-box">
-          <span class="title-info-box">{{ selectedStudent.name }}의 상세 정보</span>
+          <span class="title-info-box"
+            >{{ selectedStudent.name }}의 상세 정보</span
+          >
         </v-card-title>
         <v-card-text>
           <div class="modal-content">
             <div class="info-grid">
-              <div><strong>강의과목</strong>
+              <div>
+                <strong>강의과목</strong>
                 <div class="info-box">{{ lectureName }}</div>
               </div>
-              <div><strong>시험명</strong>
+              <div>
+                <strong>시험명</strong>
                 <div class="info-box">{{ testCategory }}</div>
               </div>
-              <div><strong>학생 이름</strong>
+              <div>
+                <strong>학생 이름</strong>
                 <div class="info-box">{{ selectedStudent.name }}</div>
               </div>
-              <div><strong>응시 여부</strong>
-                <div class="info-box">{{ selectedStudent.result_no ? '응시' : '미응시' }}</div>
+              <div>
+                <strong>응시 여부</strong>
+                <div class="info-box">
+                  {{ selectedStudent.result_no ? "응시" : "미응시" }}
+                </div>
               </div>
-              <div><strong>총 점수</strong>
+              <div>
+                <strong>총 점수</strong>
                 <div class="info-box">{{ totalScore }}</div>
               </div>
             </div>
-            <div v-for="(detail, index) in studentDetails" :key="index" class="question-detail">
+            <div
+              v-for="(detail, index) in studentDetails"
+              :key="index"
+              class="question-detail"
+            >
               <div class="question-block">
-                <div><strong>문제명</strong>
+                <div>
+                  <strong>문제명</strong>
                   <div class="question-box">{{ detail.test_question }}</div>
                 </div>
               </div>
               <div class="answer-block">
-                <div class="answer-item"><strong>보기1</strong>
+                <div class="answer-item">
+                  <strong>보기1</strong>
                   <div class="answer-box">{{ detail.test_choice1 }}</div>
                 </div>
-                <div class="answer-item"><strong>보기2</strong>
+                <div class="answer-item">
+                  <strong>보기2</strong>
                   <div class="answer-box">{{ detail.test_choice2 }}</div>
                 </div>
-                <div class="answer-item"><strong>보기3</strong>
+                <div class="answer-item">
+                  <strong>보기3</strong>
                   <div class="answer-box">{{ detail.test_choice3 }}</div>
                 </div>
-                <div class="answer-item"><strong>보기4</strong>
+                <div class="answer-item">
+                  <strong>보기4</strong>
                   <div class="answer-box">{{ detail.test_choice4 }}</div>
                 </div>
-                <div class="answer-item"><strong>정답</strong>
+                <div class="answer-item">
+                  <strong>정답</strong>
                   <div class="answer-box">{{ detail.test_answer }}</div>
                 </div>
-                <div class="answer-item"><strong>선택한 보기</strong>
+                <div class="answer-item">
+                  <strong>선택한 보기</strong>
                   <div class="answer-box">{{ detail.answer_selected }}</div>
                 </div>
               </div>
@@ -99,7 +131,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 import Paginate from "vuejs-paginate-next";
 
 export default {
@@ -123,7 +155,7 @@ export default {
       showDetails: false,
       selectedStudent: {},
       studentDetails: [],
-      testCategory: '',
+      testCategory: "",
       totalScore: 0, // 총 점수 저장할 변수
     };
   },
@@ -146,7 +178,7 @@ export default {
         }
       }
       return uniqueStudents;
-    }
+    },
   },
   watch: {
     courseNo: {
@@ -161,23 +193,25 @@ export default {
   },
   methods: {
     fetchTestResults(courseNo) {
-      axios.post('/tCourse/testResults', { course_no: courseNo })
-        .then(response => {
+      axios
+        .post("/tCourse/testResults", { course_no: courseNo })
+        .then((response) => {
           this.results = JSON.parse(JSON.stringify(response.data.testResults));
-          console.log('시험 응시 결과:', this.results);
+          console.log("시험 응시 결과:", this.results);
         })
-        .catch(error => {
-          alert('에러! 시험 응시 결과를 불러오지 못했습니다. ' + error);
+        .catch((error) => {
+          alert("에러! 시험 응시 결과를 불러오지 못했습니다. " + error);
         });
     },
     fetchTestStatistics(courseNo) {
-      axios.post('/tCourse/testStatistics', { course_no: courseNo })
-        .then(response => {
+      axios
+        .post("/tCourse/testStatistics", { course_no: courseNo })
+        .then((response) => {
           this.statistics = response.data.statistics;
-          console.log('통계 정보:', this.statistics);
+          console.log("통계 정보:", this.statistics);
         })
-        .catch(error => {
-          alert('에러! 통계 정보를 불러오지 못했습니다. ' + error);
+        .catch((error) => {
+          alert("에러! 통계 정보를 불러오지 못했습니다. " + error);
         });
     },
     handlePageChange(pageNum) {
@@ -185,23 +219,29 @@ export default {
     },
     showStudentDetails(student) {
       if (!student.result_no) {
-        alert('미응시 학생입니다');
+        alert("미응시 학생입니다");
         return;
       }
       this.selectedStudent = student;
-      axios.post('/tCourse/studentTestDetails', { course_no: this.courseNo, loginID: student.loginID })
-        .then(response => {
-          this.studentDetails = JSON.parse(JSON.stringify(response.data.studentTestDetails));
+      axios
+        .post("/tCourse/studentTestDetails", {
+          course_no: this.courseNo,
+          loginID: student.loginID,
+        })
+        .then((response) => {
+          this.studentDetails = JSON.parse(
+            JSON.stringify(response.data.studentTestDetails)
+          );
           if (this.studentDetails.length === 0) {
-            alert('조회된 데이터가 없습니다.');
+            alert("조회된 데이터가 없습니다.");
           } else {
             this.testCategory = this.studentDetails[0].test_category;
             this.totalScore = this.studentDetails[0].result_score; // 총 점수 설정
             this.showDetails = true;
           }
         })
-        .catch(error => {
-          alert('에러! 학생 상세 정보를 불러오지 못했습니다. ' + error);
+        .catch((error) => {
+          alert("에러! 학생 상세 정보를 불러오지 못했습니다. " + error);
         });
     },
   },
@@ -277,17 +317,32 @@ export default {
 }
 
 .result-button {
-  padding: 10px 17px;
-  background-color: #64aefd;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+  margin: 0 auto;
+  display: flex;
+  width: 70px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 50px;
+  padding: 8px 15px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .result-button:hover {
-  background-color: #64aefd;
+  display: flex;
+  width: 70px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 8px 15px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .v-card-text div {
@@ -357,9 +412,6 @@ export default {
   height: 70px;
 }
 
-
-
-
 .title-box {
   display: flex;
   justify-content: space-between;
@@ -370,9 +422,6 @@ export default {
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
 }
-
-
-
 
 .title-info-box {
   padding: 10px;

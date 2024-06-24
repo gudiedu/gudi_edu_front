@@ -59,7 +59,9 @@
                   ({{ item.respondent_count || 0 }} /
                   {{ item.confirmed_count }})
                 </td>
-                <td @click="viewSurveyResult(item.course_no)">결과확인</td>
+                <td @click="viewSurveyResult(item.course_no)">
+                  <span class="result-button">결과확인</span>
+                </td>
               </tr>
             </template>
           </template>
@@ -277,6 +279,7 @@ export default {
   width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
+  cursor: pointer;
 }
 
 .dashboard-table th,
@@ -301,5 +304,33 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100%;
+}
+
+.result-button {
+  display: flex;
+  width: 85px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 50px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.result-button:hover {
+  display: flex;
+  width: 85px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
 }
 </style>

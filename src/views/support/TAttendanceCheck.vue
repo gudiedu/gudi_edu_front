@@ -13,51 +13,49 @@
             <th>조퇴</th>
             <th>결석</th>
           </template>
-          
         </tr>
       </thead>
       <tbody>
         <template v-if="isHolidayOrWeekend">
-           <tr v-for="(student, index) in students" :key="index">
-            <td>{{ student.name }}</td>
-            <td>{{ student.hp }}</td>
-            <td>{{holidayMessage}}</td>
-          </tr>
-
-        </template>
-        <template v-else>
-          <template v-if="totalCnt > 0">
           <tr v-for="(student, index) in students" :key="index">
             <td>{{ student.name }}</td>
             <td>{{ student.hp }}</td>
-            <td>
-              <input
-                type="radio"
-                :name="'status-' + index"
-                :value="'지각'"
-                v-model="student.attendance_status"
-                @click="toggleRadio(index, '지각')"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                :name="'status-' + index"
-                :value="'조퇴'"
-                v-model="student.attendance_status"
-                @click="toggleRadio(index, '조퇴')"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                :name="'status-' + index"
-                :value="'결석'"
-                v-model="student.attendance_status"
-                @click="toggleRadio(index, '결석')"
-              />
-            </td>
+            <td>{{ holidayMessage }}</td>
           </tr>
+        </template>
+        <template v-else>
+          <template v-if="totalCnt > 0">
+            <tr v-for="(student, index) in students" :key="index">
+              <td>{{ student.name }}</td>
+              <td>{{ student.hp }}</td>
+              <td>
+                <input
+                  type="radio"
+                  :name="'status-' + index"
+                  :value="'지각'"
+                  v-model="student.attendance_status"
+                  @click="toggleRadio(index, '지각')"
+                />
+              </td>
+              <td>
+                <input
+                  type="radio"
+                  :name="'status-' + index"
+                  :value="'조퇴'"
+                  v-model="student.attendance_status"
+                  @click="toggleRadio(index, '조퇴')"
+                />
+              </td>
+              <td>
+                <input
+                  type="radio"
+                  :name="'status-' + index"
+                  :value="'결석'"
+                  v-model="student.attendance_status"
+                  @click="toggleRadio(index, '결석')"
+                />
+              </td>
+            </tr>
           </template>
           <template v-else>
             <tr>
@@ -65,46 +63,45 @@
             </tr>
           </template>
         </template>
-
       </tbody>
     </v-table>
-    <template v-if="isHolidayOrWeekend">
-    </template>
+    <template v-if="isHolidayOrWeekend"> </template>
     <template v-else>
-    <div class="submitAttendance">
-       <template v-if="totalCnt > 0">
-          <button @click="submitAttendance">출석 완료</button>
-       </template>
-    </div>
+      <div class="submitAttendance">
+        <template v-if="totalCnt > 0">
+          <button @click="submitAttendance">출석완료</button>
+        </template>
+      </div>
     </template>
-
   </div>
 </template>
 
 <script>
 export default {
-    props: {
+  props: {
     courseNo: Number,
   },
   data() {
     return {
       students: [],
       attendance_status: "출석",
-      totalCnt:"",
+      totalCnt: "",
       listDay: [],
-      today: new Date().toISOString().split('T')[0],
-      duration:"",
-      days_elapsed:"",
-
-      
+      today: new Date().toISOString().split("T")[0],
+      duration: "",
+      days_elapsed: "",
     };
-  },  
+  },
   mounted() {
-    this.searchList()
+    this.searchList();
   },
   computed: {
     isHolidayOrWeekend() {
-      return this.isHoliday(this.today) || this.isWeekend(this.today) || this.isComplete();
+      return (
+        this.isHoliday(this.today) ||
+        this.isWeekend(this.today) ||
+        this.isComplete()
+      );
     },
     holidayMessage() {
       if (this.isHoliday(this.today)) {
@@ -114,44 +111,41 @@ export default {
       } else {
         return "종료된 강의입니다.";
       }
-    }
-
+    },
   },
   methods: {
     isHoliday(date) {
-      const dateString = date.split('T')[0];
-      return this.listDay.some(item => item.dayoff_date === dateString);
+      const dateString = date.split("T")[0];
+      return this.listDay.some((item) => item.dayoff_date === dateString);
     },
     isWeekend(date) {
       const day = new Date(date).getDay();
       return day === 0 || day === 6; // 0: Sunday, 6: Saturday
     },
     isComplete() {
-     return this.duration === this.days_elapsed
+      return this.duration === this.days_elapsed;
     },
     searchList: function () {
+      let vm = this;
 
-      let vm = this 
-
-      let params = new URLSearchParams() 
-      params.append('courseNo', this.courseNo)
+      let params = new URLSearchParams();
+      params.append("courseNo", this.courseNo);
 
       this.axios
-        .post('/support/infoAttendance', params)
+        .post("/support/infoAttendance", params)
         .then((response) => {
           // console.log(JSON.stringify(response))
-          console.log(JSON.stringify(response.data.listDay))
+          console.log(JSON.stringify(response.data.listDay));
 
-          vm.students = response.data.listdata
-          vm.totalCnt = response.data.totalcnt
-          vm.listDay = response.data.listDay
-          vm.duration = response.data.attend.duration
-          vm.days_elapsed = response.data.attend.days_elapsed
-          
+          vm.students = response.data.listdata;
+          vm.totalCnt = response.data.totalcnt;
+          vm.listDay = response.data.listDay;
+          vm.duration = response.data.attend.duration;
+          vm.days_elapsed = response.data.attend.days_elapsed;
         })
         .catch(function (error) {
-          alert('에러! API 요청에 오류가 있습니다. ' + error)
-        })
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
     toggleRadio(index, value) {
       if (this.students[index].attendance_status === value) {
@@ -159,30 +153,28 @@ export default {
       }
     },
     submitAttendance() {
-
       this.students.forEach((student) => {
         if (!student.attendance_status) {
-          student.attendance_status = '출석';
+          student.attendance_status = "출석";
         }
       });
 
-      let params = new URLSearchParams()
-      params.append('courseNo', this.courseNo)
-      params.append('students', JSON.stringify(this.students))
-      
+      let params = new URLSearchParams();
+      params.append("courseNo", this.courseNo);
+      params.append("students", JSON.stringify(this.students));
+
       // JSON.stringify(this.weeks))
 
       this.axios
-        .post('/support/saveAttendance', params)
+        .post("/support/saveAttendance", params)
         .then((response) => {
           // console.log(JSON.stringify(response))
-          alert(response.data.resultMsg)
+          alert(response.data.resultMsg);
         })
         .catch(function (error) {
-          alert('에러! API 요청에 오류가 있습니다. ' + error)
-        })
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
-
   },
 };
 </script>
@@ -213,7 +205,8 @@ export default {
 }
 
 button {
-  padding: 10px 20px;
+  padding: 6px 12px;
+  font-size: 16px;
   background-color: #007bff;
   color: white;
   border: none;

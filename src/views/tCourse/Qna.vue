@@ -12,10 +12,22 @@
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" @keyup.enter="onEnterKey" />
+            <input
+              type="text"
+              class="search-input"
+              placeholder="검색어를 입력해주세요."
+              v-model="stitle"
+              @keyup.enter="onEnterKey"
+            />
           </div>
           <div class="button-group">
-            <button class="search-button" @click="searchList" ref="searchButton">검색</button>
+            <button
+              class="search-button"
+              @click="searchList"
+              ref="searchButton"
+            >
+              검색
+            </button>
           </div>
         </div>
       </div>
@@ -54,7 +66,9 @@
           </template>
           <template v-else>
             <tr>
-              <td colspan="5">질의응답이 없습니다.</td>
+              <td colspan="5" style="text-align: center">
+                질의응답이 없습니다.
+              </td>
             </tr>
           </template>
         </tbody>
@@ -164,7 +178,8 @@ export default {
           // 전체 데이터의 인덱스를 기반으로 글 번호를 매김 (오래된 순으로 번호 매기기)
           let totalData = vm.questionList.map((item, index) => {
             console.log(vm.totalCnt, vm.currentPage, vm.pageSize, index);
-            item.display_no = vm.totalCnt - ((vm.currentPage - 1) * vm.pageSize + index);
+            item.display_no =
+              vm.totalCnt - ((vm.currentPage - 1) * vm.pageSize + index);
             return item;
           });
 
@@ -218,6 +233,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #fff;
+  cursor: pointer;
 }
 
 .titletext {
