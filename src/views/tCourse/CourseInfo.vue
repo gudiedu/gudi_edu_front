@@ -6,46 +6,44 @@
           <div class="titletext">{{ titleText }}</div>
           <v-spacer></v-spacer>
         </v-card-title>
-        
       </div>
-      
 
       <v-divider></v-divider>
 
       <v-card class="dashboard-card">
         <div class="titletext">강의 정보</div>
-      <div class="container">
-        <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findStatus('all')"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'ing' }"
-            @click="findStatus('ing')"
-            >진행중</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'complete',
-            }"
-            @click="findStatus('complete')"
-            >진행완료</v-btn
-          >
-          <v-btn
-            :class="{
-              'filter-button': true,
-              active: activeFilter === 'expect',
-            }"
-            @click="findStatus('expect')"
-            >진행예정</v-btn
-          >
+        <div class="container">
+          <div class="filter-button-group">
+            <v-btn
+              :class="{ 'filter-button': true, active: activeFilter === 'all' }"
+              @click="findStatus('all')"
+              >전체</v-btn
+            >
+            <v-btn
+              :class="{ 'filter-button': true, active: activeFilter === 'ing' }"
+              @click="findStatus('ing')"
+              >진행중</v-btn
+            >
+            <v-btn
+              :class="{
+                'filter-button': true,
+                active: activeFilter === 'complete',
+              }"
+              @click="findStatus('complete')"
+              >진행완료</v-btn
+            >
+            <v-btn
+              :class="{
+                'filter-button': true,
+                active: activeFilter === 'expect',
+              }"
+              @click="findStatus('expect')"
+              >진행예정</v-btn
+            >
+          </div>
         </div>
-      </div>
         <v-table class="dashboard-table">
-        <colgroup>
+          <colgroup>
             <col width="*%" />
             <col width="9%" />
             <col width="10%" />
@@ -55,7 +53,7 @@
             <col width="9%" />
             <col width="9%" />
             <col width="9%" />
-        </colgroup>
+          </colgroup>
           <thead>
             <tr>
               <th>강의명</th>
@@ -70,59 +68,78 @@
             </tr>
           </thead>
           <tbody>
-          <template v-if="totalCnt > 0">
-            <template v-for="item in courseList" :key="item.course_no">
+            <template v-if="totalCnt > 0">
+              <template v-for="item in courseList" :key="item.course_no">
+                <tr>
+                  <td>{{ item.course_name }}</td>
+                  <td>{{ item.course_subject }}</td>
+                  <td>{{ item.course_loc }}</td>
+                  <td>{{ item.course_start_date }}</td>
+                  <td>{{ item.course_end_date }}</td>
+                  <td>{{ item.countstudent }}명</td>
+                  <td>{{ item.course_quota }}명</td>
+                  <td>
+                    {{
+                      getCourseStatus(
+                        item.course_start_date,
+                        item.course_end_date
+                      )
+                    }}
+                  </td>
+                  <td
+                    @click="
+                      showAttendance(
+                        item.course_no,
+                        item.course_start_date,
+                        item.course_end_date
+                      )
+                    "
+                    class="showAttendance"
+                  >
+                    <span class="list-button">명단조회</span>
+                  </td>
+                </tr>
+              </template>
+            </template>
+            <template v-else>
               <tr>
-                <td>{{ item.course_name }}</td>
-                <td>{{ item.course_subject}}</td>
-                <td>{{ item.course_loc}}</td>
-                <td>{{ item.course_start_date}}</td>
-                <td>{{ item.course_end_date}}</td>
-                <td>{{item.countstudent}}명</td>
-                <td>{{ item.course_quota}}명</td>
-                <td>{{ getCourseStatus(item.course_start_date, item.course_end_date) }}</td>
-                <td @click="showAttendance(item.course_no, item.course_start_date, item.course_end_date)" class="showAttendance">명단조회</td>
+                <td colspan="9">조회된 데이터가 없습니다.</td>
               </tr>
             </template>
-          </template>
-          <template v-else>
-            <tr>
-              <td colspan="9">조회된 데이터가 없습니다.</td>
-            </tr>
-          </template>
           </tbody>
         </v-table>
       </v-card>
 
-    <div id="noticePagination">
-      <paginate
-        class="justify-content-center"
-        v-model="currentPage"
-        :page-count="page()"
-        :page-range="5"
-        :margin-pages="0"
-        :click-handler="searchList"
-        :prev-text="'이전'"
-        :next-text="'다음'"
-        :container-class="'pagination'"
-        :page-class="'page-item'"
-      ></paginate>
-    </div>
-
+      <div id="noticePagination">
+        <paginate
+          class="justify-content-center"
+          v-model="currentPage"
+          :page-count="page()"
+          :page-range="5"
+          :margin-pages="0"
+          :click-handler="searchList"
+          :prev-text="'이전'"
+          :next-text="'다음'"
+          :container-class="'pagination'"
+          :page-class="'page-item'"
+        ></paginate>
+      </div>
 
       <v-card v-if="attendance" class="dashboard-card">
         <div class="titletext">수강생 명단</div>
-        <Attendance :courseNo=courseNo :stateMsg=stateMsg @execute-search-list="searchList" />
+        <Attendance
+          :courseNo="courseNo"
+          :stateMsg="stateMsg"
+          @execute-search-list="searchList"
+        />
       </v-card>
     </v-card>
-
- 
   </v-container>
 </template>
 
 <script>
 import Attendance from "./TStudentApprovalAttendance.vue";
-import Paginate from 'vuejs-paginate-next';
+import Paginate from "vuejs-paginate-next";
 
 export default {
   components: { Attendance, Paginate },
@@ -133,38 +150,37 @@ export default {
       pageSize: 5,
       currentPage: 1,
       courseList: [],
-      courseNo:"",
+      courseNo: "",
       status: "",
       activeFilter: "all",
       stateMsg: "",
-      
+
       attendance: false,
     };
   },
   mounted() {
-    this.searchList()
+    this.searchList();
   },
   methods: {
     searchList: function () {
+      let vm = this;
 
-      let vm = this 
-
-      let params = new URLSearchParams() 
-      params.append('currentPage', this.currentPage)
-      params.append('pageSize', this.pageSize)
-      params.append('status', this.status)
+      let params = new URLSearchParams();
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
+      params.append("status", this.status);
 
       this.axios
-        .post('/tCourse/listCourseInfo', params)
+        .post("/tCourse/listCourseInfo", params)
         .then((response) => {
           // console.log(JSON.stringify(response))
 
-          vm.courseList = response.data.listdata
-          vm.totalCnt = response.data.totalcnt
+          vm.courseList = response.data.listdata;
+          vm.totalCnt = response.data.totalcnt;
         })
         .catch(function (error) {
-          alert('에러! API 요청에 오류가 있습니다. ' + error)
-        })
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
     findStatus(param) {
       if (param === "all") {
@@ -179,14 +195,13 @@ export default {
         this.activeFilter = param;
         this.currentPage = 1;
         this.status = param;
-      } else if (param ==="expect") {
+      } else if (param === "expect") {
         this.activeFilter = param;
         this.currentPage = 1;
         this.status = param;
       }
 
       this.searchList();
-
     },
 
     getCourseStatus(startdate, enddate) {
@@ -201,31 +216,30 @@ export default {
       } else if (currentDate > end) {
         return "진행완료";
       }
-
     },
     showAttendance(course_no, st_date, end_date) {
       if (this.courseNo !== course_no) {
-          this.courseNo = course_no;
+        this.courseNo = course_no;
 
-          this.stateMsg = this.getCourseStatus(st_date, end_date);
+        this.stateMsg = this.getCourseStatus(st_date, end_date);
 
-          this.attendance = false;
-          this.$nextTick(() => {
+        this.attendance = false;
+        this.$nextTick(() => {
           this.attendance = true;
         });
       }
     },
     page: function () {
-      var total = this.totalCnt
-      var page = this.pageSize
-      var xx = total % page
-      var result = parseInt(total / page)
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var xx = total % page;
+      var result = parseInt(total / page);
 
       if (xx == 0) {
-        return result
+        return result;
       } else {
-        result = result + 1
-        return result
+        result = result + 1;
+        return result;
       }
     },
   },
@@ -260,7 +274,7 @@ export default {
 }
 
 .container {
-  margin-top:10px;
+  margin-top: 10px;
   display: flex;
   justify-content: space-between;
   height: 50px;
@@ -351,5 +365,33 @@ export default {
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.list-button {
+  display: flex;
+  width: 60px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 10px;
+  padding: 0px 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.list-button:hover {
+  display: flex;
+  width: 60px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 10px;
+  padding: 0px 5px;
+  font-size: 12px;
+  font-weight: 600;
 }
 </style>

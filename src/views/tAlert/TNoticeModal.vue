@@ -2,24 +2,44 @@
   <div class="lecture-detail">
     <h2 class="title">공지사항</h2>
 
-    <form id="file-form" enctype="multipart/form-data" @submit.prevent="insertNotice">
+    <form
+      id="file-form"
+      enctype="multipart/form-data"
+      @submit.prevent="insertNotice"
+    >
       <table class="info-table">
         <tr>
           <td class="label">제목</td>
           <td class="content">
-            <input type="text" name="noticeTitle" v-model="noticeTitle" class="form-input" maxlength="50" />
+            <input
+              type="text"
+              name="noticeTitle"
+              v-model="noticeTitle"
+              class="form-input"
+              maxlength="50"
+            />
           </td>
         </tr>
         <tr class="content">
           <td class="label">내용</td>
           <td class="content">
-            <textarea name="noticeContent" v-model="noticeContent" class="form-textarea" maxlength="2000"></textarea>
+            <textarea
+              name="noticeContent"
+              v-model="noticeContent"
+              class="form-textarea"
+              maxlength="2000"
+            ></textarea>
           </td>
         </tr>
         <tr>
           <td class="label">파일</td>
           <td class="content">
-            <input type="file" id="file-insert" name="file-insert" @change="handleFileChange" />
+            <input
+              type="file"
+              id="file-insert"
+              name="file-insert"
+              @change="handleFileChange"
+            />
           </td>
         </tr>
       </table>
@@ -169,6 +189,8 @@ export default {
 
 .insert-button,
 .cancel-button {
+  width: 60px;
+  height: 40px;
   color: #ffffff;
   border: none;
   border-radius: 4px;

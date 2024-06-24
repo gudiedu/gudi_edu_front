@@ -28,19 +28,29 @@
       <tr class="content">
         <td class="label">내용</td>
         <td class="content">
-          <div v-if="!noticeEditing" style="height: 400px; overflow-y: auto">{{ noticeContent }}</div>
-          <textarea v-else v-model="noticeContent" class="form-textarea"></textarea>
+          <div v-if="!noticeEditing" style="height: 400px; overflow-y: auto">
+            {{ noticeContent }}
+          </div>
+          <textarea
+            v-else
+            v-model="noticeContent"
+            class="form-textarea"
+          ></textarea>
         </td>
       </tr>
 
       <tr class="content" v-if="fileName || noticeEditing">
         <td class="label">첨부파일</td>
         <td class="content">
-          <div v-if="!noticeEditing && fileName" id="preview" @click="downLoad">{{ fileName }}</div>
+          <div v-if="!noticeEditing && fileName" id="preview" @click="downLoad">
+            {{ fileName }}
+          </div>
           <div v-else>
             <div v-if="fileName">
               <span>{{ fileName }}</span>
-              <v-btn class="remove-file-button" @click="removeFile">파일 삭제</v-btn>
+              <v-btn class="remove-file-button" @click="removeFile"
+                >파일 삭제</v-btn
+              >
             </div>
             <input type="file" id="file-insert" @change="handleFileChange" />
           </div>
@@ -48,10 +58,21 @@
       </tr>
     </table>
     <div class="button-group">
-      <v-btn v-if="noticeEditing" class="save-button" @click="saveNotice">저장</v-btn>
-      <v-btn v-else-if="isMyNotice" class="update-button" @click="noticeEditing = true">수정</v-btn>
-      <v-btn class="delete-button" @click="deleteNotice" v-if="isMyNotice">삭제</v-btn>
-      <v-btn class="cancel-button" @click="cancelEdit">{{ noticeEditing ? "취소" : "닫기" }}</v-btn>
+      <v-btn v-if="noticeEditing" class="save-button" @click="saveNotice"
+        >저장</v-btn
+      >
+      <v-btn
+        v-else-if="isMyNotice"
+        class="update-button"
+        @click="noticeEditing = true"
+        >수정</v-btn
+      >
+      <v-btn class="delete-button" @click="deleteNotice" v-if="isMyNotice"
+        >삭제</v-btn
+      >
+      <v-btn class="cancel-button" @click="cancelEdit">{{
+        noticeEditing ? "취소" : "닫기"
+      }}</v-btn>
     </div>
   </div>
 </template>
@@ -302,6 +323,8 @@ export default {
 .save-button,
 .delete-button,
 .cancel-button {
+  width: 60px;
+  height: 40px;
   color: #ffffff;
   border: none;
   border-radius: 4px;

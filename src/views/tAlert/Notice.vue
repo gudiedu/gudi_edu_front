@@ -8,15 +8,33 @@
 
       <div class="container">
         <div class="filter-button-group">
-          <v-btn :class="{ 'filter-button': true, active: activeFilter === 'all' }" @click="findAll">전체</v-btn>
-          <v-btn :class="{ 'filter-button': true, active: activeFilter === 'a' }" @click="findAdmin">관리자</v-btn>
-          <v-btn :class="{ 'filter-button': true, active: activeFilter === 't' }" @click="findTeacher">강사</v-btn>
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
+            @click="findAll"
+            >전체</v-btn
+          >
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 'a' }"
+            @click="findAdmin"
+            >관리자</v-btn
+          >
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 't' }"
+            @click="findTeacher"
+            >강사</v-btn
+          >
         </div>
 
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" @keyup.enter="searchMethod" />
+            <input
+              type="text"
+              class="search-input"
+              placeholder="검색어를 입력해주세요."
+              v-model="stitle"
+              @keyup.enter="searchMethod"
+            />
           </div>
           <div class="button-group">
             <button class="search-button" @click="searchMethod">검색</button>
@@ -86,7 +104,11 @@
     <v-dialog v-model="selectModal" max-width="800px" max-height="1000px">
       <v-card>
         <v-card-text>
-          <NoticeSelectModal @close-modal="closeSelectModal" :action="action" :noticeNo="noticeNo" />
+          <NoticeSelectModal
+            @close-modal="closeSelectModal"
+            :action="action"
+            :noticeNo="noticeNo"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -155,7 +177,8 @@ export default {
 
           // 전체 데이터의 인덱스를 기반으로 글 번호를 매김 (오래된 순으로 번호 매기기)
           let totalData = vm.noticeList.map((item, index) => {
-            item.display_no = vm.totalCnt - ((vm.currentPage - 1) * vm.pageSize + index);
+            item.display_no =
+              vm.totalCnt - ((vm.currentPage - 1) * vm.pageSize + index);
             return item;
           });
 
@@ -238,6 +261,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #fff;
+  cursor: pointer;
 }
 
 .titletext {

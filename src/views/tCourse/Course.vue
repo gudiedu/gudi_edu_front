@@ -65,7 +65,7 @@
           <col width="13%" />
           <col width="9%" />
           <col width="11%" />
-      </colgroup>
+        </colgroup>
         <thead>
           <tr>
             <th>글번호</th>
@@ -80,7 +80,6 @@
           </tr>
         </thead>
         <tbody>
-
           <template v-if="totalCnt > 0">
             <template v-for="(item, index) in courseList" :key="item.course_no">
               <tr>
@@ -88,13 +87,20 @@
                 <td @click="getLectureDetail(item.course_no)">
                   {{ item.course_name }}
                 </td>
-                <td>{{ item.course_subject}}</td>
-                <td>{{ item.course_quota}}명</td>
-                <td>{{ item.duration}}일</td>
-                <td>{{ item.course_start_date}}</td>
-                <td>{{ item.course_end_date}}</td>
-                <td>{{ item.course_loc}}</td>
-                <td>{{ getCourseStatus(item.course_start_date, item.course_end_date) }}</td>
+                <td>{{ item.course_subject }}</td>
+                <td>{{ item.course_quota }}명</td>
+                <td>{{ item.duration }}일</td>
+                <td>{{ item.course_start_date }}</td>
+                <td>{{ item.course_end_date }}</td>
+                <td>{{ item.course_loc }}</td>
+                <td>
+                  {{
+                    getCourseStatus(
+                      item.course_start_date,
+                      item.course_end_date
+                    )
+                  }}
+                </td>
               </tr>
             </template>
           </template>
@@ -106,7 +112,7 @@
         </tbody>
       </v-table>
     </v-card>
-    
+
     <div id="noticePagination">
       <paginate
         class="justify-content-center"
@@ -139,8 +145,8 @@
 
 <script>
 import LectureManagementModal from "./TCourseModal.vue";
-import Paginate from 'vuejs-paginate-next';
-import { openModal } from 'jenesius-vue-modal'
+import Paginate from "vuejs-paginate-next";
+import { openModal } from "jenesius-vue-modal";
 
 export default {
   components: { Paginate },
@@ -156,37 +162,33 @@ export default {
       pageSize: 10,
       currentPage: 1,
       courseList: [],
-      opoupreturn:"",
-
-
+      opoupreturn: "",
     };
   },
-    mounted() {
-    this.searchList()
+  mounted() {
+    this.searchList();
   },
   methods: {
-
     searchList: function () {
+      let vm = this; //this를 axios안에서 사용할 수 없으므로 별도로 할달을 빼놓았음
 
-      let vm = this //this를 axios안에서 사용할 수 없으므로 별도로 할달을 빼놓았음
-
-      let params = new URLSearchParams() //파라미터를 넘길 때 사용
-      params.append('stitle', this.stitle)
-      params.append('status', this.status)
-      params.append('currentPage', this.currentPage)
-      params.append('pageSize', this.pageSize)
+      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      params.append("stitle", this.stitle);
+      params.append("status", this.status);
+      params.append("currentPage", this.currentPage);
+      params.append("pageSize", this.pageSize);
 
       this.axios
-        .post('/tCourse/listCourse', params)
+        .post("/tCourse/listCourse", params)
         .then((response) => {
           // console.log(JSON.stringify(response))
 
-          vm.courseList = response.data.listdata
-          vm.totalCnt = response.data.totalcnt
+          vm.courseList = response.data.listdata;
+          vm.totalCnt = response.data.totalcnt;
         })
         .catch(function (error) {
-          alert('에러! API 요청에 오류가 있습니다. ' + error)
-        })
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
     findStatus(param) {
       if (param === "all") {
@@ -201,14 +203,13 @@ export default {
         this.activeFilter = param;
         this.currentPage = 1;
         this.status = param;
-      } else if (param ==="expect") {
+      } else if (param === "expect") {
         this.activeFilter = param;
         this.currentPage = 1;
         this.status = param;
       }
 
       this.searchList();
-
     },
 
     getCourseStatus(startdate, enddate) {
@@ -223,56 +224,52 @@ export default {
       } else if (currentDate > end) {
         return "진행완료";
       }
-
     },
     openPopup: async function () {
       const popUpVar = await openModal(LectureManagementModal, {
-        
         title: this.pTitle,
         courseNo: "",
         action: this.action,
         retrunval: (value) => {
-          this.opoupreturn = value
-          console.log('return val : ' + value)
+          this.opoupreturn = value;
+          console.log("return val : " + value);
         },
-      })
+      });
 
       popUpVar.onclose = () => {
-        console.log('Close')
+        console.log("Close");
         //팝업창이 닫히면 리스트 다시 새로고침 (등록, 수정 한 데이터가 업로드 된다.)
-        if (this.opoupreturn === 'Y') {
-          this.searchList()
+        if (this.opoupreturn === "Y") {
+          this.searchList();
         }
         // return false;
-      }
+      };
 
-      console.log(popUpVar)
+      console.log(popUpVar);
     },
 
     openAddModal() {
       this.action = "I";
       this.openPopup();
-
     },
-    closeAddModal() {
-    },
+    closeAddModal() {},
     getLectureDetail(courseNo) {
       this.$router.push({
         name: "tCourseDetail",
-        params: {course_no: courseNo},
+        params: { course_no: courseNo },
       });
     },
     page: function () {
-      var total = this.totalCnt
-      var page = this.pageSize
-      var xx = total % page
-      var result = parseInt(total / page)
+      var total = this.totalCnt;
+      var page = this.pageSize;
+      var xx = total % page;
+      var result = parseInt(total / page);
 
       if (xx == 0) {
-        return result
+        return result;
       } else {
-        result = result + 1
-        return result
+        result = result + 1;
+        return result;
       }
     },
   },
@@ -286,6 +283,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #fff;
+  cursor: pointer;
 }
 
 .titletext {

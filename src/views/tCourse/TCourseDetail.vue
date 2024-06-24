@@ -29,12 +29,12 @@
           </thead>
           <tbody>
             <tr>
-              <td>{{course.course_name}}</td>
-              <td>{{course.course_subject}}</td>
-              <td>{{course.course_loc}}</td>
-              <td>{{course.course_start_date}}</td>
-              <td>{{course.course_end_date}}</td>
-              <td>{{course.course_quota}}명</td>
+              <td>{{ course.course_name }}</td>
+              <td>{{ course.course_subject }}</td>
+              <td>{{ course.course_loc }}</td>
+              <td>{{ course.course_start_date }}</td>
+              <td>{{ course.course_end_date }}</td>
+              <td>{{ course.course_quota }}명</td>
             </tr>
           </tbody>
         </v-table>
@@ -46,7 +46,7 @@
         <v-textarea
           class="textarea"
           label="강의소개"
-          :model-value=course.course_description
+          :model-value="course.course_description"
           readonly
           row-height="30"
           rows="5"
@@ -69,9 +69,9 @@
           <tbody>
             <template v-for="item in detailList" :key="item.course_detail_no">
               <tr>
-                <td>{{item.course_detail_week_no}}주차</td>
-                <td>{{item.course_detail_goal}}</td>
-                <td>{{item.course_detail_content}}</td>
+                <td>{{ item.course_detail_week_no }}주차</td>
+                <td>{{ item.course_detail_goal }}</td>
+                <td>{{ item.course_detail_content }}</td>
               </tr>
             </template>
           </tbody>
@@ -90,9 +90,11 @@
           </thead>
           <tbody>
             <tr>
-              <td>{{course.duration}}일</td>
-              <td>{{getCurrentCourse()}}일</td>
-              <td>{{ ((getCurrentCourse() / course.duration) * 100).toFixed(2) }}%</td>
+              <td>{{ course.duration }}일</td>
+              <td>{{ getCurrentCourse() }}일</td>
+              <td>
+                {{ ((getCurrentCourse() / course.duration) * 100).toFixed(2) }}%
+              </td>
             </tr>
           </tbody>
         </v-table>
@@ -115,10 +117,10 @@
 
 <script>
 import LectureManagementModal from "./TCourseModal.vue";
-import { openModal } from 'jenesius-vue-modal'
+import { openModal } from "jenesius-vue-modal";
 export default {
   components: {},
-    props: {
+  props: {
     // courseNo: Number,
   },
   data() {
@@ -128,32 +130,27 @@ export default {
       courseNo: this.$route.params.course_no,
       course: "",
       detailList: [],
-
     };
   },
 
   mounted() {
-    this.courseInfo() 
-
-
+    this.courseInfo();
   },
   methods: {
     courseInfo() {
-
-      let params = new URLSearchParams()
-      params.append('courseNo', this.courseNo)
+      let params = new URLSearchParams();
+      params.append("courseNo", this.courseNo);
 
       this.axios
-        .post('/tCourse/detailCourse', params)
+        .post("/tCourse/detailCourse", params)
         .then((response) => {
           // console.log(JSON.stringify(response))
-          this.course =  response.data.course;
+          this.course = response.data.course;
           this.detailList = response.data.detail;
-
         })
         .catch(function (error) {
-          alert('에러! API 요청에 오류가 있습니다. ' + error)
-        })
+          alert("에러! API 요청에 오류가 있습니다. " + error);
+        });
     },
 
     getCurrentCourse() {
@@ -176,21 +173,21 @@ export default {
         courseNo: this.courseNo,
         action: this.action,
         retrunval: (value) => {
-          this.opoupreturn = value
-          console.log('return val : ' + value)
+          this.opoupreturn = value;
+          console.log("return val : " + value);
         },
-      })
+      });
 
       popUpVar.onclose = () => {
-        console.log('Close')
+        console.log("Close");
         //팝업창이 닫히면 다시 새로고침 (등록, 수정 한 데이터가 업로드 된다.)
-        if (this.opoupreturn === 'Y') {
-          this.courseInfo()
+        if (this.opoupreturn === "Y") {
+          this.courseInfo();
         }
         // return false;
-      }
+      };
 
-      console.log(popUpVar)
+      console.log(popUpVar);
     },
     updateLecture() {
       this.action = "U";
@@ -198,42 +195,33 @@ export default {
     },
     deleteLecture() {
       if (confirm("삭제하시겠습니까?")) {
-
         this.action = "D";
 
-        let params = new URLSearchParams()
-        params.append('courseNo', this.courseNo)
-        params.append('paction', this.action)
+        let params = new URLSearchParams();
+        params.append("courseNo", this.courseNo);
+        params.append("paction", this.action);
 
         this.axios
-          .post('/tCourse/saveCourse', params)
+          .post("/tCourse/saveCourse", params)
           .then((response) => {
             // console.log(JSON.stringify(response))
-            alert(response.data.resultMsg)
+            alert(response.data.resultMsg);
             if (response.data.result > 0) {
               history.back();
             }
-
-
           })
           .catch(function (error) {
-            alert('에러! API 요청에 오류가 있습니다. ' + error)
-          })
-
+            alert("에러! API 요청에 오류가 있습니다. " + error);
+          });
       }
-
     },
     goBack() {
       history.back();
     },
 
-
     // getPersentCourse() {
 
-
     // },
-
-
   },
 };
 </script>
@@ -313,20 +301,27 @@ export default {
 
 .update-button,
 .delete-button,
-.insert-button,
-.goBack-button {
+.insert-button {
   /* padding: 10px 16px; */
+  width: 60px;
+  height: 40px;
   color: #ffffff;
   border: none;
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
-  
 }
 .goBack-button {
-  padding: 8px 14px;
+  padding: 10px 16px;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
 }
+
 .update-button {
   margin-right: 10px;
 }
