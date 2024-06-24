@@ -8,7 +8,7 @@
           <tr>
             <td class="label">강의명</td>
             <td class="content">
-              <select v-model="courseNo" class="form-input select-input">
+              <select v-model="courseNo" class="form-input course-select-input">
                 <option value="" disabled>강의를 선택해 주세요</option>
                 <option v-for="course in courseList" :key="course.course_no" :value="course.course_no">
                   {{ course.course_name }}
@@ -19,7 +19,7 @@
           <tr>
             <td class="label">제목</td>
             <td class="content">
-              <input type="text" name="resource_title" v-model="resourceTitle" class="form-input" />
+              <input type="text" name="resource_title" v-model="resourceTitle" class="form-input title-input" />
             </td>
           </tr>
           <tr>
@@ -29,14 +29,17 @@
                 @input="checkContentLength"></textarea>
             </td>
           </tr>
+          <!-- 등록 모달창의 파일 부분 -->
           <tr>
             <td class="label">파일</td>
             <td class="content">
-              <input type="file" id="file-insert" name="file-insert" @change="handleFileChange" multiple />
-              <div v-if="filePreviews.length">
-                <div v-for="(preview, index) in filePreviews" :key="index" class="file-preview">
+              <input type="file" id="file-insert-register" name="file-insert" @change="handleFileChangeRegister"
+                multiple />
+              <!-- 새로 업로드된 파일 정보 표시 -->
+              <div v-if="filePreviewsRegister.length">
+                <div v-for="(preview, index) in filePreviewsRegister" :key="index" class="file-preview">
                   <img v-if="isImage(preview.name)" :src="preview.url" class="file-thumbnail" />
-                  <input v-else type="text" v-model="preview.name" class="file-name-input" />
+                  <div v-else class="file-name">{{ preview.name }}</div>
                 </div>
               </div>
             </td>
@@ -56,15 +59,14 @@
         <table class="info-table">
           <tr>
             <td class="label">강의명</td>
-            <!-- 수정: 강의명을 텍스트로 표시 -->
             <td class="content">
-              <div class="form-input readonly-input">{{ materials.course_name }}</div>
+              <div class="readonly-input">{{ materials.course_name }}</div>
             </td>
           </tr>
           <tr>
             <td class="label">제목</td>
             <td class="content">
-              <input type="text" name="resource_title" v-model="resourceTitle" class="form-input" />
+              <input type="text" name="resource_title" v-model="resourceTitle" class="input-title" />
             </td>
           </tr>
           <tr>
@@ -74,20 +76,22 @@
                 @input="checkContentLength"></textarea>
             </td>
           </tr>
+          <!-- 수정 모달창의 파일 부분 -->
           <tr>
             <td class="label">파일</td>
             <td class="content">
-              <input type="file" id="file-insert" name="file-insert" @change="handleFileChange" multiple />
-              <div v-if="existingFile">
-                <!-- 기존 파일 정보를 표시 -->
-                <div class="file-preview">
-                  <img v-if="isImage(existingFile)" :src="existingFileUrl" class="file-thumbnail" />
-                  <div v-else class="file-name">{{ existingFileName }}</div>
+              <div class="file-container">
+                <div v-if="existingFile">
+                  <span class="file-name">{{ truncateFileName(existingFileName) }}</span>
+                  <!-- 수정된 부분: 파일 선택 버튼을 노란색으로 변경하고 파일을 교체할 수 있도록 수정 -->
+                  <v-btn class="select-file-button" @click="triggerFileInput">파일 선택</v-btn>
+                  <input type="file" id="file-insert-modify" ref="fileInput" @change="handleFileChangeModify"
+                    style="display:none;" />
                 </div>
               </div>
-              <div v-if="filePreviews.length">
-                <!-- 새로 업로드된 파일 정보를 표시 -->
-                <div v-for="(preview, index) in filePreviews" :key="index" class="file-preview">
+              <!-- 새로 업로드된 파일 정보 표시 -->
+              <div v-if="filePreviewsModify.length">
+                <div v-for="(preview, index) in filePreviewsModify" :key="index" class="file-preview">
                   <img v-if="isImage(preview.name)" :src="preview.url" class="file-thumbnail" />
                   <div v-else class="file-name">{{ preview.name }}</div>
                 </div>
@@ -97,7 +101,7 @@
         </table>
         <div class="button-group">
           <v-btn class="update-button" type="submit">수정</v-btn>
-          <v-btn class="delete-button" @click="deleteNotice">삭제</v-btn>
+          <v-btn class="delete-button" @click="confirmDelete">삭제</v-btn>
           <v-btn class="cancel-button" @click="$emit('close')">닫기</v-btn>
         </div>
       </form>
@@ -125,19 +129,22 @@ export default {
       courseNo: '',
       resourceTitle: '',
       resourceContent: '',
-      selectedFiles: [],
-      filePreviews: [],
+      selectedFilesRegister: [], // 등록 모달창에서 선택된 파일들
+      selectedFilesModify: [],   // 수정 모달창에서 선택된 파일들
+      filePreviewsRegister: [],  // 등록 모달창에서 파일 미리보기
+      filePreviewsModify: [],    // 수정 모달창에서 파일 미리보기
       existingFile: null,
       existingFileName: '',
       existingFileUrl: '',
+      noticeEditing: false,
     };
   },
   created() {
     if (this.action === 'C') {
       this.fetchCourseList();
     } else if (this.action === 'U') {
-      this.fetchCourseList(); // 강의명 목록을 가져오기 위해 필요
-      this.fetchResource(); // 선택한 학습자료의 데이터를 가져오기 위해 필요
+      this.fetchCourseList();
+      this.fetchResource();
     }
   },
   watch: {
@@ -187,12 +194,23 @@ export default {
           console.error("There was an error fetching the resource!", error);
         });
     },
-    handleFileChange(event) {
-      this.selectedFiles = Array.from(event.target.files);
-      this.filePreviews = this.selectedFiles.map(file => ({
+    handleFileChangeRegister(event) { // 등록 모달창 파일 변경 처리
+      this.selectedFilesRegister = Array.from(event.target.files);
+      this.filePreviewsRegister = this.selectedFilesRegister.map(file => ({
         name: file.name,
         url: URL.createObjectURL(file)
       }));
+    },
+    handleFileChangeModify(event) { // 수정 모달창 파일 변경 처리
+      this.selectedFilesModify = Array.from(event.target.files);
+      this.filePreviewsModify = this.selectedFilesModify.map(file => ({
+        name: file.name,
+        url: URL.createObjectURL(file)
+      }));
+    },
+    triggerFileInput() {
+      // 파일 선택 input 트리거
+      this.$refs.fileInput.click();
     },
     checkContentLength() {
       const maxLength = /[가-힣]/.test(this.resourceContent) ? 1500 : 2000;
@@ -201,15 +219,24 @@ export default {
         this.resourceContent = this.resourceContent.substring(0, maxLength);
       }
     },
-    insertNotice() {
+    insertNotice() { // 학습자료 등록
+      if (!this.courseNo) {
+        alert('강의를 선택해 주세요.');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('course_no', this.courseNo);
       formData.append('resource_title', this.resourceTitle);
       formData.append('resource_content', this.resourceContent);
-      this.selectedFiles.forEach(file => {
-        formData.append('files', file);
-      });
 
+      if (this.selectedFilesRegister.length > 0) {
+        this.selectedFilesRegister.forEach(file => {
+          formData.append('files', file);
+        });
+      } else {
+        formData.append('files', new Blob([])); // 빈 파일 리스트 추가
+      }
       axios.post('/tCourse/addResource', formData)
         .then(response => {
           if (response.data.result === 'success') {
@@ -224,16 +251,20 @@ export default {
           alert('학습자료 등록에 실패했습니다.');
         });
     },
-    updateNotice() {
+    updateNotice() { // 학습자료 수정
       const formData = new FormData();
       formData.append('resource_no', this.materials.resource_no);
       formData.append('resource_title', this.resourceTitle);
       formData.append('resource_content', this.resourceContent);
-      if (this.selectedFiles.length) {
-        this.selectedFiles.forEach(file => {
-          formData.append('files', file); // files가 서버에서 받을 파일 필드명과 일치해야 함
+
+      if (this.selectedFilesModify.length > 0) {
+        this.selectedFilesModify.forEach(file => {
+          formData.append('files', file);
         });
       }
+
+      // fileExits 값을 추가
+      formData.append('fileExits', this.selectedFilesModify.length > 0 ? 'Y' : 'N');
 
       axios.post('/tCourse/updateResource', formData)
         .then(response => {
@@ -248,6 +279,11 @@ export default {
           console.error("There was an error updating the resource!", error);
           alert('학습자료 수정에 실패했습니다.');
         });
+    },
+    confirmDelete() {
+      if (confirm('정말로 삭제하시겠습니까?')) {
+        this.deleteNotice();
+      }
     },
     deleteNotice() {
       axios.post('/tCourse/deleteResource', {
@@ -269,6 +305,16 @@ export default {
     isImage(filename) {
       const extension = filename.split('.').pop().toLowerCase();
       return ['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(extension);
+    },
+    truncateFileName(fileName) {
+      const maxLength = 4;
+      const fileParts = fileName.split('.');
+      const name = fileParts.slice(0, -1).join('.');
+      const extension = fileParts.slice(-1)[0];
+      if (name.length > maxLength) {
+        return name.substring(0, maxLength) + '...' + '.' + extension;
+      }
+      return fileName;
     }
   },
 };
@@ -281,7 +327,8 @@ export default {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   margin-top: 16px;
-  max-width: 800px;
+  max-width: 1000px;
+  /* 모달 창의 최대 너비를 늘림 */
   margin: auto;
 }
 
@@ -302,17 +349,14 @@ export default {
   background-color: #f0f0f0;
   font-weight: bold;
   text-align: center;
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   width: 15%;
-  /* 레이블 셀의 너비를 15%로 설정 */
   padding: 8px;
-  /* 추가: 패딩 설정 */
 }
 
 .info-table .content {
   background-color: #ffffff;
   width: 85%;
-  /* 내용 셀의 너비를 85%로 설정 */
   text-align: left;
   border: 1px solid #ddd;
   padding: 8px;
@@ -329,14 +373,10 @@ export default {
 
 .form-input {
   width: 100%;
-  /* 입력 필드의 너비를 100%로 설정 */
-  padding: 10px;
   border: 1px solid #dcdcdc;
   border-radius: 4px;
   font-size: 14px;
   color: #34495e;
-  box-sizing: border-box;
-  /* 박스 크기 설정 */
 }
 
 .form-input:focus,
@@ -346,9 +386,48 @@ export default {
   outline: none;
 }
 
+/* 읽기 전용 스타일 */
+.readonly-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #34495e;
+  background-color: #f0f0f0;
+}
+
+/* 제목 입력 스타일 */
+.input-title {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #34495e;
+}
+
+/* 스타일 클래스 분리 */
+.course-select-input {
+  width: 100%;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  font-size: 18px;
+  color: #34495e;
+  height: 60px;
+}
+
+.title-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #34495e;
+}
+
 .form-textarea {
   height: 400px;
-  /* 높이를 400px로 조정 */
   width: 100%;
   padding: 10px;
   border: 1px solid #dcdcdc;
@@ -360,7 +439,7 @@ export default {
 
 .content-input {
   height: 400px;
-  /* 높이를 400px로 설정 */
+  overflow-y: scroll;
 }
 
 .button-group {
@@ -370,9 +449,9 @@ export default {
 }
 
 .update-button,
+.save-button,
 .delete-button,
-.cancel-button,
-.insert-button {
+.cancel-button {
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -390,22 +469,23 @@ export default {
   box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
 }
 
-.insert-button {
-  background-color: #407bff;
+.save-button {
+  background-color: #4caf50;
 }
 
-.insert-button:hover {
-  background-color: #5a9bff;
-  box-shadow: 0 4px 8px rgba(64, 123, 255, 0.2);
+.save-button:hover {
+  background-color: #66bb6a;
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
 }
 
 .delete-button {
-  background-color: #d9534f;
+  background-color: #d32f2f;
+  margin: 0;
 }
 
 .delete-button:hover {
-  background-color: #c9302c;
-  box-shadow: 0 4px 8px rgba(217, 83, 79, 0.2);
+  background-color: #e57373;
+  box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 
 .cancel-button {
@@ -418,35 +498,94 @@ export default {
   box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
 }
 
-/* 여기서 select 요소의 크기를 조정할 수 있습니다. */
-select.form-input {
-  width: 100%;
-  /* 너비를 100%로 설정 */
-  height: 60px;
-  /* 높이를 조정 */
-  padding: 10px;
-  /* 패딩을 조정 */
-  font-size: 16px;
-  /* 폰트 크기를 조정 */
+.remove-file-button {
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  border-radius: 4px;
+  padding: 8px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.remove-file-button:hover {
+  background-color: #ece2e4;
+  box-shadow: 0 4px 8px rgba(253, 192, 204, 0.2);
+}
+
+#preview {
+  cursor: pointer;
+  color: #407bff;
+  text-decoration: underline;
+  display: inline-block;
+  margin-top: 10px;
 }
 
 .file-preview {
   display: flex;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .file-thumbnail {
-  width: 50px;
-  height: 50px;
+  max-width: 200px;
+  max-height: 200px;
   object-fit: cover;
+  margin-right: 50px;
+}
+
+.file-name {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
   margin-right: 8px;
 }
 
-.file-name-input {
-  flex: 1;
-  padding: 4px;
-  border: 1px solid #dcdcdc;
+.file-download-container {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.file-download-container span {
+  margin-right: 10px;
+}
+
+.download-file-button {
+  background: #a2eafc;
+  border: none;
+  cursor: pointer;
+  color: white;
+  padding: 8px 16px;
   border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.download-file-button:hover {
+  background: #7fd7fa;
+}
+
+.select-file-button {
+  background-color: #f0ad4e;
+  border: none;
+  cursor: pointer;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-right: 8px;
+  transition: background-color 0.3s;
+}
+
+.select-file-button:hover {
+  background-color: #ec971f;
+}
+
+.file-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 </style>

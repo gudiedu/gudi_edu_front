@@ -45,6 +45,10 @@
             <td class="centered">{{ item.name }}</td>
             <td class="centered">{{ item.resource_created_at }}</td>
           </tr>
+          <tr v-if="lectureItems.length === 0">
+            <!-- 데이터가 없을 때 표시되는 행 -->
+            <td colspan="5" class="text-center">조회된 데이터가 없습니다.</td>
+          </tr>
         </tbody>
       </v-table>
 
@@ -296,5 +300,12 @@ export default {
 
 .pagination-page:hover {
   background-color: #0056b3;
+}
+
+.no-data-message {
+  text-align: center;
+  font-size: 18px;
+  color: #888;
+  padding: 20px;
 }
 </style>
