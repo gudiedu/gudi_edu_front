@@ -449,7 +449,7 @@ export default {
 }
 
 .addQuestion-button {
-  background-color: #007bff;
+  background-color: #172a54;
   color: white;
 }
 

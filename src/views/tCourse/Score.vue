@@ -71,8 +71,8 @@
           :click-handler="handlePageChange"
           :container-class="'pagination-container'"
           :page-class="'pagination-page'"
-          :prev-text="'Prev'"
-          :next-text="'Next'"
+          :prev-text="'이전'"
+          :next-text="'다음'"
         ></paginate>
       </div>
     </v-card>

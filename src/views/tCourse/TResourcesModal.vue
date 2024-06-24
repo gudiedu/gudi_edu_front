@@ -2,7 +2,7 @@
   <div class="lecture-detail">
     <!-- 학습자료 등록 모달 -->
     <div v-if="action === 'C'">
-      <h2 class="title">학습자료 등록창</h2>
+      <h2 class="title">학습자료 등록</h2>
       <form id="file-form" enctype="multipart/form-data" @submit.prevent="insertNotice">
         <table class="info-table">
           <tr>
@@ -54,7 +54,7 @@
 
     <!-- 학습자료 수정 모달 -->
     <div v-if="action === 'U'">
-      <h2 class="title">학습자료 수정창</h2>
+      <h2 class="title">학습자료 수정</h2>
       <form id="file-form" enctype="multipart/form-data" @submit.prevent="updateNotice">
         <table class="info-table">
           <tr>
@@ -84,7 +84,7 @@
                 <div v-if="existingFile">
                   <span class="file-name">{{ truncateFileName(existingFileName) }}</span>
                   <!-- 수정된 부분: 파일 선택 버튼을 노란색으로 변경하고 파일을 교체할 수 있도록 수정 -->
-                  <v-btn class="select-file-button" @click="triggerFileInput">파일 선택</v-btn>
+                  <v-btn class="select-file-button" @click="triggerFileInput">파일선택</v-btn>
                   <input type="file" id="file-insert-modify" ref="fileInput" @change="handleFileChangeModify"
                     style="display:none;" />
                 </div>
@@ -452,6 +452,8 @@ export default {
 .save-button,
 .delete-button,
 .cancel-button {
+  width: 55px;
+  height: 35px;
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -568,7 +570,7 @@ export default {
 }
 
 .select-file-button {
-  background-color: #f0ad4e;
+  background-color: #172a54;
   border: none;
   cursor: pointer;
   color: white;
@@ -579,7 +581,7 @@ export default {
 }
 
 .select-file-button:hover {
-  background-color: #ec971f;
+  background-color: #254385;
 }
 
 .file-container {

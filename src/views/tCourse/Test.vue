@@ -109,8 +109,8 @@
             :click-handler="handlePageChange"
             :container-class="'pagination-container'"
             :page-class="'pagination-page'"
-            :prev-text="'Prev'"
-            :next-text="'Next'"
+            :prev-text="'이전'"
+            :next-text="'다음'"
           ></paginate>
           <!-- 페이징 컴포넌트 설정 -->
         </div>
@@ -173,8 +173,8 @@
             :click-handler="handleQuestionPageChange"
             :container-class="'pagination-container'"
             :page-class="'pagination-page'"
-            :prev-text="'Prev'"
-            :next-text="'Next'"
+            :prev-text="'이전'"
+            :next-text="'다음'"
           ></paginate>
           <!-- 페이징 컴포넌트 설정 -->
         </div>

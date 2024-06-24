@@ -96,7 +96,7 @@
                     "
                     class="showAttendance"
                   >
-                    <span class="list-button">명단조회</span>
+                    <span class="list-button">명단</span>
                   </td>
                 </tr>
               </template>
@@ -371,28 +371,28 @@ export default {
 
 .list-button {
   display: flex;
-  width: 60px;
+  width: 55px;
   height: 35px;
   align-items: center;
   background-color: #ffffff;
   color: #407bff;
   border: 1px solid #407bff;
   border-radius: 10px;
-  padding: 0px 5px;
+  padding: 0px 14px;
   font-size: 12px;
   font-weight: 600;
 }
 
 .list-button:hover {
   display: flex;
-  width: 60px;
+  width: 55px;
   height: 35px;
   align-items: center;
   background-color: #407bff;
   color: #ffffff;
   border: 1px solid #ffffff;
   border-radius: 10px;
-  padding: 0px 5px;
+  padding: 0px 14px;
   font-size: 12px;
   font-weight: 600;
 }
