@@ -88,7 +88,7 @@ export default {
       sEnrollList: [],
       enrollAvailable: [],
       courseNo: "",
-      studentSignedID: "",
+      studentSignedInID: "",
       searchKeyword: "",
       selectedOption: "과목명",
       options: ["과목명", "강의명", "강사명"],
@@ -143,7 +143,7 @@ export default {
       let enrollInfo = document.getElementById("enrollment");
       let data = new FormData(enrollInfo);
       data.append("openedNo", this.courseNo);
-      data.append("studentSignedID", this.studentSignedID);
+      data.append("studentSignedInID", this.studentSignedInID);
 
       console.log("수강신청번호: ", this.courseNo);
 
@@ -152,7 +152,7 @@ export default {
 
         if (response.data.result > 0) {
           alert(response.data.resultMsg);
-          console.log("너왜안나오냐: ", response.data.resultMsg);
+          // console.log("resultMsg: ", response.data.resultMsg);
         } else {
           alert(response.data.resultMsg);
         }

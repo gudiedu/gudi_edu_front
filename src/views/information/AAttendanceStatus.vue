@@ -31,7 +31,7 @@
           <form
             id="file-form"
             enctype="multipart/form-data"
-            v-if="item.attendance_status === '병결' && !item.file_no"
+            v-if="(item.attendance_status === '병결' || item.attendance_status === '공결') && !item.file_no "
           >
             <input
               type="file"
@@ -44,7 +44,7 @@
           <form
             id="file-form"
             enctype="multipart/form-data"
-            v-else-if="item.attendance_status === '병결'"
+            v-else-if="item.attendance_status === '병결' || item.attendance_status === '공결'"
           >
             <div class="form-label"></div>
             <span id="preview" @click="download(item)">
@@ -91,7 +91,7 @@ export default {
   data() {
     return {
       attendanceStatus: null,
-      attendanceOptions: ["출석", "지각", "조퇴", "병결"],
+      attendanceOptions: ["출석", "지각", "조퇴", "병결", "공결"],
       attendanceList: this.aList,
       selectLecture: this.selectedLecture,
       selectedFile: "",

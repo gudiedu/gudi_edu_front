@@ -109,6 +109,7 @@ export default {
         .then((response) => {
           this.lectureList = response.data.courseList;
           this.totalItems = response.data.totalCnt;
+          console.log(JSON.stringify(response));
         })
         .catch((error) => {
           alert("에러! API 요청에 오류가 있습니다. " + error);

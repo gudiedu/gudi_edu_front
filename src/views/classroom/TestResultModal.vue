@@ -179,7 +179,7 @@ export default {
   margin-bottom: 10px;
   word-wrap: break-word;
   white-space: pre-wrap;
-  max-width: 100%; /* Adjust as necessary */
+  max-width: 100%;
 }
 
 .v-radio-group {

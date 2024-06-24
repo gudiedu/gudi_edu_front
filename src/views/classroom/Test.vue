@@ -144,7 +144,7 @@ export default {
       activeFilter: "all",
       sTestList: [],
       courseNo: 0,
-      studentSignedID: "",
+      studentSignedInID: "",
       testList: [],
       testModal: false,
       testResultModal: false,
@@ -166,11 +166,12 @@ export default {
       let testListParams = new URLSearchParams();
       testListParams.append("searchKeyword", this.searchKeyword);
       testListParams.append("status", this.status);
+      testListParams.append("studentSignedInID", this.studentSignedInID);
 
       this.axios
         .post("/classroom/sTestList.do", testListParams)
         .then((response) => {
-          console.log("강의리스트불러오는JSON이닷: ", JSON.stringify(response));
+          console.log("testListJSON: ", JSON.stringify(response));
 
           this.sTestList = response.data.testList;
 
@@ -201,7 +202,7 @@ export default {
       this.axios
         .post("/classroom/sTestCalculate.do", testResultParam)
         .then((response) => {
-          console.log("여기를찾아쥬세유: ", JSON.stringify(response));
+          console.log("sTestCalculate: ", JSON.stringify(response));
 
           response.data.sTestResultList.forEach((each) => {
             this.testCourseNo = each.course_no;
