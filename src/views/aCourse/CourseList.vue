@@ -47,11 +47,11 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>강의번호</th>
+            <th>번호</th>
             <th>강의명</th>
             <th>강사명</th>
-            <th>수강인원</th>
-            <th>수강기간</th>
+            <th class="space-cell">수강인원</th>
+            <!-- <th>수강기간</th> -->
             <th>시작일</th>
             <th>종료일</th>
             <th>강의실</th>
@@ -65,12 +65,12 @@
 
           <tr v-for="(item, index) in filteredCourseList" :key="item.course_no">
             <td>{{ item.course_no }}</td>
-            <td>{{ item.course_name }}</td>
+            <td class="space-cell">{{ item.course_name }}</td>
             <td>{{ item.user_name }}</td>
             <td>{{ item.course_quota }}명</td>
-            <td>{{ item.course_period }}일</td>
-            <td>{{ item.course_start_date }}</td>
-            <td>{{ item.course_end_date }}</td>
+            <!-- <td>{{ item.course_period }}일</td> -->
+            <td>{{ formatDateToShort(item.course_start_date) }}</td>
+            <td>{{ formatDateToShort(item.course_end_date) }}</td>
             <td>{{ item.course_loc }}</td>
             <td>
               <span v-if="new Date() > new Date(item.course_end_date)">진행완료</span>
@@ -135,6 +135,13 @@ export default {
       this.currentPage = pageNumber;
       this.getCourseList();
   },
+  formatDateToShort(dateString) {
+    const dateParts = dateString.split("-");
+    const year = dateParts[0].slice(2); // Get last two digits of the year
+    const month = dateParts[1];
+    const day = dateParts[2];
+    return `${year}-${month}-${day}`;
+  },
     getCourseList() {
       
       let vm = this;
@@ -158,6 +165,8 @@ export default {
       console.error('Error fetching course list:', error);
      });
     },
+
+
     filterCourses() {
     const now = new Date();
     if (this.activeFilter === "all") {
@@ -339,10 +348,15 @@ export default {
 
 .dashboard-table th,
 .dashboard-table td {
-  padding: 12px;
+  padding: 10px;
   text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
+  white-space: nowrap;
+  
+}
+.space-cell {
+  white-space: normal !important;
 }
 
 .dashboard-table th {
