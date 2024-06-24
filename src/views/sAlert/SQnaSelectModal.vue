@@ -127,7 +127,7 @@ export default {
       replyNo: 0,
       replyContent: "",
       replyCreatedAt: "",
-      studentSignedID:""
+      studentSignedID: "",
     };
   },
   mounted() {
@@ -138,7 +138,7 @@ export default {
     sQnaSelected() {
       let params = new URLSearchParams();
       params.append("SelectedQuestionNo", this.SelectedQuestionNo);
-      params.append("studentSignedID",this.studentSignedID);
+      params.append("studentSignedID", this.studentSignedID);
       //params.append("replyNo", this.reply_no);
 
       this.axios
@@ -351,6 +351,8 @@ td.reply-content {
 .delete-button,
 .insert-button {
   /* padding: 10px 16px; */
+  width: 55px;
+  height: 35px;
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -371,6 +373,8 @@ td.reply-content {
 }
 
 .delete-button {
+  width: 55px;
+  height: 35px;
   background-color: #99001c;
   margin-right: 15px;
 }

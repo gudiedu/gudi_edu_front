@@ -83,13 +83,22 @@
                 </td>
                 <td>
                   <span v-if="isAfterEndDate(item.course_end_date)">
-                    <span v-if="item.survey_completed === 'Y'">완료</span>
-                    <span v-else @click="classSatisfaction(item.course_no)"
+                    <span
+                      v-if="item.survey_completed === 'Y'"
+                      class="survey-button"
+                      >완료</span
+                    >
+                    <span
+                      v-else
+                      @click="classSatisfaction(item.course_no)"
+                      class="survey-button"
                       >미완료</span
                     >
                   </span>
                 </td>
-                <td @click="attendance(item.course_no)">출결</td>
+                <td @click="attendance(item.course_no)">
+                  <span class="attendance-button">출결</span>
+                </td>
               </tr>
             </template>
           </template>
@@ -348,5 +357,46 @@ export default {
 
 .dashboard-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.attendance-button {
+  display: flex;
+  width: 50px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 15px;
+  padding: 0px 11px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.attendance-button:hover {
+  display: flex;
+  width: 50px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 15px;
+  padding: 0px 11px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.survey-button {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: ffffff;
+  color: #172a54;
+  border-radius: 5px;
+  padding: 0px 8px;
+  font-size: 16px;
+  font-weight: 600;
 }
 </style>

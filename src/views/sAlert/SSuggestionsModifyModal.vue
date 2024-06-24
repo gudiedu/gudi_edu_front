@@ -526,18 +526,15 @@ export default {
 .insert-button,
 .goBack-button {
   /* padding: 10px 16px; */
+  width: 55px;
+  height: 35px;
   color: #ffffff;
+  background-color: #407bff;
   border: none;
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.update-button,
-.insert-button,
-.goBack-button {
-  background-color: #407bff;
 }
 
 .update-button:hover,

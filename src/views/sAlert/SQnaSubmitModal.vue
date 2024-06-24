@@ -8,35 +8,41 @@
     <form id="submitting">
       <div class="form-group">
         <div class="form-label">과목명</div>
-        <select v-model="selectedCourseNo"
-          class="form-input">
+        <select v-model="selectedCourseNo" class="form-input">
           <option disabled value="">선택하세요</option>
-          <option v-for="course in enrolledCourses" :key="course.course_no" :value="course.course_no">
+          <option
+            v-for="course in enrolledCourses"
+            :key="course.course_no"
+            :value="course.course_no"
+          >
             {{ course.course_name }}
           </option>
         </select>
-        <input type="hidden" v-model="studentName">
+        <input type="hidden" v-model="studentName" />
       </div>
       <div class="form-group">
         <div class="form-label">제목</div>
-        <input type="text"
+        <input
+          type="text"
           name="questionTitle"
           v-model="questionTitle"
-          class="form-input" />
+          class="form-input"
+        />
       </div>
       <div class="form-group">
         <div class="form-label">내용</div>
-        <textarea 
+        <textarea
           name="questionContent"
           v-model="questionContent"
-          class="form-textarea"></textarea>
+          class="form-textarea"
+        ></textarea>
       </div>
-        <!-- CKEditor 사용
+      <!-- CKEditor 사용
         code mirror 사용 예정-->
 
-        <div class="button-group">
-          <v-btn class="insert-button" @click="submitQuestion">등록</v-btn>
-        </div>
+      <div class="button-group">
+        <v-btn class="insert-button" @click="submitQuestion">등록</v-btn>
+      </div>
     </form>
   </div>
 </template>
@@ -58,39 +64,37 @@ export default {
       selectedCourseNo: "",
     };
   },
-  mounted(){
+  mounted() {
     this.init();
   },
   methods: {
-
-    init(){
+    init() {
       let courseParams = new URLSearchParams();
       courseParams.append("courseNo", this.course_no);
       courseParams.append("courseName", this.course_name);
       courseParams.append("loginID", this.loginID);
 
       this.axios
-      .post("sAlert/sQnaGetCourseName.do", courseParams)
-      .then((response) => {
-        console.log("JSON.stringify(response)", JSON.stringify(response));
+        .post("sAlert/sQnaGetCourseName.do", courseParams)
+        .then((response) => {
+          console.log("JSON.stringify(response)", JSON.stringify(response));
 
-        this.enrolledCourses = response.data.sQnaGetCourseName;
+          this.enrolledCourses = response.data.sQnaGetCourseName;
 
-        response.data.sQnaGetCourseName.forEach(each => {
+          response.data.sQnaGetCourseName.forEach((each) => {
             this.courseName = each.course_name;
             this.studentName = each.name;
             this.courseNo = each.course_no;
 
             console.log("this.studentName:", this.studentName);
-        });
+          });
 
-        this.courseName = response.data.sQnaGetCourseName.course_name;
-        this.courseNo = response.data.sQnaGetCourseName.course_no;
+          this.courseName = response.data.sQnaGetCourseName.course_name;
+          this.courseNo = response.data.sQnaGetCourseName.course_no;
 
-        console.log("두번째 studentName확인이지롱 : ", this.studentName);
-       
-      })
-      .catch(function (error) {
+          console.log("두번째 studentName확인이지롱 : ", this.studentName);
+        })
+        .catch(function (error) {
           alert("init에서 오류 발생!" + error);
         });
     },
@@ -123,7 +127,6 @@ export default {
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);
         });
-
     },
   },
 };
@@ -190,6 +193,8 @@ export default {
 .delete-button,
 .insert-button {
   /* padding: 10px 16px; */
+  width: 55px;
+  height: 35px;
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -210,6 +215,8 @@ export default {
 }
 
 .delete-button {
+  width: 55px;
+  height: 35px;
   background-color: #d32f2f;
   margin: 0;
 }
