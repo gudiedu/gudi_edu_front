@@ -107,21 +107,25 @@ export default {
       this.loading = true;
 
       const params = new URLSearchParams();
-      params.append("loginID", this.loginId);
-      params.append("password", this.pwd);
-      this.axios
-        .post("/api/loginProc.do", params)
-        .then((res) => {
-          console.log("res:");
-          console.log(res);
-          let data = res.data;
-          if (data.result == "SUCCESS") {
-            this.$store.commit("setLoginInfo", {
-              loginId: data.loginId,
-              userNm: data.name,
-              userType: data.user_type,
-              usrMnuAtrt: data.usrMnuAtrt,
-            });
+      params.append('loginID', this.loginId);
+      params.append('password', this.pwd);
+      this.axios.post('/api/loginProc.do', params)
+      .then(res => {
+        console.log("res:")
+        console.log(res)
+        let data = res.data;
+        if(data.result == "SUCCESS") {
+          this.$store.commit("setLoginInfo", {
+            loginId: data.loginId,
+            userNm: data.name,
+            userType: data.user_type,
+            usrMnuAtrt: data.usrMnuAtrt,
+          })
+          
+          sessionStorage.setItem('loginInfo', JSON.stringify(data));
+          sessionStorage.setItem('loginID', data.loginId);
+          sessionStorage.setItem('name', data.name);
+          sessionStorage.setItem('user_type', data.user_type);
 
             sessionStorage.setItem("loginInfo", JSON.stringify(data));
             sessionStorage.setItem("loginID", data.loginId);
