@@ -10,9 +10,9 @@
         <label for="testCategory">시험명</label>
         <select v-model="testCategory" id="testCategory" required>
           <option disabled value="">시험명을 선택해주세요</option>
-          <option value="1차">1차</option>
-          <option value="2차">2차</option>
-          <option value="테스트">테스트</option>
+          <option value="firstAssessment">1차</option>
+          <option value="secondAssessment">2차</option>
+          <option value="testAssessment">테스트</option>
         </select>
       </div>
       <div>
@@ -80,10 +80,10 @@
           <div class="dropdown-container">
             <select v-model="question.test_answer" id="testAnswer" required>
               <option disabled value="">정답을 선택해주세요</option>
-              <option value="보기1">보기1</option>
-              <option value="보기2">보기2</option>
-              <option value="보기3">보기3</option>
-              <option value="보기4">보기4</option>
+              <option value="1">보기1</option>
+              <option value="2">보기2</option>
+              <option value="3">보기3</option>
+              <option value="4">보기4</option>
             </select>
             <i class="dropdown-icon">▼</i>
           </div>

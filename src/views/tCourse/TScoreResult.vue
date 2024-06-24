@@ -144,6 +144,10 @@ export default {
       type: Number,
       required: true,
     },
+    testType: {
+      type: String,
+      required: true,
+    },
   },
   components: { Paginate },
   data() {
@@ -155,8 +159,8 @@ export default {
       showDetails: false,
       selectedStudent: {},
       studentDetails: [],
-      testCategory: "",
-      totalScore: 0, // 총 점수 저장할 변수
+      testCategory: '',
+      totalScore: 0,
     };
   },
   computed: {
@@ -185,17 +189,25 @@ export default {
       immediate: true,
       handler(newCourseNo) {
         if (newCourseNo) {
-          this.fetchTestResults(newCourseNo);
-          this.fetchTestStatistics(newCourseNo);
+          this.fetchTestResults(newCourseNo, this.testType);
+          this.fetchTestStatistics(newCourseNo, this.testType);
+        }
+      },
+    },
+    testType: {
+      immediate: true,
+      handler(newTestType) {
+        if (newTestType && this.courseNo) {
+          this.fetchTestResults(this.courseNo, newTestType);
+          this.fetchTestStatistics(this.courseNo, newTestType);
         }
       },
     },
   },
   methods: {
-    fetchTestResults(courseNo) {
-      axios
-        .post("/tCourse/testResults", { course_no: courseNo })
-        .then((response) => {
+    fetchTestResults(courseNo, testType) {
+      axios.post('/tCourse/testResults', { course_no: courseNo, test_category: testType })
+        .then(response => {
           this.results = JSON.parse(JSON.stringify(response.data.testResults));
           console.log("시험 응시 결과:", this.results);
         })
@@ -203,10 +215,9 @@ export default {
           alert("에러! 시험 응시 결과를 불러오지 못했습니다. " + error);
         });
     },
-    fetchTestStatistics(courseNo) {
-      axios
-        .post("/tCourse/testStatistics", { course_no: courseNo })
-        .then((response) => {
+    fetchTestStatistics(courseNo, testType) {
+      axios.post('/tCourse/testStatistics', { course_no: courseNo, test_category: testType })
+        .then(response => {
           this.statistics = response.data.statistics;
           console.log("통계 정보:", this.statistics);
         })
@@ -223,15 +234,13 @@ export default {
         return;
       }
       this.selectedStudent = student;
-      axios
-        .post("/tCourse/studentTestDetails", {
-          course_no: this.courseNo,
-          loginID: student.loginID,
-        })
-        .then((response) => {
-          this.studentDetails = JSON.parse(
-            JSON.stringify(response.data.studentTestDetails)
-          );
+      axios.post('/tCourse/studentTestDetails', {
+        course_no: this.courseNo,
+        loginID: student.loginID,
+        test_category: this.testType // Add the test category here
+      })
+        .then(response => {
+          this.studentDetails = JSON.parse(JSON.stringify(response.data.studentTestDetails));
           if (this.studentDetails.length === 0) {
             alert("조회된 데이터가 없습니다.");
           } else {
@@ -397,9 +406,7 @@ export default {
 
 .answer-item {
   flex: 1 1 calc(50% - 10px);
-  /* 각 항목이 50% 너비를 가지며, 간격 조정 */
   margin: 5px;
-  /* 항목 사이 간격 */
 }
 
 .answer-box {
@@ -430,8 +437,6 @@ export default {
   border-radius: 5px;
   overflow: auto;
   text-align: center;
-  /* 내용 가운데 정렬 */
   width: 100%;
-  /* 제목 박스가 전체 너비를 차지하도록 설정 */
 }
 </style>

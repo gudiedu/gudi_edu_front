@@ -47,26 +47,14 @@
         </thead>
         <tbody>
           <tr v-for="(lecture, index) in lectureList" :key="lecture.course_no">
-            <td class="text-center">
-              {{ (currentPage - 1) * pageSize + index + 1 }}
-            </td>
-            <td
-              class="text-center course-link"
-              @click="showTestResult(lecture.course_name, lecture.course_no)"
-            >
-              {{ lecture.course_name }}
-            </td>
+            <td class="text-center">{{ (currentPage - 1) * pageSize + index + 1 }}</td>
+            <td class="text-center course-link" @click="showTestResult(lecture.course_name, lecture.course_no)">{{
+              lecture.course_name }}</td>
             <td class="text-center">{{ lecture.course_start_date }}</td>
             <td class="text-center">{{ lecture.course_end_date }}</td>
-            <td class="text-center">{{ lecture.course_quota }}</td>
-            <td class="text-center">
-              <button
-                class="result-button"
-                @click="showTestResult(lecture.course_name, lecture.course_no)"
-              >
-                결과확인
-              </button>
-            </td>
+            <td class="text-center">{{ lecture.enrollment_confirmed }}</td>
+            <td class="text-center"><button class="result-button"
+                @click="showTestResult(lecture.course_name, lecture.course_no)">결과확인</button></td>
           </tr>
           <tr v-if="lectureList.length === 0">
             <td colspan="6" class="text-center">조회된 데이터가 없습니다.</td>
@@ -94,10 +82,17 @@
         <div class="titletext">{{ selectedLecture.name }} 시험응시결과</div>
         <v-spacer></v-spacer>
       </v-card-title>
-      <TScoreResult
-        :lectureName="selectedLecture.name"
-        :courseNo="selectedLecture.no"
-      />
+
+      <div class="filter-buttons">
+        <v-btn :class="{ 'filter-button': true, active: activeFilter === '1차' }"
+          @click="filterTests('1차')">1차</v-btn>
+        <v-btn :class="{ 'filter-button': true, active: activeFilter === '2차' }"
+          @click="filterTests('2차')">2차</v-btn>
+        <v-btn :class="{ 'filter-button': true, active: activeFilter === '테스트' }"
+          @click="filterTests('테스트')">테스트</v-btn>
+      </div>
+
+      <TScoreResult :lectureName="selectedLecture.name" :courseNo="selectedLecture.no" :testType="activeFilter" />
     </v-card>
   </v-container>
 </template>
@@ -119,13 +114,14 @@ export default {
       totalItems: 0,
       selectedLecture: null,
       loading: false,
+      activeFilter: '1차', // 기본적으로 1차 시험을 조회하도록 설정
+      results: [], // 시험 결과를 저장할 배열
     };
   },
   mounted() {
     this.searchLectures();
   },
   watch: {
-    // stitle이 빈 문자열로 변경될 때 searchLectures를 호출합니다.
     stitle(newVal) {
       if (newVal === "") {
         this.searchLectures();
@@ -143,6 +139,7 @@ export default {
       axios
         .post("/tCourse/courseList", params)
         .then((response) => {
+          console.log("API Response:", response.data); // 응답 데이터 로그 출력
           this.lectureList = response.data.courseList;
           this.totalItems = response.data.totalCnt;
           console.log(JSON.stringify(response));
@@ -160,13 +157,32 @@ export default {
     },
     showTestResult(lectureName, courseNo) {
       this.selectedLecture = { name: lectureName, no: courseNo };
+      this.filterTests('1차'); // 기본적으로 1차 시험 결과를 조회하도록 설정
     },
     handleInputChange(event) {
-      // 입력 필드의 값이 변경될 때 호출되는 메서드
       if (event.target.value === "") {
-        this.searchLectures(); // 검색어가 빈 문자열이면 초기 데이터를 로드합니다.
+        this.searchLectures();
       }
     },
+    filterTests(testType) {
+      this.activeFilter = testType;
+      this.fetchTestResults(this.selectedLecture.no, testType);
+    },
+    fetchTestResults(courseNo, testType) {
+      let params = new URLSearchParams();
+      params.append("course_no", courseNo);
+      params.append("test_category", testType);
+
+      axios
+        .post("/tCourse/testResults", params)
+        .then((response) => {
+          this.results = JSON.parse(JSON.stringify(response.data.testResults));
+          console.log('시험 응시 결과:', this.results);
+        })
+        .catch((error) => {
+          alert('에러! 시험 응시 결과를 불러오지 못했습니다. ' + error);
+        });
+    }
   },
   computed: {
     pageCount() {
@@ -322,5 +338,20 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.filter-buttons {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+.filter-button {
+  margin: 0 5px;
+}
+
+.filter-button.active {
+  background-color: #007bff;
+  color: white;
 }
 </style>
