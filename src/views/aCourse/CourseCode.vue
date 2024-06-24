@@ -80,7 +80,7 @@
     <div id="Pagination">
       <paginate
         class="justify-content-center"
-        v-model="currentPage" 
+        v-model="currentPage"
         :page-count="page()"
         :page-range="5"
         :margin-pages="0"
@@ -88,21 +88,28 @@
         :prev-text="'이전'"
         :next-text="'다음'"
         :container-class="'pagination'"
-        :page-class="'page-item'">
+        :page-class="'page-item'"
+      >
       </paginate>
-     </div>
-
-
-
-
+    </div>
 
     <div class="button-group">
       <button class="insert-button" @click="openAddModal">등록</button>
     </div>
-    <v-dialog v-model="addModal" max-width="600px" persistent @click:outside="closeAddModal">
+    <v-dialog
+      v-model="addModal"
+      max-width="600px"
+      persistent
+      @click:outside="closeAddModal"
+    >
       <v-card>
         <v-card-text>
-          <ALectureLCodeModal :action="action" :detail_code="detail_code" :detail_name="detail_name" @close="closeAddModal" />
+          <ALectureLCodeModal
+            :action="action"
+            :detail_code="detail_code"
+            :detail_name="detail_name"
+            @close="closeAddModal"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -110,15 +117,15 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 import ALectureLCodeModal from "./ACourseCodeModal.vue";
 import Paginate from "vuejs-paginate-next";
 
 export default {
-  components: { 
+  components: {
     ALectureLCodeModal,
     Paginate,
-   },
+  },
   data() {
     return {
       titleText: "강의코드관리",
@@ -128,7 +135,7 @@ export default {
       stitle: "",
       detail_code: "",
       detail_name: "", // detail_name 추가
-      courseList: [] ,// 강의 코드 목록을 저장할 배열
+      courseList: [], // 강의 코드 목록을 저장할 배열
       currentPage: 1,
       totalCnt: 0,
       pageSize: 10,
@@ -143,7 +150,7 @@ export default {
     handlePageClick(pageNumber) {
       this.getCourseList();
       this.currentPage = pageNumber;
-  },
+    },
     getCourseList() {
       let vm = this;
       let courseParams = new URLSearchParams();
@@ -153,27 +160,27 @@ export default {
       courseParams.append("detail_name", this.detail_name);
       courseParams.append("detail_code", this.detail_code);
 
-    //   let courseParams = {
-    //   currentPage: this.currentPage,
-    //   pageSize: this.pageSize,
-    //   detail_name: this.detail_name,
-    //   detail_code: this.detail_code
-    // }; 위와 같은 코드임
+      //   let courseParams = {
+      //   currentPage: this.currentPage,
+      //   pageSize: this.pageSize,
+      //   detail_name: this.detail_name,
+      //   detail_code: this.detail_code
+      // }; 위와 같은 코드임
 
-  axios.post('/acourse/aCourseList.do', courseParams)
-    .then(response => {
-      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
-      vm.courseList = response.data.listdate; // 데이터 바인딩
-      vm.totalCnt = response.data.totalCnt;
+      axios
+        .post("/acourse/aCourseList.do", courseParams)
+        .then((response) => {
+          console.log("Course list response:", response.data); // 전체 응답 데이터 콘솔 출력
+          vm.courseList = response.data.listdate; // 데이터 바인딩
+          vm.totalCnt = response.data.totalCnt;
 
-      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
-      console.log("JSON.stringify(response) : " + JSON.stringify(response));
-    })
-    .catch(error => {
-      console.error('Error fetching course list:', error);
-    });
-},
-
+          console.log("Course list:", this.courseList); // 바인딩된 데이터 콘솔 출력
+          console.log("JSON.stringify(response) : " + JSON.stringify(response));
+        })
+        .catch((error) => {
+          console.error("Error fetching course list:", error);
+        });
+    },
 
     findAll() {
       this.activeFilter = "all";
@@ -205,9 +212,8 @@ export default {
     //   console.error('Error fetching course list:', error);
     // });
 
-
     // },
-    
+
     lectureCodeModify(lecture) {
       this.selectedNotice = lecture;
       this.detail_code = lecture.detail_code;
@@ -215,28 +221,28 @@ export default {
       this.action = "U";
       this.addModal = true;
     },
-    
+
     openAddModal() {
-      axios.get('/acourse/nextCodeSelect.do')
-        .then(response => {
+      axios
+        .get("/acourse/nextCodeSelect.do")
+        .then((response) => {
           this.detail_code = response.data; // 새로운 강의 코드 저장
           this.action = "";
           this.addModal = true;
         })
-        .catch(error => {
-          console.error('Error generating course code:', error);
+        .catch((error) => {
+          console.error("Error generating course code:", error);
         });
     },
     closeAddModal() {
-      this.detail_name = '';
+      this.detail_name = "";
       console.log("모달닫힘");
       this.addModal = false;
-      if(this.stitle == ''){
+      if (this.stitle == "") {
         this.getCourseList(); // 모달이 닫힐 때 강의 목록을 갱신합니다.
-      }else{
+      } else {
         this.getCourseList();
       }
-
     },
     page: function () {
       var total = this.totalCnt;
@@ -251,7 +257,6 @@ export default {
         return result;
       }
     },
-
   },
 };
 </script>
@@ -263,6 +268,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #fff;
+  cursor: pointer;
 }
 
 .titletext {

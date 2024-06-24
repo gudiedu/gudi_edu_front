@@ -158,7 +158,7 @@ export default {
       noticeCreatedAt: "",
       noticeNo: 0,
       /** @vue-data {any[]} typeList - 관리자, 강사 별 공지사항 목록 */
-      typeList: [], 
+      typeList: [],
       /** @vue-data {String} previewHtml - 이미지 미리보기 HTML 코드 */
       previewHtml: "",
       /** @vue-data {String} fileName - 원본 파일명 */
@@ -172,7 +172,7 @@ export default {
     this.page();
   },
   methods: {
-    /** 
+    /**
      * 전체 공지사항 목록 조회
      * @param {String} stitle - 검색어
      */
@@ -334,6 +334,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #fff;
+  cursor: pointer;
 }
 
 .titletext {

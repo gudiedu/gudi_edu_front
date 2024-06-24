@@ -68,6 +68,7 @@ export default {
       loginID: "",
       password: "",
       saveId: false, //기존 false
+      loading: false,
     };
   },
   mounted() {
@@ -149,10 +150,12 @@ export default {
             //sessionStroage 값 확인
             //sessionStorage.getItem("세션값:" + JSON.stringify(data.loginId))
           } else {
+            this.loading = false;
             alert("ID 혹은 비밀번호가 틀립니다.");
           }
         })
         .catch((error) => {
+          this.loading = false;
           console.log(error);
         });
     },

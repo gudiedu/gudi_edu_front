@@ -401,6 +401,8 @@ export default {
 .delete-button,
 .insert-button {
   /* padding: 10px 16px; */
+  width: 50px;
+  height: 40px;
   color: #ffffff;
   border: none;
   border-radius: 4px;

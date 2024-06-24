@@ -7,8 +7,6 @@
       </v-card-title>
 
       <div class="container">
-
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -38,7 +36,7 @@
             <th>종료일</th>
             <th>현황</th>
             <th>설문코드</th>
-            <th></th>
+            <th>결과</th>
           </tr>
         </thead>
         <tbody>
@@ -55,12 +53,21 @@
             <td>{{ item.course_quota }}명</td>
             <td>{{ item.course_start_date }}</td>
             <td>{{ item.course_end_date }}</td>
-            <td>{{ item.respondent_count || 0 }} / {{ item.confirmed_count }}</td>
             <td>
-              <span v-if="!item.survey_no" class="survey-create" @click="createSurvey(item)">설문생성</span>
+              {{ item.respondent_count || 0 }} / {{ item.confirmed_count }}
+            </td>
+            <td>
+              <span
+                v-if="!item.survey_no"
+                class="survey-create"
+                @click="createSurvey(item)"
+                >생성</span
+              >
               <span v-else>{{ item.survey_no }}</span>
             </td>
-            <td @click="viewSurveyResult(item.course_no)">결과확인</td>
+            <td @click="viewSurveyResult(item.course_no)">
+              <span class="result-button">확인</span>
+            </td>
           </tr>
         </tbody>
       </v-table>
@@ -70,7 +77,7 @@
     <div id="Pagination">
       <paginate
         class="justify-content-center"
-        v-model="currentPage" 
+        v-model="currentPage"
         :page-count="page()"
         :page-range="5"
         :margin-pages="0"
@@ -78,9 +85,10 @@
         :prev-text="'이전'"
         :next-text="'다음'"
         :container-class="'pagination'"
-        :page-class="'page-item'">
+        :page-class="'page-item'"
+      >
       </paginate>
-     </div>
+    </div>
 
     <div class="button-group">
       <button class="survey-button" @click="surveyManagement">
@@ -91,11 +99,11 @@
     <v-dialog v-model="createSurveyModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <CreateSurvey 
-          :action="action" 
-          :course_no="course_no"
-          :course_name="course_name"
-          @close="closeAddModal"
+          <CreateSurvey
+            :action="action"
+            :course_no="course_no"
+            :course_name="course_name"
+            @close="closeAddModal"
           />
         </v-card-text>
       </v-card>
@@ -104,7 +112,10 @@
     <v-dialog v-model="viewSurveyResultModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <viewSurveyResultModal :courseNo="selectedCourseNo" @close="viewSurveyResultModal = false" />
+          <viewSurveyResultModal
+            :courseNo="selectedCourseNo"
+            @close="viewSurveyResultModal = false"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -112,18 +123,18 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 import Paginate from "vuejs-paginate-next";
 import CreateSurvey from "./ACreateSurveyModal.vue";
 
 import viewSurveyResultModal from "./TClassSurveyModal.vue";
 
 export default {
-  components: { 
+  components: {
     CreateSurvey,
     viewSurveyResultModal,
     Paginate,
-    },
+  },
   data() {
     return {
       titleText: "수업만족도관리",
@@ -151,7 +162,7 @@ export default {
     handlePageClick(pageNumber) {
       this.getCourseList();
       this.currentPage = pageNumber;
-  },
+    },
 
     viewSurveyResult(courseNo) {
       console.log("Selected course_no: ", courseNo); // 디버깅 로그 추가
@@ -169,17 +180,18 @@ export default {
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
 
-  axios.post('/course/searchClassSurvey.do',params)
-    .then(response => {
-      vm.courseList = response.data.listdate; // 데이터 바인딩
-      vm.totalCnt = response.data.totalCnt;
+      axios
+        .post("/course/searchClassSurvey.do", params)
+        .then((response) => {
+          vm.courseList = response.data.listdate; // 데이터 바인딩
+          vm.totalCnt = response.data.totalCnt;
 
-      console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
-      console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
-    })
-    .catch(error => {
-      console.error('Error fetching course list:', error);
-     });
+          console.log("Course list response:", response.data); // 전체 응답 데이터 콘솔 출력
+          console.log("Course list:", this.courseList); // 바인딩된 데이터 콘솔 출력
+        })
+        .catch((error) => {
+          console.error("Error fetching course list:", error);
+        });
     },
 
     // searchMethod() {
@@ -210,14 +222,13 @@ export default {
     },
     closeAddModal() {
       this.addModal = false;
-      this.createSurveyModal =false;
+      this.createSurveyModal = false;
       this.getCourseList();
     },
     createSurvey(course) {
       this.course_no = course.course_no;
       this.course_name = course.course_name;
       this.createSurveyModal = true;
-
     },
     page: function () {
       var total = this.totalCnt;
@@ -236,7 +247,7 @@ export default {
       this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
       this.getCourseList(); // 검색 실행
     },
-   
+
     surveyManagement() {
       this.$router.push({
         name: "aSurveyManagement",
@@ -254,6 +265,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #fff;
+  cursor: pointer;
 }
 
 .titletext {
@@ -322,11 +334,66 @@ export default {
   font-size: 16px;
   transition: background-color 0.3s, color 0.3s, text-decoration 0.3s;
 }
-.survey-create:hover{
-  text-decoration: underline;
-  color: blue;
+
+.survey-create {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #172a54;
+  /* border: 1px solid #407bff; */
+  border-radius: 50px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 5px;
 }
 
+.survey-create:hover {
+  /* text-decoration: underline;
+  color: blue; */
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #172a54;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 5px;
+}
+
+.result-button {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.result-button:hover {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 50px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-weight: 600;
+}
 
 .search-button:hover,
 .insert-button:hover,
@@ -349,6 +416,12 @@ export default {
   font-size: 16px;
   white-space: nowrap;
 }
+
+.dashboard-table td span {
+  display: flex;
+  justify-content: center;
+}
+
 .course-name-cell {
   padding: 12px;
   text-align: left;

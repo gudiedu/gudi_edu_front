@@ -5,7 +5,7 @@
     <div class="form-group">
       <div class="form-label">강의코드</div>
       <!-- detail_code를 props로부터 직접 사용 -->
-      <input type="text" :value="detail_code" class="form-input" readonly  />
+      <input type="text" :value="detail_code" class="form-input" readonly />
     </div>
     <div class="form-group">
       <div class="form-label">강의명</div>
@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   props: {
@@ -37,7 +37,7 @@ export default {
   data() {
     return {
       paction: this.action,
-      localDetailName: this.detail_name || '', // 수정할 데이터는 localDetailName으로 정의
+      localDetailName: this.detail_name || "", // 수정할 데이터는 localDetailName으로 정의
     };
   },
   methods: {
@@ -46,25 +46,25 @@ export default {
         alert("강의명을 입력해주세요.");
         return;
       }
-      const params = new URLSearchParams()
-      params.append('detail_code', this.detail_code);
-      params.append('detail_name', this.localDetailName);
-    
-      axios.post('/api/acourse/codeUpdate.do', params)
-        .then(response => {
-          console.log("updatNotice:", response)
+      const params = new URLSearchParams();
+      params.append("detail_code", this.detail_code);
+      params.append("detail_name", this.localDetailName);
+
+      axios
+        .post("/api/acourse/codeUpdate.do", params)
+        .then((response) => {
+          console.log("updatNotice:", response);
           alert(this.localDetailName + " 강의코드가 수정되었습니다.");
-          this.$emit('close');
+          this.$emit("close");
         })
-        .catch(error => {
+        .catch((error) => {
           alert(this.localDetailName + " 강의코드가 수정되었습니다.");
           // console.error('Error updating course:', error);
           // alert('Error updating course');
-          this.$emit('close');
-        })
-      },
-     
-     
+          this.$emit("close");
+        });
+    },
+
     //   axios.post('/acourse/codeUpdate.do', {
     //       detail_code: this.detail_code,
     //       detail_name: this.localDetailName
@@ -79,44 +79,47 @@ export default {
     //       alert('Error updating course');
     //     });
     // },
-    
-   
+
     deleteNotice() {
-      if (confirm(this.localDetailName + " 강의코드를 정말로 삭제하시겠습니까?")) {
-        axios.delete('/acourse/codeDelete.do', {
-          params: {
-            detail_code: this.detail_code
-          }
-        })
-        .then(response => {
-          console.log("deleteNotice:", response)
-          alert(this.localDetailName + " 강의코드가 삭제되었습니다.");
-          this.$emit('close'); // 부모 컴포넌트에서 모달을 닫도록 이벤트 발생
-        })
-        .catch(error => {
-          console.error('Error deleting course:', error);
-          alert('Error deleting course');
-        });
+      if (
+        confirm(this.localDetailName + " 강의코드를 정말로 삭제하시겠습니까?")
+      ) {
+        axios
+          .delete("/acourse/codeDelete.do", {
+            params: {
+              detail_code: this.detail_code,
+            },
+          })
+          .then((response) => {
+            console.log("deleteNotice:", response);
+            alert(this.localDetailName + " 강의코드가 삭제되었습니다.");
+            this.$emit("close"); // 부모 컴포넌트에서 모달을 닫도록 이벤트 발생
+          })
+          .catch((error) => {
+            console.error("Error deleting course:", error);
+            alert("Error deleting course");
+          });
       }
     },
     insertNotice() {
-      if (this.localDetailName.trim() === '') {
-        alert('강의명을 입력해주세요.');
+      if (this.localDetailName.trim() === "") {
+        alert("강의명을 입력해주세요.");
         return;
       }
 
-      axios.post('/acourse/aCourseInsert.do', {
-        detail_code: this.detail_code, // 강의 코드 포함
-        detail_name: this.localDetailName
-      })
-      .then(response => {
-        alert(this.localDetailName + " 강의코드가 등록되었습니다.");
-        this.$emit('close'); // 부모 컴포넌트에서 모달을 닫도록 이벤트 발생
-      })
-      .catch(error => {
-        console.error('Error adding course:', error);
-        alert('Error adding course');
-      });
+      axios
+        .post("/acourse/aCourseInsert.do", {
+          detail_code: this.detail_code, // 강의 코드 포함
+          detail_name: this.localDetailName,
+        })
+        .then((response) => {
+          alert(this.localDetailName + " 강의코드가 등록되었습니다.");
+          this.$emit("close"); // 부모 컴포넌트에서 모달을 닫도록 이벤트 발생
+        })
+        .catch((error) => {
+          console.error("Error adding course:", error);
+          alert("Error adding course");
+        });
     },
   },
 };
@@ -183,6 +186,8 @@ export default {
 .delete-button,
 .insert-button {
   /* padding: 10px 16px; */
+  width: 50px;
+  height: 40px;
   color: #ffffff;
   border: none;
   border-radius: 4px;

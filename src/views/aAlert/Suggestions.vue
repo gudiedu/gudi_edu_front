@@ -205,6 +205,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #fff;
+  cursor: pointer;
 }
 
 .titletext {
@@ -315,7 +316,7 @@ export default {
   background-color: #f1f1f1;
 }
 
-.suggestion-no{
+.suggestion-no {
   width: 80px;
 }
 </style>

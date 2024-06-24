@@ -116,9 +116,7 @@
               @change="handleFileChange"
             />
           </form>
-          <v-btn class="insert-button" @click.prevent="insertReply"
-            >등록</v-btn
-          >
+          <v-btn class="insert-button" @click.prevent="insertReply">등록</v-btn>
         </div>
       </template>
       <template v-else-if="action === 'U'">
@@ -442,6 +440,8 @@ export default {
 .delete-button,
 .insert-button {
   /* padding: 10px 16px; */
+  width: 85px;
+  height: 40px;
   color: #ffffff;
   border: none;
   border-radius: 4px;

@@ -8,11 +8,8 @@
 
       <div>설문코드 : {{ survey_no }}</div>
       <div>설문조사명 : {{ survey_name }}</div>
-      
 
       <div class="container">
-
-
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
@@ -41,15 +38,19 @@
             <th>질문유형</th>
           </tr>
         </thead>
-          <tbody>
-            
+        <tbody>
           <tr v-if="questionList.length === 0">
             <td colspan="5" class="no-data">결과가 없습니다.</td>
           </tr>
-          <tr v-for="(item, index) in questionList" :key="item.survey_question_no">
+          <tr
+            v-for="(item, index) in questionList"
+            :key="item.survey_question_no"
+          >
             <td>{{ index + 1 }}</td>
             <td>{{ item.survey_question_no }}</td>
-            <td @click="qusetionModify(item)">{{ item.survey_question_text }}</td>
+            <td @click="qusetionModify(item)">
+              {{ item.survey_question_text }}
+            </td>
             <td>{{ item.question_choiced }}</td>
             <td>{{ getQuestionType(item.survey_question_type) }}</td>
           </tr>
@@ -57,21 +58,21 @@
       </v-table>
     </v-card>
 
-
     <div class="button-group">
       <button class="insert-button" @click="openAddModal">질문추가</button>
     </div>
-    <v-dialog v-model="addModal" max-width="800px" >
+    <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ASurveyManagementModal 
-          :survey_question_text="survey_question_text" 
-          :survey_question_no="survey_question_no"
-          :question_choiced="question_choiced"
-          :survey_question_type = "survey_question_type"
-          :survey_no="survey_no" 
-          :action="action"  
-          @close="closeAddModal"/>
+          <ASurveyManagementModal
+            :survey_question_text="survey_question_text"
+            :survey_question_no="survey_question_no"
+            :question_choiced="question_choiced"
+            :survey_question_type="survey_question_type"
+            :survey_no="survey_no"
+            :action="action"
+            @close="closeAddModal"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -79,13 +80,13 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 import ASurveyManagementModal from "./ASurveyQuestionModal.vue";
 export default {
   components: { ASurveyManagementModal },
   props: {
     survey_no: Number,
-    survey_name: String
+    survey_name: String,
   },
   data() {
     return {
@@ -106,52 +107,47 @@ export default {
     // survey_no을 이용한 추가적인 로직
   },
 
-  
-
-  mounted(){
+  mounted() {
     this.getQuestionList();
   },
 
-
   methods: {
-    qusetionModify(question){
-    this.selectedNotice = question;
-    this.survey_question_no = question.survey_question_no;
-    this.survey_question_text = question.survey_question_text;
-    this.question_choiced = question.question_choiced;
-    this.survey_question_type = question.survey_question_type;
-    this.action = "U";
-    this.addModal = true;
-  },
-    getQuestionList(){
+    qusetionModify(question) {
+      this.selectedNotice = question;
+      this.survey_question_no = question.survey_question_no;
+      this.survey_question_text = question.survey_question_text;
+      this.question_choiced = question.question_choiced;
+      this.survey_question_type = question.survey_question_type;
+      this.action = "U";
+      this.addModal = true;
+    },
+    getQuestionList() {
       let surveyParams = new URLSearchParams();
       surveyParams.append("survey_no", this.survey_no);
       surveyParams.append("stitle", this.stitle);
       console.log(this.survey_no);
       console.log(this.survey_name);
 
-      axios.post('/survey/QuestionList.do', surveyParams)
-      .then(response => {
-
-      console.log('QuestionList response:', response.data); // 전체 응답 데이터 콘솔 출력
-      this.questionList = response.data.listdate; // 데이터 바인딩
-      console.log('QuestionList:', this.questionList); // 바인딩된 데이터 콘솔 출력
-    })
-    .catch(error => {
-      console.error('Error fetching QuestionList:', error);
-    });
-
+      axios
+        .post("/survey/QuestionList.do", surveyParams)
+        .then((response) => {
+          console.log("QuestionList response:", response.data); // 전체 응답 데이터 콘솔 출력
+          this.questionList = response.data.listdate; // 데이터 바인딩
+          console.log("QuestionList:", this.questionList); // 바인딩된 데이터 콘솔 출력
+        })
+        .catch((error) => {
+          console.error("Error fetching QuestionList:", error);
+        });
     },
     handleSearch() {
       this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
       this.getQuestionList(); // 검색 실행
     },
-   
+
     getQuestionType(questionType) {
-      return questionType === "written" ? '서술형' : '선택형';
+      return questionType === "written" ? "서술형" : "선택형";
     },
 
-    
     findAll() {
       this.activeFilter = "all";
     },
@@ -165,7 +161,7 @@ export default {
 
     openAddModal() {
       this.selectedNotice = "";
-       // questionList에서 최대 survey_question_no를 찾아 +1
+      // questionList에서 최대 survey_question_no를 찾아 +1
       const maxQuestionNo = this.questionList.reduce((max, item) => {
         return item.survey_question_no > max ? item.survey_question_no : max;
       }, 0);
@@ -189,6 +185,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #fff;
+  cursor: pointer;
 }
 
 .titletext {

@@ -53,7 +53,7 @@
       </div>
 
       <v-divider></v-divider>
-      <v-table class="dashboard-table" >
+      <v-table class="dashboard-table">
         <thead>
           <tr>
             <th>회원유형</th>
@@ -61,75 +61,184 @@
             <th>이름</th>
             <th>이메일</th>
             <th>휴대전화</th>
-            <th> 회원수정 </th>
+            <th>회원수정</th>
             <th v-if="activeFilter === 's'">출석</th>
           </tr>
         </thead>
         <!-- 전체 조회 -->
-        <tbody v-if="activeFilter !== 'a' && activeFilter !== 't' && activeFilter !== 's'&& activeFilter !== 'search' ">
-          <tr v-for="(person, index) in people" :key="index"> 
-            <td>{{person.user_type}}</td>
-            <td>{{person.loginID}}</td>
-            <td>{{person.name}}</td>
-            <td>{{person.email}}</td>
-            <td>{{person.hp}}</td>
-            <td><button id="edit" @click="EditMemberModal(person.loginID, person.hp, person.name, person.email)"> 편집</button></td>
+        <tbody
+          v-if="
+            activeFilter !== 'a' &&
+            activeFilter !== 't' &&
+            activeFilter !== 's' &&
+            activeFilter !== 'search'
+          "
+        >
+          <tr v-for="(person, index) in people" :key="index">
+            <td>{{ person.user_type }}</td>
+            <td>{{ person.loginID }}</td>
+            <td>{{ person.name }}</td>
+            <td>{{ person.email }}</td>
+            <td>{{ person.hp }}</td>
+            <td>
+              <button
+                id="edit"
+                class="edit-button"
+                @click="
+                  EditMemberModal(
+                    person.loginID,
+                    person.hp,
+                    person.name,
+                    person.email
+                  )
+                "
+              >
+                편집
+              </button>
+            </td>
             <td></td>
           </tr>
         </tbody>
         <!-- 관리자 조회 -->
-        <tbody v-if="activeFilter !== 'all' && activeFilter !== 't' && activeFilter !== 's' && activeFilter !== 'search' ">
-          <tr v-for="(admin, index) in admins" :key="index"> 
-            <td>{{admin.user_type}}</td>
-            <td>{{admin.loginID}}</td>
-            <td>{{admin.name}}</td>
-            <td>{{admin.email}}</td>
-            <td>{{admin.hp}}</td>
-            <td><button id="edit" @click="EditMemberModal(admin.loginID, admin.hp, admin.name, admin.email)" >편집</button></td>
+        <tbody
+          v-if="
+            activeFilter !== 'all' &&
+            activeFilter !== 't' &&
+            activeFilter !== 's' &&
+            activeFilter !== 'search'
+          "
+        >
+          <tr v-for="(admin, index) in admins" :key="index">
+            <td>{{ admin.user_type }}</td>
+            <td>{{ admin.loginID }}</td>
+            <td>{{ admin.name }}</td>
+            <td>{{ admin.email }}</td>
+            <td>{{ admin.hp }}</td>
+            <td>
+              <button
+                id="edit"
+                class="edit-button"
+                @click="
+                  EditMemberModal(
+                    admin.loginID,
+                    admin.hp,
+                    admin.name,
+                    admin.email
+                  )
+                "
+              >
+                편집
+              </button>
+            </td>
             <td></td>
           </tr>
         </tbody>
         <!-- 강사 조회 -->
-        <tbody v-if="activeFilter !== 'all' && activeFilter !== 'a' && activeFilter !== 's' && activeFilter !== 'search'  ">
-          <tr v-for="(teacher, index) in teachers" :key="index"> 
-            <td>{{teacher.user_type}}</td>
-            <td>{{teacher.loginID}}</td>
-            <td>{{teacher.name}}</td>
-            <td>{{teacher.email}}</td>
-            <td>{{teacher.hp}}</td>
-            <td><button id="edit" @click="EditMemberModal(teacher.loginID, teacher.hp, teacher.name, teacher.email)" >편집</button></td>
+        <tbody
+          v-if="
+            activeFilter !== 'all' &&
+            activeFilter !== 'a' &&
+            activeFilter !== 's' &&
+            activeFilter !== 'search'
+          "
+        >
+          <tr v-for="(teacher, index) in teachers" :key="index">
+            <td>{{ teacher.user_type }}</td>
+            <td>{{ teacher.loginID }}</td>
+            <td>{{ teacher.name }}</td>
+            <td>{{ teacher.email }}</td>
+            <td>{{ teacher.hp }}</td>
+            <td>
+              <button
+                id="edit"
+                class="edit-button"
+                @click="
+                  EditMemberModal(
+                    teacher.loginID,
+                    teacher.hp,
+                    teacher.name,
+                    teacher.email
+                  )
+                "
+              >
+                편집
+              </button>
+            </td>
             <td></td>
           </tr>
         </tbody>
         <!-- 학생 조회 -->
-        <tbody v-if="activeFilter !== 'all' && activeFilter !== 'a' && activeFilter !== 't' && activeFilter !== 'search' ">
-          <tr v-for="(student, index) in students" :key="index"> 
-            <td>{{student.user_type}}</td>
-            <td>{{student.loginID}}</td>
-            <td>{{student.name}}</td>
-            <td>{{student.email}}</td>
-            <td>{{student.hp}}</td>
-            <td><button id="edit" @click="EditMemberModal(student.loginID, student.hp, student.name, student.email)" >편집</button></td>
-            <td @click="navigateToStudentAttendance(student)">이동</td>
+        <tbody
+          v-if="
+            activeFilter !== 'all' &&
+            activeFilter !== 'a' &&
+            activeFilter !== 't' &&
+            activeFilter !== 'search'
+          "
+        >
+          <tr v-for="(student, index) in students" :key="index">
+            <td>{{ student.user_type }}</td>
+            <td>{{ student.loginID }}</td>
+            <td>{{ student.name }}</td>
+            <td>{{ student.email }}</td>
+            <td>{{ student.hp }}</td>
+            <td>
+              <button
+                id="edit"
+                class="edit-button"
+                @click="
+                  EditMemberModal(
+                    student.loginID,
+                    student.hp,
+                    student.name,
+                    student.email
+                  )
+                "
+              >
+                편집
+              </button>
+            </td>
+            <td>
+              <button
+                id="attendance-button"
+                @click="navigateToStudentAttendance(student)"
+              >
+                출결
+              </button>
+            </td>
           </tr>
         </tbody>
         <!-- 검색 -->
-        <tbody v-if="activeFilter !== 'all' && activeFilter !== 'a' && activeFilter !== 't' && activeFilter !== 's'">
-          <tr v-for="(user, index) in users_searched" :key="index" >
-            <td>{{user.user_type}}</td>
-            <td>{{user.loginID}}</td>
-            <td>{{user.name}}</td>
-            <td>{{user.email}}</td>
-            <td>{{user.hp}}</td>
-            <td><button id="edit" @click="EditMemberModal(user.loginID, user.hp, user.name, user.email)" >편집</button></td>
+        <tbody
+          v-if="
+            activeFilter !== 'all' &&
+            activeFilter !== 'a' &&
+            activeFilter !== 't' &&
+            activeFilter !== 's'
+          "
+        >
+          <tr v-for="(user, index) in users_searched" :key="index">
+            <td>{{ user.user_type }}</td>
+            <td>{{ user.loginID }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.hp }}</td>
+            <td>
+              <button
+                id="edit"
+                @click="
+                  EditMemberModal(user.loginID, user.hp, user.name, user.email)
+                "
+              >
+                편집
+              </button>
+            </td>
             <td><a href=""></a></td>
           </tr>
         </tbody>
-        
       </v-table>
     </v-card>
 
-    
     <div class="button-group">
       <button class="insert-button" @click="openRegMemberModal">등록</button>
     </div>
@@ -145,15 +254,20 @@
     <v-dialog v-model="EditModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <EditMember :action="action" v-bind:selectedID="selectedID " v-bind:selectedHP="selectedHP" v-bind:selectedNAME="selectedNAME" v-bind:selectedEMAIL="selectedEMAIL" />
+          <EditMember
+            :action="action"
+            v-bind:selectedID="selectedID"
+            v-bind:selectedHP="selectedHP"
+            v-bind:selectedNAME="selectedNAME"
+            v-bind:selectedEMAIL="selectedEMAIL"
+          />
         </v-card-text>
       </v-card>
     </v-dialog>
 
-
     <!-- 페이지네이션 추가-->
   </v-container>
-</template> 
+</template>
 
 <script>
 import AMemberRegistration from "./AMemberRegistration.vue";
@@ -161,103 +275,105 @@ import EditMember from "./EditMember";
 //import EditMember from './EditMember.vue';
 
 export default {
-  
   components: {
     AMemberRegistration,
     EditMember,
-    
   },
   mounted() {
-    let user_type = sessionStorage.getItem('user_type');
-    console.log(user_type)
-    user_type === "a" ? this.$router.push('/dashboard/information/hrinfo') : this.$router.push('/dashboard');
-  }, 
+    let user_type = sessionStorage.getItem("user_type");
+    console.log(user_type);
+    user_type === "a"
+      ? this.$router.push("/dashboard/information/hrinfo")
+      : this.$router.push("/dashboard");
+  },
 
   data() {
     return {
       titleText: "인원관리",
       activeFilter: "all",
-      RegMemberModal:false,
-      EditModal:false,
-      people:[],
-      admins:[],
-      teachers:[],
-      students:[],
-      users_searched:[],
+      RegMemberModal: false,
+      EditModal: false,
+      people: [],
+      admins: [],
+      teachers: [],
+      students: [],
+      users_searched: [],
       search_word: "",
-      action:"",
-      selectedID:"",
-      selectedHP:"",
-      selectedNAME:"",
-      selectedEMAIL:""
+      action: "",
+      selectedID: "",
+      selectedHP: "",
+      selectedNAME: "",
+      selectedEMAIL: "",
     };
   },
   methods: {
     findAll() {
       this.activeFilter = "all";
-      this.axios.get('/api/adm/doGetAllPeopleList.do')
-      .then(res=>{
-        this.people = res.data.allUsers;
-        console.log(res)
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error)
-      }) 
-
+      this.axios
+        .get("/api/adm/doGetAllPeopleList.do")
+        .then((res) => {
+          this.people = res.data.allUsers;
+          console.log(res);
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
     },
     findAdmins() {
-      this.activeFilter = 'a';
+      this.activeFilter = "a";
       const params = new URLSearchParams();
-      params.append('user_type', this.activeFilter);
-      this.axios.post('/api/adm/doGetUsersByUserType.do', params)
-      .then(res => {
-        this.admins = res.data.members;
-      })
-      .catch(error => console.error(error)); 
+      params.append("user_type", this.activeFilter);
+      this.axios
+        .post("/api/adm/doGetUsersByUserType.do", params)
+        .then((res) => {
+          this.admins = res.data.members;
+        })
+        .catch((error) => console.error(error));
     },
     findTeachers() {
-      this.activeFilter = 't';
+      this.activeFilter = "t";
       const params = new URLSearchParams();
-      params.append('user_type', this.activeFilter);
-      this.axios.post('/api/adm/doGetUsersByUserType.do', params)
-      .then(res => {
-        this.teachers = res.data.members;
-      })
-      .catch(error => console.error(error)); 
+      params.append("user_type", this.activeFilter);
+      this.axios
+        .post("/api/adm/doGetUsersByUserType.do", params)
+        .then((res) => {
+          this.teachers = res.data.members;
+        })
+        .catch((error) => console.error(error));
     },
-    findStudents(){
-      this.activeFilter = 's';
+    findStudents() {
+      this.activeFilter = "s";
       const params = new URLSearchParams();
-      params.append('user_type', this.activeFilter);
-      this.axios.post('/api/adm/doGetUsersByUserType.do', params)
-      .then(res => {
-        console.log(res)
-        this.students = res.data.members;
-      })
-      .catch(error => console.error(error)); 
+      params.append("user_type", this.activeFilter);
+      this.axios
+        .post("/api/adm/doGetUsersByUserType.do", params)
+        .then((res) => {
+          console.log(res);
+          this.students = res.data.members;
+        })
+        .catch((error) => console.error(error));
     },
     searchForUser() {
-      this.activeFilter = 'search';
+      this.activeFilter = "search";
       const params = new URLSearchParams();
-      params.append('search_word', this.search_word);
+      params.append("search_word", this.search_word);
       this.axios
-      .post('/api/adm/doSearchForUser.do', params)
-      .then(res => {
-        this.users_searched = res.data.users;
-      })
-      .catch(error => console.error(error));
-
+        .post("/api/adm/doSearchForUser.do", params)
+        .then((res) => {
+          this.users_searched = res.data.users;
+        })
+        .catch((error) => console.error(error));
     },
 
     EditMemberModal(userId, hp, name, email) {
-      console.log("EditMemberModal:" + userId + hp + name + email)
+      console.log("EditMemberModal:" + userId + hp + name + email);
       this.selectedID = userId;
       this.selectedHP = hp;
       this.selectedNAME = name;
       this.selectedEMAIL = email;
-      
+
       this.EditModal = true;
-      // 이름에 대한 변수 
+      // 이름에 대한 변수
     },
     openRegMemberModal() {
       //this.action = "";
@@ -266,30 +382,89 @@ export default {
     closeAddModal() {
       this.RegMemberModall = false;
     },
-    navigateToStudentAttendance(student){
+    navigateToStudentAttendance(student) {
       // this.$store.dispatch('updateStudentInfo', student);
-      this.$router.push({ name : 'aStudentAttendance', params: {studentId: student.loginID} });
+      this.$router.push({
+        name: "aStudentAttendance",
+        params: { studentId: student.loginID },
+      });
     },
   },
 };
 </script>
 
 <style scoped>
+#attendance-button {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 4px 13px;
+  font-size: 13px;
+  font-weight: 600;
+}
 
+#attendance-button:hover {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 50px;
+  padding: 4px 13px;
+  font-size: 13px;
+  font-weight: 600;
+}
 
-#edit{
+/* #edit {
   font-weight: bold;
-  background-color:rgb(240, 188, 91);
-  width:80%;
+  background-color: rgb(240, 188, 91);
+  width: 80%;
   height: 80%;
   border-radius: 8px;
+} */
+
+#edit {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #ffffff;
+  color: #407bff;
+  border: 1px solid #407bff;
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
 }
+
+#edit:hover {
+  display: flex;
+  width: 55px;
+  height: 35px;
+  align-items: center;
+  background-color: #407bff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .dashboard-card {
   margin: 20px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #fff;
+  cursor: pointer;
 }
 
 .titletext {
@@ -336,7 +511,6 @@ export default {
 .search-container {
   display: flex;
   align-items: center;
-  padding: 16px;
   border: 1px solid #ccc;
   border-radius: 25px;
   margin: 16px 0;
@@ -382,10 +556,9 @@ export default {
   margin: 16px 0;
 }
 
-
 .dashboard-table td {
   text-align: center;
-  padding: 12px;
+  padding: 10px;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
 }
@@ -394,7 +567,7 @@ export default {
   text-align: center;
   background-color: #f4f4f4;
   font-weight: bold;
-  padding: 12px;
+  padding: 10px;
   border-bottom: 1px solid #ddd;
   font-size: 15px;
 }
