@@ -121,7 +121,8 @@ export default {
       filteredCourseList: [], // 필터링된 강의 목록을 저장할 배열
       currentPage: 1,
       totalCnt: 0,
-      pageSize: 30,
+      pageSize: 10,
+      studentSignedInID: "",
 
     };
   },
@@ -199,24 +200,6 @@ export default {
       this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
       this.getCourseList(); // 검색 실행
     },
-
-    // searchMethod() {
-    //   console.log(this.stitle);
-    //   axios.get('/course/courseSearch.do', {
-    //       params: {
-    //         word: this.stitle
-    //       }
-    //     })
-    // .then(response => {
-    //   console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
-    //   this.courseList = response.data.listdate; // 데이터 바인딩
-    //   this.filterCourses();
-    //   console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
-    // })
-    // .catch(error => {
-    //   console.error('Error fetching course list:', error);
-    // });
-    // },
 
     noticeModify(notice) {
       this.selectedNotice = notice;

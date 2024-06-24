@@ -46,7 +46,6 @@
     </form>
   </div>
 </template>
-
 <script>
 export default {
   props: {
@@ -62,22 +61,41 @@ export default {
       enrolledCourses: [],
       sQnaGetCourseName: [],
       selectedCourseNo: "",
+      studentSignedInID:"",
     };
   },
   mounted() {
     this.init();
+    $('#summernote').summernote({
+      height: 800,
+      minHeight: null,
+      maxHeight: null,
+      focus: true,
+      toolbar: [
+        ['style', ['bold', 'italic', 'underline']],
+        ['fontsize', ['fontsize']],
+        ['color', ['color']],
+        ['para', ['paragraph']],
+        ['height', ['height']],
+        ['Insert', ['picture']],
+        ['Mics',['codeview']]
+      ]
+    });
   },
   methods: {
     init() {
       let courseParams = new URLSearchParams();
       courseParams.append("courseNo", this.course_no);
       courseParams.append("courseName", this.course_name);
-      courseParams.append("loginID", this.loginID);
+      courseParams.append("studentSignedInID", this.studentSignedInID);
+
+      console.log("studentSignedInID : ", this.studentSignedInID);
+      console.log("courseNo : ", this.courseNo);
 
       this.axios
-        .post("sAlert/sQnaGetCourseName.do", courseParams)
-        .then((response) => {
-          console.log("JSON.stringify(response)", JSON.stringify(response));
+      .post("sAlert/sQnaGetCourseName.do", courseParams)
+      .then((response) => {
+        console.log("JSON.stringify(response) : ", JSON.stringify(response.data));
 
           this.enrolledCourses = response.data.sQnaGetCourseName;
 
@@ -85,6 +103,7 @@ export default {
             this.courseName = each.course_name;
             this.studentName = each.name;
             this.courseNo = each.course_no;
+            this.sQnaGetCourseName = each.loginId;
 
             console.log("this.studentName:", this.studentName);
           });
@@ -92,9 +111,11 @@ export default {
           this.courseName = response.data.sQnaGetCourseName.course_name;
           this.courseNo = response.data.sQnaGetCourseName.course_no;
 
-          console.log("두번째 studentName확인이지롱 : ", this.studentName);
-        })
-        .catch(function (error) {
+        console.log("두번째 studentName확인 : ", this.studentName);
+        console.log("sQnaGetCourseName : ", this.sQnaGetCourseName);
+       
+      })
+      .catch(function (error) {
           alert("init에서 오류 발생!" + error);
         });
     },
@@ -108,9 +129,9 @@ export default {
       data.append("studentName", this.studentName);
 
       // FormData에 값을 잘 추가했는지 확인하는 alert
-      for (let [key, value] of data.entries()) {
-        alert(`${key}: ${value}`);
-      }
+      // for (let [key, value] of data.entries()) {
+      //   alert(`${key}: ${value}`);
+      // }
 
       this.axios
         .post("/sAlert/sQnaInsert.do", data)

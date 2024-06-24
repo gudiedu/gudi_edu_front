@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container>
     <v-card class="dashboard-card">
       <v-card-title class="d-flex align-center pe-2">
         <div class="titletext">{{ titleText }}</div>
@@ -9,8 +9,7 @@
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'all' }"
             @click="filtered('all')"
-            >전체</v-btn
-          >
+            >전체</v-btn>
           <v-btn
             :class="{
               'filter-button': true,
@@ -27,7 +26,7 @@
               class="search-input"
               placeholder="검색어를 입력해주세요."
               v-model="searchKeyword"
-              @keydown.enter = "handleSearch"
+              @keydown.enter="handleSearch"
             />
           </div>
           <div class="button-group">
@@ -47,26 +46,24 @@
         </thead>
         <tbody>
           <template v-if="totalCnt > 0">
-            <!--해당 게시글에 대한 세부정보는 SQnaSelectModal로 열기-->
             <template v-for="item in listQna" :key="item.question_no">
               <tr class="table_row" @click="sQnaSelected(item.question_no)">
                 <td>{{ item.course_name }}</td>
                 <td>{{ item.question_title }}</td>
                 <td>{{ item.name }}</td>
                 <td>{{ item.question_created_at }}</td>
-                <td>{{ item.reply_no > 0 ? "Y" : "N" }}</td>
+                <td>{{ item.reply_no > 0 ? 'Y' : 'N' }}</td>
               </tr>
             </template>
           </template>
           <template v-else>
             <tr style="text-align: center">
-              <td>조회된 데이터가 없습니다.</td>
+              <td colspan="5">조회된 데이터가 없습니다.</td>
             </tr>
           </template>
         </tbody>
       </v-table>
     </v-card>
-    <!-- 페이지네이션 추가-->
     <div id="qnaPagination">
       <paginate
         class="justify-content-center"
@@ -110,6 +107,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import sQnaSubmitModal from "./SQnaSubmitModal.vue";
 import sQnaSelectedModal from "./SQnaSelectModal.vue";
 import Paginate from "vuejs-paginate-next";
@@ -120,8 +118,6 @@ export default {
     sQnaSelectedModal,
     Paginate,
   },
-  // modal setup
-
   data() {
     return {
       titleText: "질의응답",
@@ -136,42 +132,33 @@ export default {
       pageSize: 10,
       searchKeyword: "",
       status: "",
-      studentSignedID:""
+      studentSignedInID: ""
     };
   },
   mounted() {
     this.qna_list();
+    console.log("studentSignedInID_mounted: ", this.studentSignedInID);
   },
   methods: {
-    // Qna 등록 모달 열기
     sQnaSubmit() {
       this.action = "I";
       this.sQnaSubmitModal = true;
     },
-    // Qna 등록 모달 닫기
     closeSubmitModal() {
       this.sQnaSubmitModal = false;
       this.qna_list();
     },
-
-    // 질의응답 세부조회 모달 열기
     sQnaSelected(sQuestionNo) {
       this.sQnaSelectedModal = true;
       this.sQuestionNo = sQuestionNo;
       this.action = "S";
     },
-
-    // 질의응답 세부조회 모달 닫기
     sQnaSelectedClosed() {
       this.sQnaSelectedModal = false;
       this.qna_list();
     },
-
-    // Qna 리스트 조회 which will be mounted.
-    qna_list: function () {
-      // qna로 넘겨줄 parameter 정리
-      let vm = this; // axios에서 this를 사용하기 위해 vm에 담아봄
-
+    qna_list() {
+      let vm = this;
       let qnaParams = new URLSearchParams();
       qnaParams.append("question_title", this.question_title);
       qnaParams.append("question_no", this.question_no);
@@ -182,26 +169,25 @@ export default {
       qnaParams.append("status", this.status);
       qnaParams.append("currentPage", this.currentPage);
       qnaParams.append("pageSize", this.pageSize);
-      qnaParams.append("studentSignedID", this.studentSignedID);
+      qnaParams.append("studentSignedInID", this.studentSignedInID);
+      console.log("studentSignedInID_qnaparam: ", this.studentSignedInID);
 
-      this.axios
+      axios
         .post("/sAlert/sQnaList.do", qnaParams)
         .then((response) => {
           vm.totalCnt = response.data.totalCnt;
           vm.listQna = response.data.listQna;
           console.log(response.data.listQna);
         })
-        .catch(function (error) {
+        .catch((error) => {
           alert("ERROR" + error);
         });
     },
-
     handleSearch() {
       console.log("searchKeyword: ", this.searchKeyword);
-      this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
-      this.qna_list(); // 검색 실행
+      this.currentPage = 1;
+      this.qna_list();
     },
-
     filtered(param) {
       if (param === "all") {
         this.activeFilter = param;
@@ -210,17 +196,15 @@ export default {
         this.activeFilter = param;
         this.status = param;
       }
-
       this.qna_list();
     },
-
-    page: function () {
+    page() {
       var total = this.totalCnt;
       var page = this.pageSize;
       var remaining = total % page;
       var result = parseInt(total / page);
 
-      if (remaining == 0) {
+      if (remaining === 0) {
         return result;
       } else {
         result = result + 1;

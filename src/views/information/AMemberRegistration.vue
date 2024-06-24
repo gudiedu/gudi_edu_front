@@ -155,7 +155,7 @@ export default {
     },
     registerMember() {
         //시작 전 회원 아이디 존재 
-        console.log("회원가입 시작요!")
+        console.log("회원가입 시작")
         try{
             //const mail_regex = new RegExp('[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]{2,3}$');
             //const isMailTrue = mail_regex.test(this.email)

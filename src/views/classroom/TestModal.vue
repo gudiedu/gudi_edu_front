@@ -75,13 +75,13 @@ export default {
       let testParams = new URLSearchParams();
       testParams.append("SelectedCourseNo", this.SelectedCourseNo);
       testParams.append("SelectedTestCategory", this.SelectedTestCategory);
-      console.log("정체를밝혀랏 : ", this.SelectedTestCategory);
-      console.log("너는누구냣: ", this.SelectedCourseNo);
+      console.log(this.SelectedTestCategory);
+      console.log(this.SelectedCourseNo);
 
       this.axios
       .post("/classroom/sCreateTest.do", testParams)
       .then((response) => {
-        console.log("JSON좀봅시당: "+ JSON.stringify(response));
+        //console.log("sCreateTestJSON : "+ JSON.stringify(response));
 
         this.sTestInfo = response.data.createTest;
 
@@ -95,10 +95,10 @@ export default {
           this.testNo[index] = each.test_no;
         });
          // testNo에 값을 잘 추가했는지 확인하는 alert
-           for (let [key, value] of this.testNo.entries()) {
-             console.log(`${key}: ${value}`);
-           }
-      })
+      //      for (let [key, value] of this.testNo.entries()) {
+      //        console.log(`${key}: ${value}`);
+      //      }
+       })
     },
     // 시험 채점
     calculateTest(){
@@ -106,8 +106,8 @@ export default {
       let testcalcuateParams = new URLSearchParams();
       testcalcuateParams.append("selectedCourseNo", this.SelectedCourseNo);
       testcalcuateParams.append("selectedTestCategory", this.SelectedTestCategory);
-      console.log("카테고리왔느뇨 : ", this.SelectedTestCategory);
-      console.log("강의번호왔느뇨: ", this.SelectedCourseNo);
+      console.log("selectedTestCategory : ", this.SelectedTestCategory);
+      console.log("selectedCourseNo: ", this.SelectedCourseNo);
 
       this.axios
         .post("/classroom/sTestCalculate.do", testcalcuateParams)
@@ -132,23 +132,22 @@ export default {
       data.append("testNo", this.testNo);
 
        // FormData에 값을 잘 추가했는지 확인하는 alert
-       for (let [key, value] of data.entries()) {
-         alert(`${key}: ${value}`);
-       }
+      //  for (let [key, value] of data.entries()) {
+      //    alert(`${key}: ${value}`);
+      //  }
 
       this.axios
         .post("/classroom/sTestSubmit.do", data)
         .then((response) => {
-          console.log("너의 정체가 무엇이냐: ",JSON.stringify(response));
 
           if (response.data.result > 0) {
-            alert("result값알려주라: " + response.data.result);
+            alert("resultValue: " + response.data.result);
             alert(response.data.resultMsg);
             
             this.calculateTest();
-            alert("시험 채점 결과가 들어갔겠쬬?@.@");
+            // alert("시험 채점 결과 삽입 완료");
             
-            this.$emit("close-modal"); // 모달 닫기 이벤트 발생
+            this.$emit("close-modal");
           }
 
         })

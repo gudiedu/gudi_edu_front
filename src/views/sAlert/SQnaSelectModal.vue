@@ -127,33 +127,42 @@ export default {
       replyNo: 0,
       replyContent: "",
       replyCreatedAt: "",
-      studentSignedID: "",
+      studentSignedInID:""
     };
   },
   mounted() {
     this.sQnaSelected();
     //this.sQnaReplyContent();
+    // will edit this later
+    // $('#summernote').summernote({
+    //   height: 800,
+    //   minHeight: null,
+    //   maxHeight: null,
+    //   focus: false,
+    // });
   },
   methods: {
     sQnaSelected() {
       let params = new URLSearchParams();
       params.append("SelectedQuestionNo", this.SelectedQuestionNo);
-      params.append("studentSignedID", this.studentSignedID);
+      params.append("studentSignedInID",this.studentSignedInID);
       //params.append("replyNo", this.reply_no);
+      console.log("SelectedQuestionNo: ", this.SelectedQuestionNo);
 
       this.axios
         .post("/sAlert/sQnaSelected.do", params)
         .then((response) => {
-          //console.log("JSON.stringify(response) : " + JSON.stringify(response));
-          //console.log(response.data);
+          console.log("JSON.stringify(response) : " + JSON.stringify(response));
+          console.log(response.data);
 
           this.questionTitle = response.data.result.question_title;
+          console.log(this.questionTitle);
           this.qName = response.data.result.name; // 질문 작성자 이름
           this.questionContent = response.data.result.question_content;
           this.questionCreatedAt = response.data.result.question_created_at;
 
           this.QnaContentReply = response.data.sQnaSelectedReply; // 배열을 직접 할당
-          // console.log("this.questionTitle: ", this.questionTitle);
+          console.log("this.questionTitle: ", this.questionTitle);
           //console.log("Type of showResult:", typeof this.QnaContentReply);
 
           response.data.sQnaSelectedReply.forEach((reply) => {
@@ -161,6 +170,7 @@ export default {
             this.replyContent = reply.reply_content;
             this.replyCreatedAt = reply.reply_created_at;
           });
+          console.log("ReplyJSON : ", JSON.stringify(response.data.sQnaSelectedReply));
 
           // console.log("QnaContentReply: ", this.QnaContentReply[0]);
           // console.log("1st replyContent: ", this.replyContent);
@@ -173,29 +183,29 @@ export default {
     },
 
     sQnaDelete() {
-      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
-      params.append("SelectedQuestionNo", this.SelectedQuestionNo);
+      if(confirm("질의 작성글을 삭제하시겠습니까?")){
+        let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+        params.append("SelectedQuestionNo", this.SelectedQuestionNo);
+        params.append("studentSignedInID", this.studentSignedInID);
 
-      //console.log("this.SelectedQuestionNo", this.SelectedQuestionNo);
+        //console.log("this.SelectedQuestionNo", this.SelectedQuestionNo);
+        this.axios
+          .post("/sAlert/sQnaDelete.do", params)
+          .then((response) => {
+            //console.log(JSON.stringify(response));
 
-      this.axios
-        .post("/sAlert/sQnaDelete.do", params)
-        .then((response) => {
-          //console.log(JSON.stringify(response));
+            console.log("resultValue: ", response.data.result);
 
-          if (response.data.result > 0) {
-            alert(response.data.resultMsg);
-            this.$emit("close-modal"); // 모달 닫기 이벤트 발생
-          }
-        })
-        .catch(function (error) {
-          alert("에러! API 요청에 오류가 있습니다. " + error);
-        });
+            if (response.data.result >= 0) {
+              alert(response.data.resultMsg);
+              this.$emit("close-modal"); // 모달 닫기 이벤트 발생
+            }
+          })
+          .catch(function (error) {
+            alert("에러! API 요청에 오류가 있습니다. " + error);
+          });
+      } 
     },
-
-    // closeModal(){
-    //   this.$emit('close-modal');
-    // },
   },
 };
 </script>

@@ -85,10 +85,10 @@ export default {
       titleText: "강의상세",
       sCourseInfo: [],
       sCourseDetail: [],
-      currentLoginID: "",
       infoResult: [],
       courseDetailResult: [],
       courseDescription: "",
+      studentSignedInID:"",
     };
   },
   mounted() {
@@ -108,14 +108,14 @@ export default {
       let courseParams = new URLSearchParams();
       courseParams.append("courseNo", this.courseNo);
 
-      console.log("courseNo나오니안나오니 : " + this.courseNo);
+      // console.log("courseNo : " + this.courseNo);
 
       // axios 요청 설정
       this.axios
         .post("/classroom/sCourseInfo.do", courseParams)
         .then((response) => {
-          console.log("JSON.stringify(response) : " + JSON.stringify(response));
-          console.log("여기다 여기야: " + response.data.infoResult.course_no);
+          //console.log("JSON.stringify(response) : " + JSON.stringify(response));
+          //console.log("course_no: " + response.data.infoResult.course_no);
 
           this.sCourseInfo = response.data.infoResult;
 
@@ -138,8 +138,8 @@ export default {
           this.courseNo = response.data.infoResult.course_no;
           this.courseLoc = response.data.infoResult.course_loc;
 
-          console.log("정체가무엇이냐: " + typeof response.data.infoResult);
-          console.log("상세 타입이 무엇이냐: ", response.data.infoResult);
+          // console.log(typeof response.data.infoResult);
+          console.log(response.data.infoResult);
         })
         .catch(function (error) {
           alert("ERROR" + error);
