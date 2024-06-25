@@ -36,7 +36,7 @@
               <td style="text-align: center">
                 {{ index + 1 }}
               </td>
-              <td>{{ item.reply_content }}</td>
+              <td class="col-content">{{ item.reply_content }}</td>
               <td style="text-align: center">{{ item.name }}</td>
               <td style="text-align: center">
                 {{ item.reply_created_at }}
@@ -171,6 +171,7 @@ export default {
         this.axios
           .post("/tCourse/deletequestionreply.do", {
             reply_no: this.reply_num,
+            question_no: this.question_no,
           })
           .then((response) => {
             if (response.data.result >= 0) {
@@ -432,5 +433,12 @@ export default {
 
 .content-scroll::-webkit-scrollbar {
   display: none;
+}
+
+.dashboard-table .col-content {
+  max-width: 150px; /* 적절한 최대 너비 설정 */
+  white-space: nowrap; /* 내용을 한 줄로 표시 */
+  overflow: hidden; /* 내용이 넘치면 숨김 */
+  text-overflow: ellipsis; /* 넘친 내용을 ...으로 표시 */
 }
 </style>

@@ -10,13 +10,7 @@
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input
-              type="text"
-              class="search-input"
-              placeholder="검색어를 입력해주세요."
-              v-model="stitle"
-              @keydown.enter="handleSearch"
-            />
+            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" @keydown.enter="handleSearch" />
           </div>
           <div class="button-group">
             <button class="search-button" @click="handleSearch">검색</button>
@@ -41,7 +35,7 @@
           <template v-if="totalCnt > 0">
             <template v-for="item in resourceList" :key="item.resource_no">
               <tr class="table_row" @click="resourceModify(item.resource_no)">
-                <td>{{ item.resource_no }}</td>
+                <td>{{ item.display_no }}</td>
                 <td>{{ item.course_subject }}</td>
                 <td>{{ item.course_name }}</td>
                 <td>
@@ -54,9 +48,7 @@
           </template>
           <template v-else>
             <tr>
-              <td colspan="10" style="text-align: center">
-                조회된 데이터가 없습니다.
-              </td>
+              <td colspan="10" style="text-align: center">조회된 데이터가 없습니다.</td>
             </tr>
           </template>
         </tbody>
@@ -82,11 +74,7 @@
     <v-dialog v-model="resourceModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <ResourceModal
-            :action="action"
-            :resourceNo="resourceNo"
-            @close-modal="closeResourceModal"
-          />
+          <ResourceModal :action="action" :resourceNo="resourceNo" @close-modal="closeResourceModal" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -138,7 +126,7 @@ export default {
     searchList: function () {
       let vm = this;
 
-      let params = new URLSearchParams(); //파라미터를 넘길 때 사용
+      let params = new URLSearchParams(); // 파라미터를 넘길 때 사용
       params.append("stitle", this.stitle);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
@@ -149,6 +137,14 @@ export default {
           vm.resourceList = response.data.listData;
           console.log(vm.resourceList);
           vm.totalCnt = response.data.totalCnt;
+
+          let totalData = vm.resourceList.map((item, index) => {
+            item.display_no = vm.totalCnt - ((vm.currentPage - 1) * vm.pageSize + index) + 2;
+            return item;
+          });
+
+          // 페이지 내에서는 최신 글이 위로 오도록 함
+          vm.resourceList = totalData;
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);

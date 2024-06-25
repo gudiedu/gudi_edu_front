@@ -8,11 +8,7 @@
 
       <div class="container">
         <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findStatus('all')"
-            >전체</v-btn
-          >
+          <v-btn :class="{ 'filter-button': true, active: activeFilter === 'all' }" @click="findStatus('all')">전체</v-btn>
           <v-btn
             :class="{
               'filter-button': true,
@@ -42,13 +38,7 @@
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input
-              type="text"
-              class="search-input"
-              placeholder="검색어를 입력해주세요."
-              v-model="stitle"
-              @keydown.enter="handleSearch"
-            />
+            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" @keydown.enter="handleSearch" />
           </div>
           <!-- <select class="search-category" v-model="scategory">
             <option value="" disabled>카테고리를 선택하세요.</option>
@@ -83,11 +73,8 @@
         <tbody>
           <template v-if="totalCnt > 0">
             <template v-for="item in suggestionList" :key="item.suggestion_no">
-              <tr
-                class="table_row"
-                @click="suggestionModify(item.suggestion_no)"
-              >
-                <td>{{ item.suggestion_no }}</td>
+              <tr class="table_row" @click="suggestionModify(item.suggestion_no)">
+                <td>{{ item.display_no }}</td>
                 <td>{{ item.suggestion_category }}</td>
                 <td>
                   {{ item.suggestion_title }}
@@ -100,9 +87,7 @@
           </template>
           <template v-else>
             <tr>
-              <td colspan="10" style="text-align: center">
-                조회된 데이터가 없습니다.
-              </td>
+              <td colspan="10" style="text-align: center">조회된 데이터가 없습니다.</td>
             </tr>
           </template>
         </tbody>
@@ -131,10 +116,7 @@
     <v-dialog v-model="suggestionInsertModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <SSuggestionsInsertModal
-            @close-modal="closeInsertModal"
-            :action="action"
-          />
+          <SSuggestionsInsertModal @close-modal="closeInsertModal" :action="action" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -142,11 +124,7 @@
     <v-dialog v-model="suggestionModifyModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <SSuggestionsModifyModal
-            @close-modal="closeModifyModal"
-            :action="action"
-            :suggestionNo="suggestionNo"
-          />
+          <SSuggestionsModifyModal @close-modal="closeModifyModal" :action="action" :suggestionNo="suggestionNo" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -211,6 +189,8 @@ export default {
     },
 
     searchList() {
+      let vm = this;
+
       let params = new URLSearchParams();
       params.append("stitle", this.stitle);
       params.append("status", this.status);
@@ -221,8 +201,16 @@ export default {
       this.axios
         .post("/sAlert/sSuggestionList.do", params)
         .then((response) => {
-          this.suggestionList = response.data.listData;
-          this.totalCnt = response.data.totalCnt;
+          vm.suggestionList = response.data.listData;
+          vm.totalCnt = response.data.totalCnt;
+
+          let totalData = vm.suggestionList.map((item, index) => {
+            item.display_no = vm.totalCnt - ((vm.currentPage - 1) * vm.pageSize + index);
+            return item;
+          });
+
+          // 페이지 내에서는 최신 글이 위로 오도록 함
+          vm.noticeList = totalData;
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);

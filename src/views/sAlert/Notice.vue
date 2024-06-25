@@ -8,16 +8,8 @@
 
       <div class="container">
         <div class="filter-button-group">
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
-            @click="findStatus('all')"
-            >전체</v-btn
-          >
-          <v-btn
-            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
-            @click="findStatus('admin')"
-            >관리자</v-btn
-          >
+          <v-btn :class="{ 'filter-button': true, active: activeFilter === 'all' }" @click="findStatus('all')">전체</v-btn>
+          <v-btn :class="{ 'filter-button': true, active: activeFilter === 'admin' }" @click="findStatus('admin')">관리자</v-btn>
           <v-btn
             :class="{
               'filter-button': true,
@@ -31,13 +23,7 @@
         <div class="search">
           <div class="search-container">
             <v-icon class="search-icon">mdi-magnify</v-icon>
-            <input
-              type="text"
-              class="search-input"
-              placeholder="검색어를 입력해주세요."
-              v-model="stitle"
-              @keydown.enter="handleSearch"
-            />
+            <input type="text" class="search-input" placeholder="검색어를 입력해주세요." v-model="stitle" @keydown.enter="handleSearch" />
           </div>
           <div class="button-group">
             <button class="search-button" @click="handleSearch">검색</button>
@@ -60,7 +46,7 @@
           <template v-if="totalCnt > 0">
             <template v-for="item in noticeList" :key="item.notice_no">
               <tr class="table_row" @click="noticeModify(item.notice_no)">
-                <td>{{ item.notice_no }}</td>
+                <td>{{ item.display_no }}</td>
                 <td>
                   {{ item.notice_title }}
                 </td>
@@ -71,9 +57,7 @@
           </template>
           <template v-else>
             <tr>
-              <td colspan="10" style="text-align: center">
-                조회된 데이터가 없습니다.
-              </td>
+              <td colspan="10" style="text-align: center">조회된 데이터가 없습니다.</td>
             </tr>
           </template>
         </tbody>
@@ -99,11 +83,7 @@
     <v-dialog v-model="noticeModal" max-width="600px">
       <v-card>
         <v-card-text>
-          <NoticeModal
-            :action="action"
-            :noticeNo="noticeNo"
-            @close-modal="closeNoticeModal"
-          />
+          <NoticeModal :action="action" :noticeNo="noticeNo" @close-modal="closeNoticeModal" />
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -166,6 +146,14 @@ export default {
         .then((response) => {
           vm.noticeList = response.data.listData;
           vm.totalCnt = response.data.totalCnt;
+
+          let totalData = vm.noticeList.map((item, index) => {
+            item.display_no = vm.totalCnt - ((vm.currentPage - 1) * vm.pageSize + index);
+            return item;
+          });
+
+          // 페이지 내에서는 최신 글이 위로 오도록 함
+          vm.noticeList = totalData;
         })
         .catch(function (error) {
           alert("에러! API 요청에 오류가 있습니다. " + error);

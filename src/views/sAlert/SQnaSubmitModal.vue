@@ -10,11 +10,7 @@
         <div class="form-label">과목명</div>
         <select v-model="selectedCourseNo" class="form-input">
           <option disabled value="">선택하세요</option>
-          <option
-            v-for="course in enrolledCourses"
-            :key="course.course_no"
-            :value="course.course_no"
-          >
+          <option v-for="course in enrolledCourses" :key="course.course_no" :value="course.course_no">
             {{ course.course_name }}
           </option>
         </select>
@@ -22,20 +18,11 @@
       </div>
       <div class="form-group">
         <div class="form-label">제목</div>
-        <input
-          type="text"
-          name="questionTitle"
-          v-model="questionTitle"
-          class="form-input"
-        />
+        <input type="text" name="questionTitle" v-model="questionTitle" class="form-input" />
       </div>
       <div class="form-group">
         <div class="form-label">내용</div>
-        <textarea
-          name="questionContent"
-          v-model="questionContent"
-          class="form-textarea"
-        ></textarea>
+        <textarea name="questionContent" v-model="questionContent" class="form-textarea"></textarea>
       </div>
       <!-- CKEditor 사용
         code mirror 사용 예정-->
@@ -61,26 +48,26 @@ export default {
       enrolledCourses: [],
       sQnaGetCourseName: [],
       selectedCourseNo: "",
-      studentSignedInID:"",
+      studentSignedInID: "",
     };
   },
   mounted() {
     this.init();
-    $('#summernote').summernote({
-      height: 800,
-      minHeight: null,
-      maxHeight: null,
-      focus: true,
-      toolbar: [
-        ['style', ['bold', 'italic', 'underline']],
-        ['fontsize', ['fontsize']],
-        ['color', ['color']],
-        ['para', ['paragraph']],
-        ['height', ['height']],
-        ['Insert', ['picture']],
-        ['Mics',['codeview']]
-      ]
-    });
+    // //$('#summernote').summernote({
+    // //  height: 800,
+    // //  minHeight: null,
+    // //  maxHeight: null,
+    // //  focus: true,
+    // //  toolbar: [
+    // //    ['style', ['bold', 'italic', 'underline']],
+    //  //   ['fontsize', ['fontsize']],
+    //     ['color', ['color']],
+    //     ['para', ['paragraph']],
+    //     ['height', ['height']],
+    //     ['Insert', ['picture']],
+    //     ['Mics',['codeview']]
+    //   ]
+    // });
   },
   methods: {
     init() {
@@ -93,9 +80,9 @@ export default {
       console.log("courseNo : ", this.courseNo);
 
       this.axios
-      .post("sAlert/sQnaGetCourseName.do", courseParams)
-      .then((response) => {
-        console.log("JSON.stringify(response) : ", JSON.stringify(response.data));
+        .post("sAlert/sQnaGetCourseName.do", courseParams)
+        .then((response) => {
+          console.log("JSON.stringify(response) : ", JSON.stringify(response.data));
 
           this.enrolledCourses = response.data.sQnaGetCourseName;
 
@@ -111,11 +98,10 @@ export default {
           this.courseName = response.data.sQnaGetCourseName.course_name;
           this.courseNo = response.data.sQnaGetCourseName.course_no;
 
-        console.log("두번째 studentName확인 : ", this.studentName);
-        console.log("sQnaGetCourseName : ", this.sQnaGetCourseName);
-       
-      })
-      .catch(function (error) {
+          console.log("두번째 studentName확인 : ", this.studentName);
+          console.log("sQnaGetCourseName : ", this.sQnaGetCourseName);
+        })
+        .catch(function (error) {
           alert("init에서 오류 발생!" + error);
         });
     },
