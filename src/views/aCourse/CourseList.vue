@@ -6,7 +6,7 @@
         <v-spacer></v-spacer>
       </v-card-title>
 
-      <div class="container">
+      <!-- <div class="container">
         <div class="filter-button-group">
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'all' }"
@@ -23,6 +23,42 @@
           <v-btn
             :class="{ 'filter-button': true, active: activeFilter === 'scheduled' }"
             @click="findScheduled"
+          >진행예정</v-btn>
+        </div>
+
+        <div class="search">
+          <div class="search-container">
+            <v-icon class="search-icon">mdi-magnify</v-icon>
+            <input
+              type="text"
+              class="search-input"
+              placeholder="검색어를 입력해주세요."
+              v-model="stitle"
+            />
+          </div>
+          <div class="button-group">
+            <button class="search-button" @click="handleSearch">검색</button>
+          </div>
+        </div>
+      </div> -->
+
+      <div class="container">
+        <div class="filter-button-group">
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 'all' }"
+            @click="applyFilter('all')"
+          >전체</v-btn>
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 'admin' }"
+            @click="applyFilter('admin')"
+          >진행중</v-btn>
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 'teacher' }"
+            @click="applyFilter('teacher')"
+          >진행완료</v-btn>
+          <v-btn
+            :class="{ 'filter-button': true, active: activeFilter === 'scheduled' }"
+            @click="applyFilter('scheduled')"
           >진행예정</v-btn>
         </div>
 
@@ -150,6 +186,7 @@ export default {
       params.append("stitle", this.stitle);
       params.append("currentPage", this.currentPage);
       params.append("pageSize", this.pageSize);
+      params.append("filter", this.activeFilter);
 
 
   axios.post('/course/CourseList.do',params)
@@ -157,7 +194,8 @@ export default {
       vm.courseList = response.data.listdate; // 데이터 바인딩
       vm.totalCnt = response.data.totalCnt;
       
-      this.filteredCourseList = this.courseList;
+      // this.filteredCourseList = this.courseList;
+      this.filterCourses();
 
       console.log('Course list response:', response.data); // 전체 응답 데이터 콘솔 출력
       console.log('Course list:', this.courseList); // 바인딩된 데이터 콘솔 출력
@@ -180,23 +218,29 @@ export default {
       this.filteredCourseList = this.courseList.filter(item => now < new Date(item.course_start_date));
     }
   },
-  findAll() {
-    this.activeFilter = "all";
-    this.filterCourses();
-  },
-  findAdmin() {
-    this.activeFilter = "admin";
-    this.filterCourses();
-  },
-  findTeacher() {
-    this.activeFilter = "teacher";
-    this.filterCourses();
-  },
-  findScheduled() {
-    this.activeFilter = "scheduled";
-    this.filterCourses();
-  },
-  handleSearch() {
+  
+  // findAll() {
+  //   this.activeFilter = "all";
+  //   this.filterCourses();
+  // },
+  // findAdmin() {
+  //   this.activeFilter = "admin";
+  //   this.filterCourses();
+  // },
+  // findTeacher() {
+  //   this.activeFilter = "teacher";
+  //   this.filterCourses();
+  // },
+  // findScheduled() {
+  //   this.activeFilter = "scheduled";
+  //   this.filterCourses();
+  // },
+    applyFilter(filter) {
+        this.activeFilter = filter;
+        this.currentPage = 1; // 필터 변경 시 페이지를 1페이지로 리셋
+        this.getCourseList(); // 필터 적용 후 목록 재조회
+      },
+    handleSearch() {
       this.currentPage = 1; // 검색 시 페이지를 1페이지로 리셋
       this.getCourseList(); // 검색 실행
     },
