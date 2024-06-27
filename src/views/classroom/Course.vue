@@ -53,7 +53,7 @@
       <v-table class="dashboard-table">
         <thead>
           <tr>
-            <th>과목명</th>
+            <!-- <th>과목명</th>  -->
             <th>강의명</th>
             <th>강사명</th>
             <th>시작일</th>
@@ -66,9 +66,9 @@
           <template v-if="totalCnt > 0">
             <template v-for="item in sCourseList" :key="item.course_no">
               <tr>
-                <td @click="courseDetailed(item.course_no)">
+                <!-- <td @click="courseDetailed(item.course_no)">
                   {{ item.course_subject }}
-                </td>
+                </td> -->
                 <td @click="courseDetailed(item.course_no)">
                   {{ item.course_name }}
                 </td>
@@ -84,17 +84,30 @@
                 <td>
                   <span v-if="isAfterEndDate(item.course_end_date)">
                     <span
-                      v-if="item.survey_completed === 'Y'"
+                      v-if="
+                        isSurveyOpen(item.course_end_date) &&
+                        item.survey_completed === 'Y'
+                      "
                       class="survey-button"
                       >완료</span
                     >
                     <span
-                      v-else
+                      v-else-if="
+                        isSurveyOpen(item.course_end_date) &&
+                        item.survey_completed === 'N'
+                      "
                       @click="classSatisfaction(item.course_no)"
                       class="survey-button"
                       >미완료</span
                     >
+                    <span v-else class="survey-button">종료</span>
                   </span>
+                  <span
+                    v-else-if="isBeforeStartDate(item.course_start_date)"
+                    class="survey-button"
+                    >진행예정</span
+                  >
+                  <span v-else class="survey-button">진행중</span>
                 </td>
                 <td @click="attendance(item.course_no)">
                   <span class="attendance-button">출결</span>
@@ -217,6 +230,20 @@ export default {
     isAfterEndDate(courseEndDate) {
       // 현재 날짜와 비교하여 강좌 종료일이 이미 지났는지 확인
       return new Date() > new Date(courseEndDate);
+    },
+
+    isBeforeStartDate(courseStartDate) {
+      // 현재 날짜와 비교하여 강좌 시작일이 후이면 진행예정
+      return new Date() < new Date(courseStartDate);
+    },
+
+    isSurveyOpen(courseEndDate) {
+      // 현재 날짜와 종료일을 비교하여 종료일로부터 3일 이내인지 확인
+      const endDate = new Date(courseEndDate);
+      const currentDate = new Date();
+      const diffTime = currentDate - endDate;
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      return diffDays >= 0 && diffDays <= 3;
     },
 
     findStatus(param) {

@@ -155,9 +155,9 @@ export default {
 
     calculateTotalAllowanceAmount() {
       const attendanceAmount = this.attendanceDays * 25000;
-      const absenceAmount = this.absenceDays * 25000;
+      // const absenceAmount = this.absenceDays * 25000;
 
-      this.totalAllowanceAmount = attendanceAmount - absenceAmount;
+      this.totalAllowanceAmount = attendanceAmount;
 
       // 쉼표를 포함하여 금액을 한눈에 알아보기 쉽게 포맷팅
       this.totalAllowanceAmount = this.totalAllowanceAmount.toLocaleString();
