@@ -56,7 +56,7 @@
             <td>
               {{ item.respondent_count || 0 }} / {{ item.confirmed_count }}
             </td>
-            <td>
+            <!-- <td>
               <span
                 v-if="!item.survey_no"
                 class="survey-create"
@@ -64,7 +64,25 @@
                 >생성</span
               >
               <span v-else>{{ item.survey_no }}</span>
-            </td>
+            </td> -->
+            <td>
+            <span v-if="item.survey_no">
+              {{ item.survey_no }}    </span>
+            <span
+              v-else-if="item.survey_reg_no"
+              class="survey-edit"
+              @click="createSurvey(item)"
+            >
+              {{ item.survey_reg_no }} <span>&nbsp;[수정]</span>
+            </span>
+            <span
+              v-else
+              class="survey-create"
+              @click="createSurvey(item)"
+            >
+              생성
+            </span>
+          </td>
             <td @click="viewSurveyResult(item.course_no)">
               <span class="result-button">확인</span>
             </td>
